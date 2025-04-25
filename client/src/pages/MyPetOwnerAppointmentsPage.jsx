@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Table, Spinner, Alert, Badge, Button, Modal, Form } from 'react-bootstrap';
 import { getMyPetOwnerAppointments, cancelAppointmentByPetOwner, checkAuthStatus } from '../services/api';
-import { formatDate } from '../utils/dateUtils';
+import { format } from 'date-fns';
 import AppointmentDetailModal from '../components/AppointmentDetailModal';
 
 const statusVariants = {
@@ -195,7 +195,7 @@ const MyPetOwnerAppointmentsPage = () => {
                               {appointment.providerProfile?.user?.email || 'Unknown Provider'}
                             </td>
                             <td>{appointment.service?.name || 'Unknown Service'}</td>
-                            <td>{formatDate(appointment.appointmentTime)}</td>
+                            <td>{format(new Date(appointment.appointmentTime), 'PPpp')}</td>
                             <td>
                               <Badge bg={statusVariants[appointment.status] || 'secondary'}>
                                 {appointment.status}
@@ -253,7 +253,7 @@ const MyPetOwnerAppointmentsPage = () => {
                               {appointment.providerProfile?.user?.email || 'Unknown Provider'}
                             </td>
                             <td>{appointment.service?.name || 'Unknown Service'}</td>
-                            <td>{formatDate(appointment.appointmentTime)}</td>
+                            <td>{format(new Date(appointment.appointmentTime), 'PPpp')}</td>
                             <td>
                               <Badge bg={statusVariants[appointment.status] || 'secondary'}>
                                 {appointment.status === 'CancelledByOwner' ? 'Cancelled by You' : appointment.status}
@@ -297,7 +297,7 @@ const MyPetOwnerAppointmentsPage = () => {
           {appointmentToCancel && (
             <div className="mb-3">
               <p className="mb-1"><strong>Service:</strong> {appointmentToCancel.service?.name}</p>
-              <p className="mb-1"><strong>Date & Time:</strong> {formatDate(appointmentToCancel.appointmentTime)}</p>
+              <p className="mb-1"><strong>Date & Time:</strong> {format(new Date(appointmentToCancel.appointmentTime), 'PPpp')}</p>
               <p className="mb-0"><strong>Provider:</strong> {appointmentToCancel.providerProfile?.user?.email}</p>
             </div>
           )}
