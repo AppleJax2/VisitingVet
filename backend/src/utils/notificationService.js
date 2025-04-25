@@ -1,6 +1,9 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
+const nodemailer = require('nodemailer');
+const config = require('../config/config');
+const twilio = require('twilio');
 
 /**
  * Send an in-app notification to a user
@@ -33,6 +36,19 @@ const sendInAppNotification = async (options) => {
   }
 };
 
+// Create email transporter using nodemailer
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: config.email.host || 'smtp.gmail.com',
+    port: config.email.port || 587,
+    secure: config.email.secure || false,
+    auth: {
+      user: config.email.user,
+      pass: config.email.password
+    }
+  });
+};
+
 /**
  * Send an email notification
  * @param {Object} options - Email options
@@ -43,14 +59,31 @@ const sendInAppNotification = async (options) => {
  */
 const sendEmailNotification = async (options) => {
   try {
-    // TODO: Implement actual email sending (e.g., Nodemailer, SendGrid, etc.)
+    // Log email for development/debugging
     console.log(`[EMAIL NOTIFICATION] To: ${options.email}, Subject: ${options.subject}`);
-    console.log(`[EMAIL CONTENT] ${options.message}`);
     
-    // For now, we'll just simulate success
+    // Check if email is disabled in config or we're in a test/development environment
+    if (process.env.NODE_ENV === 'test' || process.env.DISABLE_EMAILS === 'true') {
+      console.log(`[EMAIL CONTENT] ${options.message}`);
+      return true;
+    }
+    
+    // Create email transporter
+    const transporter = createTransporter();
+    
+    // Send email
+    const info = await transporter.sendMail({
+      from: `"Visiting Vet" <${config.email.user}>`,
+      to: options.email,
+      subject: options.subject,
+      html: options.message,
+    });
+    
+    console.log(`Email sent: ${info.messageId}`);
     return true;
   } catch (error) {
     console.error('Error sending email notification:', error);
+    // Don't fail the entire process if email fails
     return false;
   }
 };
@@ -64,14 +97,33 @@ const sendEmailNotification = async (options) => {
  */
 const sendSmsNotification = async (options) => {
   try {
-    // TODO: Implement actual SMS sending (e.g., Twilio, Nexmo, etc.)
+    // Log SMS for development/debugging
     console.log(`[SMS NOTIFICATION] To: ${options.phoneNumber}`);
     console.log(`[SMS CONTENT] ${options.message}`);
     
-    // For now, we'll just simulate success
+    // Check if SMS is disabled in config or we're in a test/development environment
+    if (process.env.NODE_ENV === 'test' || process.env.DISABLE_SMS === 'true') {
+      return true;
+    }
+    
+    // Initialize Twilio client
+    const client = twilio(
+      config.twilio.accountSid,
+      config.twilio.authToken
+    );
+    
+    // Send SMS message
+    const message = await client.messages.create({
+      body: options.message,
+      from: config.twilio.phoneNumber,
+      to: options.phoneNumber
+    });
+    
+    console.log(`SMS sent with SID: ${message.sid}`);
     return true;
   } catch (error) {
     console.error('Error sending SMS notification:', error);
+    // Don't fail the entire process if SMS fails
     return false;
   }
 };

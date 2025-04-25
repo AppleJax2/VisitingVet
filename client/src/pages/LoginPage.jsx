@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { login, checkAuthStatus } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
-import { Form, Button, Container, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Card, Alert, Spinner, Toast, ToastContainer } from 'react-bootstrap';
 import theme from '../utils/theme';
 
 function LoginPage() {
@@ -10,6 +10,8 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
 
   // Check if user is already logged in
@@ -44,10 +46,14 @@ function LoginPage() {
         // Handle successful login
         console.log('Login successful:', data.user);
         
-        // Show a temporary success message
-        // We could use a toast notification here in the future
+        // Show a success toast notification
+        setToastMessage('Login successful! Redirecting to dashboard...');
+        setShowToast(true);
         
-        navigate('/dashboard'); // Redirect to dashboard
+        // Navigate after a brief delay to allow the toast to be seen
+        setTimeout(() => {
+          navigate('/dashboard'); // Redirect to dashboard
+        }, 1500);
       } else {
         setError(data?.message || 'Login failed. Please check your credentials.');
       }
@@ -99,6 +105,10 @@ function LoginPage() {
       fontWeight: '500',
       transition: 'all 0.3s ease',
     },
+    toast: {
+      backgroundColor: theme.colors.success,
+      color: 'white',
+    }
   };
 
   if (isChecking) {
@@ -113,6 +123,21 @@ function LoginPage() {
 
   return (
     <div style={styles.container}>
+      <ToastContainer position="top-end" className="p-3">
+        <Toast 
+          onClose={() => setShowToast(false)} 
+          show={showToast} 
+          delay={3000} 
+          autohide
+          style={styles.toast}
+        >
+          <Toast.Header closeButton>
+            <strong className="me-auto">Success</strong>
+          </Toast.Header>
+          <Toast.Body>{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
+      
       <Container>
         <Row className="justify-content-md-center">
           <Col md={6} lg={5}>

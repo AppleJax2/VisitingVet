@@ -1,74 +1,57 @@
-import React from 'react';
-import { Row, Col, Card, Button, Badge, Table } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Card, Button, Badge, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   Search, Calendar2Check, PlusCircle, 
   GeoAlt, Clock, Stars, Bell
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
+import { fetchPetOwnerDashboardData, fetchUserReminders, fetchUserPets, fetchUpcomingAppointments } from '../../services/api';
 
 const PetOwnerDashboard = ({ user }) => {
-  // Sample data for demonstration
-  const upcomingAppointments = [
-    {
-      id: 1,
-      provider: 'Dr. Sarah Johnson',
-      service: 'Wellness Checkup',
-      date: '2023-11-30',
-      time: '10:00 AM',
-      status: 'confirmed',
-      location: 'Your Home',
-      petName: 'Max'
-    },
-    {
-      id: 2,
-      provider: 'Dr. Michael Chen',
-      service: 'Vaccination',
-      date: '2023-12-10',
-      time: '2:30 PM',
-      status: 'pending',
-      location: 'Your Home',
-      petName: 'Bella'
-    }
-  ];
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [pets, setPets] = useState([]);
+  const [reminders, setReminders] = useState([]);
+  const [loading, setLoading] = useState({
+    appointments: true,
+    pets: true,
+    reminders: true
+  });
+  const [error, setError] = useState(null);
 
-  const pets = [
-    {
-      id: 1,
-      name: 'Max',
-      species: 'Dog',
-      breed: 'Golden Retriever',
-      age: 3,
-      lastCheckup: '2023-09-15',
-      image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
-    },
-    {
-      id: 2,
-      name: 'Bella',
-      species: 'Cat',
-      breed: 'Siamese',
-      age: 2,
-      lastCheckup: '2023-10-01',
-      image: 'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
-    }
-  ];
-
-  const reminders = [
-    {
-      id: 1,
-      title: 'Max Vaccination Due',
-      description: 'Annual rabies vaccine',
-      dueDate: '2023-12-15',
-      priority: 'high'
-    },
-    {
-      id: 2,
-      title: 'Bella Checkup',
-      description: 'Regular wellness exam',
-      dueDate: '2023-12-20',
-      priority: 'medium'
-    }
-  ];
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        // Load all required data for the dashboard
+        const appointmentsPromise = fetchUpcomingAppointments();
+        const petsPromise = fetchUserPets();
+        const remindersPromise = fetchUserReminders();
+        
+        // Wait for all data to load
+        const [appointmentsData, petsData, remindersData] = await Promise.all([
+          appointmentsPromise,
+          petsPromise,
+          remindersPromise
+        ]);
+        
+        // Update state with the fetched data
+        setUpcomingAppointments(appointmentsData.appointments || []);
+        setPets(petsData.pets || []);
+        setReminders(remindersData.reminders || []);
+      } catch (err) {
+        console.error('Error loading dashboard data:', err);
+        setError('Failed to load some dashboard data. Please try refreshing the page.');
+      } finally {
+        setLoading({
+          appointments: false,
+          pets: false,
+          reminders: false
+        });
+      }
+    };
+    
+    loadDashboardData();
+  }, [user?._id]);
 
   // Styles
   const styles = {
@@ -126,9 +109,10 @@ const PetOwnerDashboard = ({ user }) => {
         confirmed: theme.colors.success,
         pending: theme.colors.warning,
         cancelled: theme.colors.error,
+        completed: theme.colors.accent.blue,
       };
       return {
-        backgroundColor: colors[status],
+        backgroundColor: colors[status] || theme.colors.info,
       };
     },
     addButton: {
@@ -161,7 +145,21 @@ const PetOwnerDashboard = ({ user }) => {
       marginRight: '8px',
       color: theme.colors.primary.main,
     },
+    loadingContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '150px',
+    }
   };
+
+  const renderLoading = (section) => (
+    <div style={styles.loadingContainer}>
+      <Spinner animation="border" role="status" style={{ color: theme.colors.primary.main }}>
+        <span className="visually-hidden">Loading {section}...</span>
+      </Spinner>
+    </div>
+  );
 
   return (
     <div className="pet-owner-dashboard">
@@ -219,41 +217,43 @@ const PetOwnerDashboard = ({ user }) => {
               </Link>
             </Card.Header>
             <Card.Body>
-              {upcomingAppointments.length > 0 ? (
+              {loading.appointments ? (
+                renderLoading('appointments')
+              ) : upcomingAppointments.length > 0 ? (
                 upcomingAppointments.map((appointment) => (
-                  <Card key={appointment.id} style={styles.appointmentCard}>
+                  <Card key={appointment._id} style={styles.appointmentCard}>
                     <Card.Body>
                       <Row>
                         <Col md={6}>
                           <h6 style={styles.cardTitle}>
-                            {appointment.service} with {appointment.provider}
+                            {appointment.service?.name || 'Veterinary Service'} with {appointment.providerProfile?.user?.name || 'Veterinarian'}
                           </h6>
                           <p className="text-muted mb-0">
-                            For {appointment.petName}
+                            For {appointment.pet?.name || 'Your Pet'}
                           </p>
                         </Col>
                         <Col md={4}>
                           <div style={styles.infoItem}>
                             <Clock style={styles.infoIcon} />
-                            {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
+                            {new Date(appointment.appointmentTime).toLocaleDateString()} at {new Date(appointment.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
                           <div style={styles.infoItem}>
                             <GeoAlt style={styles.infoIcon} />
-                            {appointment.location}
+                            {appointment.appointmentLocation}
                           </div>
                         </Col>
                         <Col md={2} className="text-end d-flex flex-column justify-content-between">
                           <Badge 
-                            style={styles.statusBadge(appointment.status)}
+                            style={styles.statusBadge(appointment.status.toLowerCase())}
                             className="mb-2"
                           >
-                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                            {appointment.status}
                           </Badge>
                           <Button 
                             variant="outline-primary" 
                             size="sm"
                             as={Link}
-                            to={`/appointment/${appointment.id}`}
+                            to={`/appointment/${appointment._id}`}
                             style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
                           >
                             Details
@@ -292,57 +292,61 @@ const PetOwnerDashboard = ({ user }) => {
               </Link>
             </Card.Header>
             <Card.Body>
-              <Row>
-                {pets.map((pet) => (
-                  <Col md={6} key={pet.id} className="mb-3">
-                    <Card style={styles.petCard}>
-                      <Card.Img 
-                        variant="top" 
-                        src={pet.image} 
-                        style={styles.petImage}
-                      />
-                      <Card.Body>
-                        <Card.Title style={styles.cardTitle}>{pet.name}</Card.Title>
-                        <Card.Text className="text-muted mb-1">
-                          {pet.breed} • {pet.age} years old
-                        </Card.Text>
-                        <Card.Text className="text-muted mb-3">
-                          Last checkup: {new Date(pet.lastCheckup).toLocaleDateString()}
-                        </Card.Text>
-                        <div className="d-grid">
-                          <Button 
-                            variant="outline-primary" 
-                            size="sm"
-                            as={Link}
-                            to={`/pet/${pet.id}`}
-                            style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                          >
-                            View Profile
-                          </Button>
-                        </div>
+              {loading.pets ? (
+                renderLoading('pets')
+              ) : (
+                <Row>
+                  {pets.map((pet) => (
+                    <Col md={6} key={pet._id} className="mb-3">
+                      <Card style={styles.petCard}>
+                        <Card.Img 
+                          variant="top" 
+                          src={pet.profileImage || 'https://via.placeholder.com/300x200?text=Pet'} 
+                          style={styles.petImage}
+                        />
+                        <Card.Body>
+                          <Card.Title style={styles.cardTitle}>{pet.name}</Card.Title>
+                          <Card.Text className="text-muted mb-1">
+                            {pet.breed} • {pet.age} years old
+                          </Card.Text>
+                          <Card.Text className="text-muted mb-3">
+                            Last checkup: {pet.lastCheckup ? new Date(pet.lastCheckup).toLocaleDateString() : 'No records yet'}
+                          </Card.Text>
+                          <div className="d-grid">
+                            <Button 
+                              variant="outline-primary" 
+                              size="sm"
+                              as={Link}
+                              to={`/pet/${pet._id}`}
+                              style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
+                            >
+                              View Profile
+                            </Button>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                  <Col md={6} className="mb-3">
+                    <Card style={{ ...styles.petCard, height: '100%', border: `2px dashed ${theme.colors.background.light}` }}>
+                      <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
+                        <PlusCircle size={40} className="mb-3" style={{ color: theme.colors.primary.light }} />
+                        <h5 style={styles.cardTitle}>Add a New Pet</h5>
+                        <p className="text-muted text-center mb-3">
+                          Register a new pet to your profile
+                        </p>
+                        <Button 
+                          as={Link} 
+                          to="/add-pet"
+                          style={{ backgroundColor: theme.colors.primary.main, borderColor: theme.colors.primary.main }}
+                        >
+                          Add Pet
+                        </Button>
                       </Card.Body>
                     </Card>
                   </Col>
-                ))}
-                <Col md={6} className="mb-3">
-                  <Card style={{ ...styles.petCard, height: '100%', border: `2px dashed ${theme.colors.background.light}` }}>
-                    <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
-                      <PlusCircle size={40} className="mb-3" style={{ color: theme.colors.primary.light }} />
-                      <h5 style={styles.cardTitle}>Add a New Pet</h5>
-                      <p className="text-muted text-center mb-3">
-                        Register a new pet to your profile
-                      </p>
-                      <Button 
-                        as={Link} 
-                        to="/add-pet"
-                        style={{ backgroundColor: theme.colors.primary.main, borderColor: theme.colors.primary.main }}
-                      >
-                        Add Pet
-                      </Button>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
+                </Row>
+              )}
             </Card.Body>
           </Card>
         </Col>
@@ -352,38 +356,59 @@ const PetOwnerDashboard = ({ user }) => {
               <h5 style={styles.sectionTitle} className="mb-0">Reminders</h5>
             </Card.Header>
             <Card.Body>
-              {reminders.map((reminder) => (
-                <div 
-                  key={reminder.id} 
-                  className="p-3 mb-3" 
-                  style={{ 
-                    backgroundColor: `${theme.colors.background.light}50`,
-                    borderRadius: theme.borderRadius.md,
-                    borderLeft: `4px solid ${styles.reminderBadge(reminder.priority).backgroundColor}`
-                  }}
-                >
-                  <div className="d-flex justify-content-between align-items-start">
-                    <h6 style={styles.cardTitle}>{reminder.title}</h6>
-                    <Badge style={styles.reminderBadge(reminder.priority)}>
-                      {reminder.priority.charAt(0).toUpperCase() + reminder.priority.slice(1)}
-                    </Badge>
+              {loading.reminders ? (
+                renderLoading('reminders')
+              ) : reminders.length > 0 ? (
+                reminders.map((reminder) => (
+                  <div 
+                    key={reminder._id} 
+                    className="p-3 mb-3" 
+                    style={{ 
+                      backgroundColor: `${theme.colors.background.light}50`,
+                      borderRadius: theme.borderRadius.md,
+                      borderLeft: `4px solid ${styles.reminderBadge(reminder.priority).backgroundColor}`
+                    }}
+                  >
+                    <div className="d-flex justify-content-between align-items-start">
+                      <h6 style={styles.cardTitle}>{reminder.title}</h6>
+                      <Badge style={styles.reminderBadge(reminder.priority)}>
+                        {reminder.priority.charAt(0).toUpperCase() + reminder.priority.slice(1)}
+                      </Badge>
+                    </div>
+                    <p className="text-muted mb-1">{reminder.description}</p>
+                    <small className="d-flex align-items-center">
+                      <Bell className="me-1" style={{ color: theme.colors.primary.main }} />
+                      Due: {new Date(reminder.dueDate).toLocaleDateString()}
+                    </small>
                   </div>
-                  <p className="text-muted mb-1">{reminder.description}</p>
-                  <small className="d-flex align-items-center">
-                    <Bell className="me-1" style={{ color: theme.colors.primary.main }} />
-                    Due: {new Date(reminder.dueDate).toLocaleDateString()}
-                  </small>
+                ))
+              ) : (
+                <div className="text-center py-3">
+                  <p className="text-muted mb-3">No reminders yet</p>
+                  <Button 
+                    variant="outline-primary" 
+                    size="sm"
+                    as={Link}
+                    to="/add-reminder"
+                    style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
+                  >
+                    Add Reminder
+                  </Button>
                 </div>
-              ))}
-              <div className="text-center">
-                <Button 
-                  variant="outline-primary" 
-                  size="sm"
-                  style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                >
-                  Add Reminder
-                </Button>
-              </div>
+              )}
+              {reminders.length > 0 && (
+                <div className="text-center">
+                  <Button 
+                    variant="outline-primary" 
+                    size="sm"
+                    as={Link}
+                    to="/add-reminder"
+                    style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
+                  >
+                    Add Reminder
+                  </Button>
+                </div>
+              )}
             </Card.Body>
           </Card>
           

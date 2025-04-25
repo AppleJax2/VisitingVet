@@ -303,9 +303,13 @@ const DashboardLayout = ({ children, user, onLogout }) => {
             <ChatDots style={sidebarStyles.actionIcon} />
             <button style={sidebarStyles.profileButton}>
               <img
-                src={user?.profileImage || 'https://via.placeholder.com/40'}
+                src={user?.profileImage || '/assets/default-profile.png'}
                 alt="Profile"
                 style={sidebarStyles.profileImg}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/assets/default-profile.png';
+                }}
               />
               <span>{user?.name || user?.email?.split('@')[0] || 'User'}</span>
             </button>

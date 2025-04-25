@@ -265,4 +265,45 @@ export const markAllAsRead = async () => {
   }
 };
 
+// Dashboard data functions
+export const fetchPetOwnerDashboardData = async () => {
+  try {
+    const response = await api.get('/dashboard/pet-owner');
+    return response.data;
+  } catch (error) {
+    console.error('Fetch dashboard data error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch dashboard data');
+  }
+};
+
+export const fetchUserPets = async () => {
+  try {
+    const response = await api.get('/pets');
+    return response.data;
+  } catch (error) {
+    console.error('Fetch pets error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch pets');
+  }
+};
+
+export const fetchUserReminders = async () => {
+  try {
+    const response = await api.get('/reminders');
+    return response.data;
+  } catch (error) {
+    console.error('Fetch reminders error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch reminders');
+  }
+};
+
+export const fetchUpcomingAppointments = async (limit = 3) => {
+  try {
+    const response = await api.get(`/appointments/my-appointments/upcoming?limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch upcoming appointments error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch upcoming appointments');
+  }
+};
+
 export default api; 
