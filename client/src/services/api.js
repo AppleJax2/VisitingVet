@@ -255,4 +255,14 @@ export const markNotificationAsRead = async (notificationId) => {
   }
 };
 
+export const markAllAsRead = async () => {
+  try {
+    const response = await api.put('/notifications/read-all');
+    return response.data;
+  } catch (error) {
+    console.error('Mark all notifications read error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to mark all notifications as read');
+  }
+};
+
 export default api; 
