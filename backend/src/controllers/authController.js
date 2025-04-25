@@ -38,7 +38,16 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res, next) => {
-  const { email, password, role } = req.body;
+  const { 
+    email, 
+    password, 
+    role, 
+    name, 
+    phoneNumber, 
+    carrier, 
+    smsNotificationsEnabled, 
+    emailNotificationsEnabled 
+  } = req.body;
 
   try {
     // Basic validation
@@ -52,11 +61,21 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create user
+    // Validate carrier if phone number is provided
+    if (phoneNumber && smsNotificationsEnabled && !carrier) {
+      return res.status(400).json({ message: 'Mobile carrier is required for SMS notifications' });
+    }
+
+    // Create user with all provided fields
     const user = await User.create({
       email,
       password, // Password will be hashed by mongoose pre-save hook
       role,
+      name: name || '',
+      phoneNumber: phoneNumber || '',
+      carrier: carrier || '',
+      smsNotificationsEnabled: !!smsNotificationsEnabled,
+      emailNotificationsEnabled: emailNotificationsEnabled !== false // Default to true
     });
 
     if (user) {

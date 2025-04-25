@@ -19,18 +19,10 @@ const config = {
   },
   
   email: {
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 587,
-    secure: process.env.EMAIL_SECURE === 'true',
-    user: process.env.EMAIL_USER,
-    password: process.env.EMAIL_PASSWORD,
-    from: process.env.EMAIL_FROM || 'Visiting Vet <support@visitingvet.com>'
-  },
-  
-  twilio: {
-    accountSid: process.env.TWILIO_ACCOUNT_SID,
-    authToken: process.env.TWILIO_AUTH_TOKEN,
-    phoneNumber: process.env.TWILIO_PHONE_NUMBER
+    // Gmail configuration
+    user: process.env.GMAIL_USER,
+    password: process.env.GMAIL_APP_PASSWORD,
+    from: process.env.EMAIL_FROM || 'Visiting Vet <noreply@visitingvet.com>'
   },
   
   stripe: {

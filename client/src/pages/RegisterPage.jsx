@@ -5,24 +5,43 @@ import { Form, Button, Container, Row, Col, Card, Alert } from 'react-bootstrap'
 import theme from '../utils/theme';
 
 function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('PetOwner'); // Default role
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    name: '',
+    phoneNumber: '',
+    carrier: '',
+    role: 'PetOwner', // Default role
+    smsNotificationsEnabled: false,
+    emailNotificationsEnabled: true
+  });
+  
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Clear previous errors
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
     try {
-      const data = await register({ email, password, role });
+      // Extract confirmPassword from form data before sending
+      const { confirmPassword, ...registerData } = formData;
+      
+      const data = await register(registerData);
       if (data.success) {
         // Handle successful registration (e.g., update auth state, redirect)
         console.log('Registration successful:', data.user);
@@ -96,7 +115,7 @@ function RegisterPage() {
     <div style={styles.container}>
       <Container>
         <Row className="justify-content-md-center">
-          <Col md={6} lg={5}>
+          <Col md={8} lg={6}>
             <Card className="fade-in" style={styles.card}>
               <div style={styles.cardHeader}>
                 <h3 className="m-0 fw-bold">Register</h3>
@@ -104,52 +123,150 @@ function RegisterPage() {
               <Card.Body style={styles.cardBody}>
                 {error && <Alert variant="danger">{error}</Alert>}
                 <Form onSubmit={handleSubmit}>
-                  <Form.Group className="mb-3" controlId="formRegisterEmail">
-                    <Form.Label>Email address</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder="Enter email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="formRegisterEmail">
+                        <Form.Label>Email address*</Form.Label>
+                        <Form.Control
+                          type="email"
+                          placeholder="Enter email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="formRegisterName">
+                        <Form.Label>Full Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Enter your name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
-                  <Form.Group className="mb-3" controlId="formRegisterPassword">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                  </Form.Group>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="formRegisterPassword">
+                        <Form.Label>Password*</Form.Label>
+                        <Form.Control
+                          type="password"
+                          placeholder="Password"
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          required
+                          minLength={6}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="formRegisterConfirmPassword">
+                        <Form.Label>Confirm Password*</Form.Label>
+                        <Form.Control
+                          type="password"
+                          placeholder="Confirm Password"
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
-                  <Form.Group className="mb-4" controlId="formRegisterConfirmPassword">
-                    <Form.Label>Confirm Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Confirm Password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
-
-                  <Form.Group className="mb-4" controlId="formRegisterRole">
-                    <Form.Label>Register as:</Form.Label>
+                  <Form.Group className="mb-3" controlId="formRegisterRole">
+                    <Form.Label>Register as:*</Form.Label>
                     <Form.Select 
-                      value={role} 
-                      onChange={(e) => setRole(e.target.value)}
+                      name="role"
+                      value={formData.role} 
+                      onChange={handleChange}
                       style={styles.formSelect}
+                      required
                     >
                       <option value="PetOwner">Pet Owner</option>
                       <option value="MVSProvider">Mobile Vet Service Provider</option>
                       <option value="Clinic">Veterinary Clinic</option>
                     </Form.Select>
                   </Form.Group>
+
+                  <h5 className="mt-4 mb-3">Notification Preferences</h5>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="formRegisterPhone">
+                        <Form.Label>Phone Number (for SMS)</Form.Label>
+                        <Form.Control
+                          type="tel"
+                          placeholder="(123) 456-7890"
+                          name="phoneNumber"
+                          value={formData.phoneNumber}
+                          onChange={handleChange}
+                        />
+                        <Form.Text className="text-muted">
+                          Required for SMS notifications
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="formRegisterCarrier">
+                        <Form.Label>Mobile Carrier</Form.Label>
+                        <Form.Select
+                          name="carrier"
+                          value={formData.carrier}
+                          onChange={handleChange}
+                          disabled={!formData.phoneNumber}
+                        >
+                          <option value="">Select your carrier</option>
+                          <option value="att">AT&T</option>
+                          <option value="tmobile">T-Mobile</option>
+                          <option value="verizon">Verizon</option>
+                          <option value="sprint">Sprint</option>
+                          <option value="boost">Boost Mobile</option>
+                          <option value="cricket">Cricket</option>
+                          <option value="metro">Metro by T-Mobile</option>
+                          <option value="uscellular">US Cellular</option>
+                          <option value="virgin">Virgin Mobile</option>
+                          <option value="xfinity">Xfinity Mobile</option>
+                          <option value="other">Other</option>
+                        </Form.Select>
+                        <Form.Text className="text-muted">
+                          Required for SMS notifications
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Row className="mb-4">
+                    <Col>
+                      <Form.Group controlId="formRegisterEmailNotifications">
+                        <Form.Check
+                          type="checkbox"
+                          label="Receive email notifications"
+                          name="emailNotificationsEnabled"
+                          checked={formData.emailNotificationsEnabled}
+                          onChange={handleChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group controlId="formRegisterSmsNotifications">
+                        <Form.Check
+                          type="checkbox"
+                          label="Receive SMS notifications"
+                          name="smsNotificationsEnabled"
+                          checked={formData.smsNotificationsEnabled}
+                          onChange={handleChange}
+                          disabled={!formData.phoneNumber || !formData.carrier}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
                   <Button 
                     type="submit" 

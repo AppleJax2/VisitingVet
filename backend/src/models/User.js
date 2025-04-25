@@ -23,6 +23,32 @@ const userSchema = new mongoose.Schema({
     enum: ['PetOwner', 'MVSProvider', 'Clinic'], // Enforce specific roles
     required: [true, 'Please specify a user role'],
   },
+  name: {
+    type: String,
+    trim: true,
+  },
+  phoneNumber: {
+    type: String,
+    trim: true,
+    // We'll validate format in the frontend/controller
+  },
+  carrier: {
+    type: String,
+    enum: ['att', 'tmobile', 'verizon', 'sprint', 'boost', 'cricket', 'metro', 'uscellular', 'virgin', 'xfinity', 'other'],
+    // Optional field - only required if user opts in for SMS
+  },
+  smsNotificationsEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  emailNotificationsEnabled: {
+    type: Boolean,
+    default: true,
+  },
+  profileImage: {
+    type: String,
+    default: '/assets/default-profile.png',
+  },
   // Add other fields common to all users later if needed
   // Specific role details might be in separate linked collections or embedded
 }, { timestamps: true });

@@ -3,7 +3,6 @@ const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 const nodemailer = require('nodemailer');
 const config = require('../config/config');
-const twilio = require('twilio');
 
 /**
  * Send an in-app notification to a user
@@ -39,12 +38,10 @@ const sendInAppNotification = async (options) => {
 // Create email transporter using nodemailer
 const createTransporter = () => {
   return nodemailer.createTransport({
-    host: config.email.host || 'smtp.gmail.com',
-    port: config.email.port || 587,
-    secure: config.email.secure || false,
+    service: 'gmail',  // Using Gmail service
     auth: {
       user: config.email.user,
-      pass: config.email.password
+      pass: config.email.password // This should be an app password, not your regular password
     }
   });
 };
@@ -73,7 +70,7 @@ const sendEmailNotification = async (options) => {
     
     // Send email
     const info = await transporter.sendMail({
-      from: `"Visiting Vet" <${config.email.user}>`,
+      from: config.email.from || `"Visiting Vet" <${config.email.user}>`,
       to: options.email,
       subject: options.subject,
       html: options.message,
@@ -88,10 +85,26 @@ const sendEmailNotification = async (options) => {
   }
 };
 
+// Map of carrier email gateways for SMS
+const carrierGateways = {
+  'att': 'txt.att.net',
+  'tmobile': 'tmomail.net',
+  'verizon': 'vtext.com',
+  'sprint': 'messaging.sprintpcs.com',
+  'boost': 'sms.myboostmobile.com',
+  'cricket': 'sms.cricketwireless.net',
+  'metro': 'mymetropcs.com',
+  'uscellular': 'email.uscc.net',
+  'virgin': 'vmobl.com',
+  'xfinity': 'vtext.com',
+  'default': 'txt.att.net', // Default if carrier not specified
+};
+
 /**
- * Send an SMS notification
+ * Send an SMS notification (using email-to-SMS gateway - free)
  * @param {Object} options - SMS options
- * @param {String} options.phoneNumber - Recipient phone number
+ * @param {String} options.phoneNumber - Recipient phone number (10 digits, no country code)
+ * @param {String} options.carrier - Recipient's carrier (att, tmobile, verizon, etc.)
  * @param {String} options.message - SMS message
  * @returns {Promise<Boolean>} Success status
  */
@@ -106,20 +119,39 @@ const sendSmsNotification = async (options) => {
       return true;
     }
     
-    // Initialize Twilio client
-    const client = twilio(
-      config.twilio.accountSid,
-      config.twilio.authToken
-    );
+    // Clean phone number (remove non-digits)
+    const cleanNumber = options.phoneNumber.replace(/\D/g, '');
     
-    // Send SMS message
-    const message = await client.messages.create({
-      body: options.message,
-      from: config.twilio.phoneNumber,
-      to: options.phoneNumber
+    // Make sure it's a 10-digit number
+    if (cleanNumber.length !== 10) {
+      console.error('Invalid phone number format, must be 10 digits');
+      return false;
+    }
+    
+    // Get carrier gateway domain
+    const carrier = options.carrier?.toLowerCase() || 'default';
+    const gateway = carrierGateways[carrier] || carrierGateways.default;
+    
+    // Create email address for SMS gateway
+    const smsEmail = `${cleanNumber}@${gateway}`;
+    
+    // Create email transporter
+    const transporter = createTransporter();
+    
+    // SMS via email gateway usually needs to be very short
+    const truncatedMessage = options.message.length > 160 
+      ? options.message.substring(0, 157) + '...' 
+      : options.message;
+    
+    // Send email to SMS gateway
+    const info = await transporter.sendMail({
+      from: config.email.from || `"Visiting Vet" <${config.email.user}>`,
+      to: smsEmail,
+      subject: '', // Usually best to leave blank for SMS gateways
+      text: truncatedMessage, // Plain text for SMS
     });
     
-    console.log(`SMS sent with SID: ${message.sid}`);
+    console.log(`SMS (via email gateway) sent: ${info.messageId}`);
     return true;
   } catch (error) {
     console.error('Error sending SMS notification:', error);
@@ -229,6 +261,27 @@ const sendAppointmentNotification = async (options) => {
         message: options.message || defaultMessages[options.notificationType].provider
       })
     );
+    
+    // Send SMS notifications if phone numbers and carriers are available
+    if (petOwner.phoneNumber && petOwner.carrier) {
+      notificationPromises.push(
+        sendSmsNotification({
+          phoneNumber: petOwner.phoneNumber,
+          carrier: petOwner.carrier,
+          message: options.message || defaultMessages[options.notificationType].petOwner
+        })
+      );
+    }
+    
+    if (provider.phoneNumber && provider.carrier) {
+      notificationPromises.push(
+        sendSmsNotification({
+          phoneNumber: provider.phoneNumber,
+          carrier: provider.carrier,
+          message: options.message || defaultMessages[options.notificationType].provider
+        })
+      );
+    }
     
     // Track the notification in appointment
     appointment.notifications.push({
