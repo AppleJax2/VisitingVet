@@ -3,7 +3,7 @@ import { Container, Row, Col, Nav, Button } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   House, Calendar, Search, Person, 
-  Building, Gear, BoxArrow, Download,
+  Building, Gear, BoxArrowRight, Download,
   List, X, Bell, ChatDots
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
@@ -272,7 +272,7 @@ const DashboardLayout = ({ children, user, onLogout }) => {
               }}
               style={sidebarStyles.navLink}
             >
-              <BoxArrow style={sidebarStyles.navIcon} />
+              <BoxArrowRight style={sidebarStyles.navIcon} />
               <span style={sidebarStyles.navText}>Logout</span>
             </a>
           </Nav.Item>
