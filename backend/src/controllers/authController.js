@@ -18,7 +18,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     ),
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-    // sameSite: 'Strict' // Consider SameSite attribute for CSRF protection
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', // Use None for cross-site in prod, Lax otherwise
   };
 
   // Remove password from output
