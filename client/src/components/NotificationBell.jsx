@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, BellFill } from 'react-bootstrap-icons';
 import { Badge, Overlay, Popover, Spinner, ListGroup, Button } from 'react-bootstrap';
 import { getUserNotifications, markNotificationAsRead, markAllAsRead } from '../services/api';
 import { formatDistanceToNow } from 'date-fns';
+import theme from '../utils/theme';
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
@@ -102,7 +102,7 @@ const NotificationBell = () => {
   };
 
   return (
-    <div className="notification-bell">
+    <div className="notification-bell position-relative">
       <div
         ref={target}
         onClick={() => setShowPopover(!showPopover)}
@@ -110,14 +110,14 @@ const NotificationBell = () => {
       >
         {unreadCount > 0 ? (
           <>
-            <BellFill size={20} className="text-primary" />
+            <i className="bi bi-bell-fill" style={{ fontSize: '20px', color: theme.colors.accent.gold }}></i>
             <Badge 
               bg="danger" 
               pill 
               style={{ 
                 position: 'absolute', 
-                top: '-5px', 
-                right: '-5px',
+                top: '-8px', 
+                right: '-8px',
                 fontSize: '0.6rem'
               }}
             >
@@ -125,7 +125,7 @@ const NotificationBell = () => {
             </Badge>
           </>
         ) : (
-          <Bell size={20} />
+          <i className="bi bi-bell" style={{ fontSize: '20px', color: '#fff' }}></i>
         )}
       </div>
 
@@ -136,15 +136,24 @@ const NotificationBell = () => {
         rootClose
         onHide={() => setShowPopover(false)}
       >
-        <Popover id="notifications-popover" style={{ maxWidth: '350px', width: '350px' }}>
-          <Popover.Header className="d-flex justify-content-between align-items-center">
-            <span>Notifications</span>
+        <Popover id="notifications-popover" style={{ maxWidth: '350px', width: '350px', boxShadow: theme.shadows.md }}>
+          <Popover.Header className="d-flex justify-content-between align-items-center" 
+            style={{ 
+              background: theme.colors.background.light, 
+              borderBottom: `1px solid ${theme.colors.accent.lightGreen}` 
+            }}
+          >
+            <span className="fw-bold">
+              <i className="bi bi-bell me-2"></i>
+              Notifications
+            </span>
             {unreadCount > 0 && (
               <Button 
                 variant="link" 
                 size="sm" 
                 className="p-0 text-decoration-none"
                 onClick={handleMarkAllAsRead}
+                style={{ color: theme.colors.primary.main }}
               >
                 Mark all as read
               </Button>
@@ -153,12 +162,18 @@ const NotificationBell = () => {
           <Popover.Body className="p-0" style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {loading ? (
               <div className="text-center py-3">
-                <Spinner animation="border" size="sm" />
+                <Spinner animation="border" size="sm" style={{ color: theme.colors.primary.main }} />
               </div>
             ) : error ? (
-              <div className="text-center text-danger py-3">{error}</div>
+              <div className="text-center text-danger py-3">
+                <i className="bi bi-exclamation-triangle me-2"></i>
+                {error}
+              </div>
             ) : notifications.length === 0 ? (
-              <div className="text-center py-3">No notifications</div>
+              <div className="text-center py-4">
+                <i className="bi bi-bell-slash mb-2" style={{ fontSize: '2rem', color: theme.colors.text.light }}></i>
+                <p>No notifications yet</p>
+              </div>
             ) : (
               <ListGroup variant="flush">
                 {notifications.map(notification => (
@@ -169,15 +184,17 @@ const NotificationBell = () => {
                     className={notification.isRead ? 'text-muted' : 'fw-semibold'}
                     style={{ 
                       backgroundColor: notification.isRead ? '#fff' : '#f8f9fa',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      borderLeft: notification.isRead ? 'none' : `3px solid ${theme.colors.accent.gold}`
                     }}
                   >
                     <div className="d-flex flex-column">
-                      <small className="text-primary mb-1">
+                      <small className="fw-bold" style={{ color: theme.colors.primary.main }}>
                         {notification.title}
                       </small>
                       <div>{notification.message}</div>
-                      <small className="text-muted mt-1">
+                      <small className="text-muted mt-1 d-flex align-items-center">
+                        <i className="bi bi-clock me-1" style={{ fontSize: '0.8rem' }}></i>
                         {formatTime(notification.createdAt)}
                       </small>
                     </div>
@@ -186,6 +203,17 @@ const NotificationBell = () => {
               </ListGroup>
             )}
           </Popover.Body>
+          <div className="border-top p-2 text-center">
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="text-decoration-none"
+              style={{ color: theme.colors.primary.main }}
+              onClick={() => setShowPopover(false)}
+            >
+              Close
+            </Button>
+          </div>
         </Popover>
       </Overlay>
     </div>

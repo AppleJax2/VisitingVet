@@ -1,29 +1,65 @@
-import React, { useState } from 'react';
-import { login } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { login, checkAuthStatus } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
-import { Form, Button, Container, Row, Col, Card, Alert } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
 import theme from '../utils/theme';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const data = await checkAuthStatus();
+        if (data && data.success) {
+          // User is already logged in, redirect to dashboard
+          navigate('/dashboard');
+        }
+      } catch (err) {
+        // Not logged in, stay on login page
+        console.log('User not logged in');
+      } finally {
+        setIsChecking(false);
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Clear previous errors
+    setIsLoading(true);
+    
     try {
       const data = await login({ email, password });
-      if (data.success) {
-        // Handle successful login (e.g., update auth state, redirect)
+      
+      if (data && data.success) {
+        // Handle successful login
         console.log('Login successful:', data.user);
+        
+        // Show a temporary success message
+        // We could use a toast notification here in the future
+        
         navigate('/dashboard'); // Redirect to dashboard
       } else {
-        setError(data.message || 'Login failed');
+        setError(data?.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
-      setError(err.message || 'An error occurred during login.');
+      console.error('Login error:', err);
+      setError(
+        err.response?.data?.message || 
+        err.message || 
+        'An error occurred during login. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,6 +101,16 @@ function LoginPage() {
     },
   };
 
+  if (isChecking) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 76px)' }}>
+        <Spinner animation="border" role="status" style={{ color: theme.colors.primary.main }}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </Container>
+    );
+  }
+
   return (
     <div style={styles.container}>
       <Container>
@@ -75,35 +121,82 @@ function LoginPage() {
                 <h3 className="m-0 fw-bold">Login</h3>
               </div>
               <Card.Body style={styles.cardBody}>
-                {error && <Alert variant="danger">{error}</Alert>}
+                {error && (
+                  <Alert variant="danger" className="d-flex align-items-center">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    {error}
+                  </Alert>
+                )}
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label>Email address</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder="Enter email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <div className="input-group">
+                      <span className="input-group-text">
+                        <i className="bi bi-envelope"></i>
+                      </span>
+                      <Form.Control
+                        type="email"
+                        placeholder="Enter email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
                   </Form.Group>
 
                   <Form.Group className="mb-4" controlId="formBasicPassword">
                     <Form.Label>Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <div className="input-group">
+                      <span className="input-group-text">
+                        <i className="bi bi-lock"></i>
+                      </span>
+                      <Form.Control
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
                   </Form.Group>
+                  
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <Form.Check
+                      type="checkbox"
+                      id="rememberMe"
+                      label="Remember me"
+                    />
+                    <Link to="/forgot-password" style={styles.link}>
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  
                   <Button 
                     type="submit" 
-                    className="w-100"
+                    className="w-100 d-flex justify-content-center align-items-center"
                     style={styles.button}
+                    disabled={isLoading}
                   >
-                    Login
+                    {isLoading ? (
+                      <>
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                          className="me-2"
+                        />
+                        Logging in...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-box-arrow-in-right me-2"></i>
+                        Login
+                      </>
+                    )}
                   </Button>
                 </Form>
                 <div className="mt-4 text-center">

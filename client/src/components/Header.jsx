@@ -144,14 +144,14 @@ const Header = () => {
               <>
                 <NavLink to="/dashboard">Dashboard</NavLink>
                 
-                {user && user.userType === 'provider' && (
+                {user && user.role === 'MVSProvider' && (
                   <>
                     <NavLink to="/provider-profile">My Profile</NavLink>
                     <NavLink to="/provider-appointments">Appointments</NavLink>
                   </>
                 )}
                 
-                {user && user.userType === 'petOwner' && (
+                {user && user.role === 'PetOwner' && (
                   <NavLink to="/my-appointments">My Appointments</NavLink>
                 )}
                 
