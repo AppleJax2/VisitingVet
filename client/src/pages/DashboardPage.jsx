@@ -121,10 +121,13 @@ function DashboardPage() {
         <Card>
           <Card.Header as="h5">Appointment Requests</Card.Header>
           <Card.Body className="text-center">
-            <p>You don't have any appointment requests yet.</p>
-            <p>Complete your profile to start receiving appointments.</p>
-            <Button variant="outline-primary" disabled>
-              Manage Appointments (Coming Soon)
+            <p>View and manage appointment requests from pet owners.</p>
+            <Button 
+              variant="outline-primary" 
+              as={Link} 
+              to="/provider-appointments"
+            >
+              Manage Appointments
             </Button>
           </Card.Body>
         </Card>

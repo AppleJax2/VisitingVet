@@ -187,4 +187,25 @@ export const getMyPetOwnerAppointments = async () => {
   }
 };
 
+export const getMyAppointmentsProvider = async (status) => {
+  try {
+    const url = status ? `/appointments/provider?status=${status}` : '/appointments/provider';
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Get provider appointments error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get provider appointments');
+  }
+};
+
+export const updateAppointmentStatus = async (appointmentId, status) => {
+  try {
+    const response = await api.put(`/appointments/${appointmentId}/status`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Update appointment status error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update appointment status');
+  }
+};
+
 export default api; 

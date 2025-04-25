@@ -212,4 +212,137 @@ exports.getMyPetOwnerAppointments = async (req, res) => {
       error: 'Server error'
     });
   }
+};
+
+// @desc    Get provider's appointments
+// @route   GET /api/appointments/provider
+// @access  Private (MVSProvider)
+exports.getMyAppointmentsProvider = async (req, res) => {
+  try {
+    // Check if user is a MVSProvider
+    const user = await User.findById(req.user.id);
+    if (user.role !== 'MVSProvider') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only veterinary providers can access their appointments'
+      });
+    }
+    
+    // Find the provider's profile
+    const providerProfile = await VisitingVetProfile.findOne({ user: req.user.id });
+    if (!providerProfile) {
+      return res.status(404).json({
+        success: false,
+        error: 'Provider profile not found'
+      });
+    }
+    
+    // Optional status filter
+    const statusFilter = req.query.status ? { status: req.query.status } : {};
+    
+    // Get all appointments for this provider
+    const appointments = await Appointment.find({
+      providerProfile: providerProfile._id,
+      ...statusFilter
+    })
+      .populate({
+        path: 'petOwner',
+        select: 'email' // Include only basic user info
+      })
+      .populate('service')
+      .sort({ appointmentTime: 1 });
+    
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      data: appointments
+    });
+  } catch (error) {
+    console.error('Error fetching provider appointments:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+};
+
+// @desc    Update appointment status
+// @route   PUT /api/appointments/:appointmentId/status
+// @access  Private (MVSProvider)
+exports.updateAppointmentStatus = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { status } = req.body;
+    
+    // Validate required fields
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        error: 'Status is required'
+      });
+    }
+    
+    // Validate status value
+    const validStatuses = ['Confirmed', 'Cancelled', 'Completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: `Status must be one of: ${validStatuses.join(', ')}`
+      });
+    }
+    
+    // Check if user is a MVSProvider
+    const user = await User.findById(req.user.id);
+    if (user.role !== 'MVSProvider') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only veterinary providers can update appointment status'
+      });
+    }
+    
+    // Find the provider's profile
+    const providerProfile = await VisitingVetProfile.findOne({ user: req.user.id });
+    if (!providerProfile) {
+      return res.status(404).json({
+        success: false,
+        error: 'Provider profile not found'
+      });
+    }
+    
+    // Find the appointment and ensure it belongs to this provider
+    const appointment = await Appointment.findOne({
+      _id: appointmentId,
+      providerProfile: providerProfile._id
+    });
+    
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        error: 'Appointment not found or does not belong to this provider'
+      });
+    }
+    
+    // Validate state transitions
+    if (appointment.status === 'Cancelled' || appointment.status === 'Completed') {
+      return res.status(400).json({
+        success: false,
+        error: `Cannot update an appointment with status '${appointment.status}'`
+      });
+    }
+    
+    // Update the appointment status
+    appointment.status = status;
+    await appointment.save();
+    
+    res.status(200).json({
+      success: true,
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error updating appointment status:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
 }; 
