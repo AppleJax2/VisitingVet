@@ -198,13 +198,60 @@ export const getMyAppointmentsProvider = async (status) => {
   }
 };
 
-export const updateAppointmentStatus = async (appointmentId, status) => {
+export const updateAppointmentStatus = async (appointmentId, status, additionalData = {}) => {
   try {
-    const response = await api.put(`/appointments/${appointmentId}/status`, { status });
+    const response = await api.put(`/appointments/${appointmentId}/status`, { 
+      status,
+      ...additionalData
+    });
     return response.data;
   } catch (error) {
     console.error('Update appointment status error:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to update appointment status');
+  }
+};
+
+export const cancelAppointmentByPetOwner = async (appointmentId, cancellationReason) => {
+  try {
+    const response = await api.put(`/appointments/${appointmentId}/cancel`, { 
+      cancellationReason 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Cancel appointment error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to cancel appointment');
+  }
+};
+
+export const getAppointmentDetails = async (appointmentId) => {
+  try {
+    const response = await api.get(`/appointments/${appointmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get appointment details error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get appointment details');
+  }
+};
+
+// Notifications API
+export const getUserNotifications = async (isRead) => {
+  try {
+    const url = isRead !== undefined ? `/notifications?isRead=${isRead}` : '/notifications';
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Get notifications error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get notifications');
+  }
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+  try {
+    const response = await api.put(`/notifications/${notificationId}/read`);
+    return response.data;
+  } catch (error) {
+    console.error('Mark notification read error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to mark notification as read');
   }
 };
 

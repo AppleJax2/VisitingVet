@@ -9,6 +9,8 @@ import ProviderProfileViewPage from './pages/ProviderProfileViewPage';
 import ProviderSearchPage from './pages/ProviderSearchPage';
 import MyPetOwnerAppointmentsPage from './pages/MyPetOwnerAppointmentsPage';
 import ProviderAppointmentsPage from './pages/ProviderAppointmentsPage';
+import LandingPage from './pages/LandingPage';
+import NotificationBell from './components/NotificationBell';
 import './App.css';
 
 // Basic protected route component (can be enhanced later)
@@ -24,6 +26,7 @@ function App() {
       <div className="App">
         <Routes>
           {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
@@ -35,11 +38,8 @@ function App() {
           <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
           <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
           
-          {/* Redirect to dashboard if logged in, otherwise to login */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
           {/* Handle 404 - can be replaced with a proper NotFound component */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </Router>

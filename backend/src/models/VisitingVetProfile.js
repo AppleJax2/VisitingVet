@@ -48,6 +48,67 @@ const visitingVetProfileSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  // New fields for external scheduling
+  useExternalScheduling: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
+  externalSchedulingUrl: {
+    type: String,
+    validate: {
+      validator: function(v) {
+        // Only required if useExternalScheduling is true
+        return !this.useExternalScheduling || (v && v.trim().length > 0);
+      },
+      message: 'External scheduling URL is required when using external scheduling'
+    }
+  },
+  contactPhone: {
+    type: String,
+    trim: true,
+  },
+  contactEmail: {
+    type: String,
+    trim: true,
+    lowercase: true,
+    match: [
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      'Please provide a valid email',
+    ],
+  },
+  // Business information
+  businessName: {
+    type: String,
+    trim: true,
+  },
+  businessAddress: {
+    type: String,
+    trim: true,
+  },
+  businessDescription: {
+    type: String,
+    maxlength: [1000, 'Business description cannot be more than 1000 characters'],
+  },
+  // Animal type specialization
+  animalTypes: {
+    type: [{
+      type: String,
+      enum: ['Small Animal', 'Large Animal', 'Exotic', 'Avian', 'Equine', 'Farm Animal', 'Other'],
+    }],
+    default: ['Small Animal'],
+    validate: {
+      validator: function(v) {
+        return v.length > 0;
+      },
+      message: 'At least one animal type must be selected'
+    }
+  },
+  // Ferrier or other specialty service type
+  specialtyServices: {
+    type: [String],
+    default: [],
+  },
 }, { timestamps: true });
 
 // Virtual for fetching services

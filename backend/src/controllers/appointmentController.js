@@ -3,6 +3,7 @@ const VisitingVetProfile = require('../models/VisitingVetProfile');
 const Service = require('../models/Service');
 const Availability = require('../models/Availability');
 const User = require('../models/User');
+const notificationService = require('../utils/notificationService');
 
 // Helper function to check if the requested time is within provider's availability
 const isTimeWithinAvailability = (availability, requestedDate, serviceDuration) => {
@@ -70,7 +71,7 @@ const hasAppointmentConflict = async (providerProfileId, startTime, endTime) => 
 // @access  Private (PetOwner)
 exports.requestAppointment = async (req, res) => {
   try {
-    const { providerProfileId, serviceId, appointmentTime, notes } = req.body;
+    const { providerProfileId, serviceId, appointmentTime, notes, animalDetails, customFieldResponses } = req.body;
     const requestedTime = new Date(appointmentTime);
     
     // Validate required fields
@@ -87,6 +88,14 @@ exports.requestAppointment = async (req, res) => {
       return res.status(404).json({
         success: false,
         error: 'Provider profile not found'
+      });
+    }
+
+    // If provider uses external scheduling, don't allow appointment creation
+    if (providerProfile.useExternalScheduling) {
+      return res.status(400).json({
+        success: false,
+        error: 'This provider uses external scheduling. Please contact them directly.'
       });
     }
     
@@ -126,6 +135,15 @@ exports.requestAppointment = async (req, res) => {
     estimatedEndTime.setMinutes(
       estimatedEndTime.getMinutes() + service.estimatedDurationMinutes
     );
+
+    // Validate that appointment time is in the future
+    const now = new Date();
+    if (requestedTime <= now) {
+      return res.status(400).json({
+        success: false,
+        error: 'Appointment time must be in the future'
+      });
+    }
     
     // Check if requested time is within provider's availability
     if (!isTimeWithinAvailability(
@@ -161,7 +179,15 @@ exports.requestAppointment = async (req, res) => {
       appointmentTime: requestedTime,
       estimatedEndTime,
       notes: notes || '',
-      status: 'Requested'
+      status: 'Requested',
+      animalDetails: animalDetails || {},
+      customFieldResponses: customFieldResponses || []
+    });
+
+    // Send notifications
+    await notificationService.sendAppointmentNotification({
+      appointmentId: appointment._id,
+      notificationType: 'Created'
     });
     
     res.status(201).json({
@@ -272,7 +298,7 @@ exports.getMyAppointmentsProvider = async (req, res) => {
 exports.updateAppointmentStatus = async (req, res) => {
   try {
     const { appointmentId } = req.params;
-    const { status } = req.body;
+    const { status, completionNotes, followUpRecommended, followUpNotes, cancellationReason } = req.body;
     
     // Validate required fields
     if (!status) {
@@ -323,7 +349,7 @@ exports.updateAppointmentStatus = async (req, res) => {
     }
     
     // Validate state transitions
-    if (appointment.status === 'Cancelled' || appointment.status === 'Completed') {
+    if (appointment.status === 'Cancelled' || appointment.status === 'Completed' || appointment.status === 'CancelledByOwner') {
       return res.status(400).json({
         success: false,
         error: `Cannot update an appointment with status '${appointment.status}'`
@@ -332,7 +358,25 @@ exports.updateAppointmentStatus = async (req, res) => {
     
     // Update the appointment status
     appointment.status = status;
+
+    // Add additional details based on the status
+    if (status === 'Cancelled') {
+      appointment.cancellationReason = cancellationReason || '';
+      appointment.cancelledBy = 'Provider';
+      appointment.cancellationTime = new Date();
+    } else if (status === 'Completed') {
+      appointment.completionNotes = completionNotes || '';
+      appointment.followUpRecommended = followUpRecommended || false;
+      appointment.followUpNotes = followUpNotes || '';
+    }
+    
     await appointment.save();
+
+    // Send notifications
+    await notificationService.sendAppointmentNotification({
+      appointmentId: appointment._id,
+      notificationType: status === 'Confirmed' ? 'Updated' : status
+    });
     
     res.status(200).json({
       success: true,
@@ -340,6 +384,134 @@ exports.updateAppointmentStatus = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating appointment status:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+};
+
+// @desc    Cancel appointment by pet owner
+// @route   PUT /api/appointments/:appointmentId/cancel
+// @access  Private (PetOwner)
+exports.cancelAppointmentByPetOwner = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { cancellationReason } = req.body;
+    
+    // Check if user is a PetOwner
+    const user = await User.findById(req.user.id);
+    if (user.role !== 'PetOwner') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only pet owners can cancel their appointments'
+      });
+    }
+    
+    // Find the appointment and ensure it belongs to this pet owner
+    const appointment = await Appointment.findOne({
+      _id: appointmentId,
+      petOwner: req.user.id
+    });
+    
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        error: 'Appointment not found or does not belong to you'
+      });
+    }
+    
+    // Validate state transitions
+    if (appointment.status === 'Cancelled' || appointment.status === 'Completed' || appointment.status === 'CancelledByOwner') {
+      return res.status(400).json({
+        success: false,
+        error: `Cannot cancel an appointment with status '${appointment.status}'`
+      });
+    }
+    
+    // Only allow cancellation if appointment is in the future (at least 24 hours before)
+    const now = new Date();
+    const appointmentTime = new Date(appointment.appointmentTime);
+    const timeDifference = appointmentTime.getTime() - now.getTime();
+    const hoursDifference = timeDifference / (1000 * 60 * 60);
+    
+    // Check if appointment is less than 24 hours away
+    if (hoursDifference < 24) {
+      return res.status(400).json({
+        success: false,
+        error: 'Appointments can only be cancelled at least 24 hours in advance'
+      });
+    }
+    
+    // Update the appointment status
+    appointment.status = 'CancelledByOwner';
+    appointment.cancellationReason = cancellationReason || '';
+    appointment.cancelledBy = 'PetOwner';
+    appointment.cancellationTime = new Date();
+    
+    await appointment.save();
+
+    // Send notifications
+    await notificationService.sendAppointmentNotification({
+      appointmentId: appointment._id,
+      notificationType: 'Cancelled',
+      message: `Appointment was cancelled by the pet owner${cancellationReason ? ': ' + cancellationReason : ''}.`
+    });
+    
+    res.status(200).json({
+      success: true,
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error cancelling appointment:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+};
+
+// @desc    Get appointment details
+// @route   GET /api/appointments/:appointmentId
+// @access  Private (PetOwner/MVSProvider)
+exports.getAppointmentDetails = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    
+    // Find the appointment
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('petOwner', 'email')
+      .populate({
+        path: 'providerProfile',
+        select: 'bio yearsExperience photoUrl licenseInfo businessName animalTypes',
+        populate: { path: 'user', select: 'email' }
+      })
+      .populate('service');
+    
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        error: 'Appointment not found'
+      });
+    }
+    
+    // Check authorization
+    if (
+      appointment.petOwner._id.toString() !== req.user.id &&
+      appointment.providerProfile.user._id.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to view this appointment'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error fetching appointment details:', error);
     res.status(500).json({
       success: false,
       error: 'Server error'
