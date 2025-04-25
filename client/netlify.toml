@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build" # Command to build the site
+  publish = "dist"          # Directory (relative to root) that contains the deploy-ready assets
+
+[build.environment]
+  # Set environment variables needed during build
+  # VITE_API_URL will be set in Netlify UI for production
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 
