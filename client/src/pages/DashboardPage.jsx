@@ -49,14 +49,39 @@ function DashboardPage() {
           <Card.Body className="text-center">
             <h4>Welcome to VisitingVet.com</h4>
             <p>Find a veterinarian who can visit your home, saving you and your pets the stress of a clinic visit.</p>
+            <div className="d-flex justify-content-center gap-3">
+              <Button 
+                variant="primary" 
+                size="lg" 
+                as={Link} 
+                to="/search-providers"
+                className="mt-3"
+              >
+                Find a Visiting Vet
+              </Button>
+              <Button 
+                variant="success" 
+                size="lg" 
+                as={Link} 
+                to="/my-appointments"
+                className="mt-3"
+              >
+                My Appointments
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+        
+        <Card className="mb-4">
+          <Card.Header as="h5">Your Appointments</Card.Header>
+          <Card.Body className="text-center">
+            <p>View and manage your appointment requests with visiting veterinarians.</p>
             <Button 
-              variant="primary" 
-              size="lg" 
+              variant="outline-primary" 
               as={Link} 
-              to="/search-providers"
-              className="mt-3"
+              to="/my-appointments"
             >
-              Find a Visiting Vet
+              View My Appointments
             </Button>
           </Card.Body>
         </Card>

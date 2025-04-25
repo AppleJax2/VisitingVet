@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import ProviderProfileEditPage from './pages/ProviderProfileEditPage';
 import ProviderProfileViewPage from './pages/ProviderProfileViewPage';
 import ProviderSearchPage from './pages/ProviderSearchPage';
+import MyPetOwnerAppointmentsPage from './pages/MyPetOwnerAppointmentsPage';
 import './App.css';
 
 // Basic protected route component (can be enhanced later)
@@ -30,6 +31,7 @@ function App() {
           {/* Protected Routes */}
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/provider-profile" element={<ProviderProfileEditPage />} />
+          <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
           
           {/* Redirect to dashboard if logged in, otherwise to login */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

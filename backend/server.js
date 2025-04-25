@@ -7,6 +7,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
 const serviceRoutes = require('./src/routes/serviceRoutes');
 const availabilityRoutes = require('./src/routes/availabilityRoutes');
+const appointmentRoutes = require('./src/routes/appointmentRoutes');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/profiles', serviceRoutes);
 app.use('/api/availability', availabilityRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {

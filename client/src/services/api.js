@@ -166,4 +166,25 @@ export const getProviderAvailability = async (profileId) => {
   }
 };
 
+// Appointment management
+export const requestAppointment = async (appointmentData) => {
+  try {
+    const response = await api.post('/appointments', appointmentData);
+    return response.data;
+  } catch (error) {
+    console.error('Request appointment error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to request appointment');
+  }
+};
+
+export const getMyPetOwnerAppointments = async () => {
+  try {
+    const response = await api.get('/appointments/my-appointments');
+    return response.data;
+  } catch (error) {
+    console.error('Get appointments error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get appointments');
+  }
+};
+
 export default api; 

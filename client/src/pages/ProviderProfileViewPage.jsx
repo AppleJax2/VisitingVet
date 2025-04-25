@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Badge, ListGroup, Alert, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, ListGroup, Alert, Spinner, Button } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
-import { getProfileById } from '../services/api';
+import { getProfileById, getProviderAvailability, checkAuthStatus } from '../services/api';
+import AppointmentRequestModal from '../components/AppointmentRequestModal';
 
 function ProviderProfileViewPage() {
   const { id } = useParams();
@@ -10,12 +11,22 @@ function ProviderProfileViewPage() {
   const [profile, setProfile] = useState(null);
   const [user, setUser] = useState(null);
   const [services, setServices] = useState([]);
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchUserAndProfile = async () => {
       setIsLoading(true);
       setError('');
       try {
+        // Check current user role (if logged in)
+        const authData = await checkAuthStatus();
+        if (authData && authData.success) {
+          setCurrentUserRole(authData.user.role);
+        }
+        
+        // Fetch provider profile
         const data = await getProfileById(id);
         if (data && data.success) {
           setProfile(data.profile);
@@ -29,8 +40,24 @@ function ProviderProfileViewPage() {
       }
     };
 
-    fetchProfile();
+    fetchUserAndProfile();
   }, [id]);
+
+  const handleRequestAppointment = (service) => {
+    if (currentUserRole !== 'PetOwner') {
+      // Redirect to login or show message for non-pet owners
+      setError('You must be logged in as a pet owner to request appointments.');
+      return;
+    }
+    
+    setSelectedService(service);
+    setShowAppointmentModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowAppointmentModal(false);
+    setSelectedService(null);
+  };
 
   if (isLoading) {
     return (
@@ -168,7 +195,7 @@ function ProviderProfileViewPage() {
                               <strong>Price:</strong> ${service.price} ({service.priceType})
                             </span>
                           </div>
-                          <div className="mt-2">
+                          <div className="mt-2 d-flex justify-content-between align-items-center">
                             <Badge bg={
                               service.offeredLocation === 'InHome' ? 'success' :
                               service.offeredLocation === 'InClinic' ? 'primary' : 'warning'
@@ -176,6 +203,15 @@ function ProviderProfileViewPage() {
                               {service.offeredLocation === 'InHome' ? 'In-Home' :
                                service.offeredLocation === 'InClinic' ? 'In-Clinic' : 'In-Home & In-Clinic'}
                             </Badge>
+                            
+                            <Button 
+                              variant="primary" 
+                              size="sm"
+                              onClick={() => handleRequestAppointment(service)}
+                              disabled={currentUserRole !== 'PetOwner'}
+                            >
+                              Request Appointment
+                            </Button>
                           </div>
                         </Card.Body>
                       </Card>
@@ -183,10 +219,34 @@ function ProviderProfileViewPage() {
                   ))}
                 </Row>
               )}
+              
+              {currentUserRole !== 'PetOwner' && services.length > 0 && (
+                <Alert variant="info" className="mt-3">
+                  You need to be logged in as a pet owner to request appointments.
+                  {!currentUserRole && (
+                    <div className="mt-2">
+                      <Link to="/login" className="btn btn-primary btn-sm">
+                        Log In
+                      </Link>{' '}
+                      <Link to="/register" className="btn btn-outline-primary btn-sm">
+                        Register
+                      </Link>
+                    </div>
+                  )}
+                </Alert>
+              )}
             </Card.Body>
           </Card>
         </Col>
       </Row>
+      
+      {/* Appointment Request Modal */}
+      <AppointmentRequestModal
+        show={showAppointmentModal}
+        onHide={handleCloseModal}
+        service={selectedService}
+        providerProfileId={id}
+      />
     </Container>
   );
 }
