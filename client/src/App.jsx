@@ -10,7 +10,7 @@ import ProviderSearchPage from './pages/ProviderSearchPage';
 import MyPetOwnerAppointmentsPage from './pages/MyPetOwnerAppointmentsPage';
 import ProviderAppointmentsPage from './pages/ProviderAppointmentsPage';
 import LandingPage from './pages/LandingPage';
-import NotificationBell from './components/NotificationBell';
+import Header from './components/Header';
 import './App.css';
 
 // Basic protected route component (can be enhanced later)
@@ -24,23 +24,26 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
-          <Route path="/search-providers" element={<ProviderSearchPage />} />
-          
-          {/* Protected Routes */}
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/provider-profile" element={<ProviderProfileEditPage />} />
-          <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
-          <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
-          
-          {/* Handle 404 - can be replaced with a proper NotFound component */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Header />
+        <div className="main-content">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
+            <Route path="/search-providers" element={<ProviderSearchPage />} />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/provider-profile" element={<ProviderProfileEditPage />} />
+            <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
+            <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
+            
+            {/* Handle 404 - can be replaced with a proper NotFound component */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
       </div>
     </Router>
   );
