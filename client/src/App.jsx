@@ -1,9 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import ProviderProfileEditPage from './pages/ProviderProfileEditPage';
+import ProviderProfileViewPage from './pages/ProviderProfileViewPage';
+import ProviderSearchPage from './pages/ProviderSearchPage';
+import './App.css';
 
 // Basic protected route component (can be enhanced later)
 // For now, DashboardPage handles its own auth check
@@ -15,21 +19,25 @@ import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard"
-          element={
-            // <ProtectedRoute>
-              <DashboardPage />
-            // </ProtectedRoute>
-          }
-        />
-        {/* Redirect base path to login or dashboard depending on auth status */}
-        {/* For simplicity now, redirect to login */}
-        <Route path="/" element={<Navigate to="/login" />} />
-         {/* Add other routes here */}
-      </Routes>
+      <div className="App">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
+          <Route path="/search-providers" element={<ProviderSearchPage />} />
+          
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/provider-profile" element={<ProviderProfileEditPage />} />
+          
+          {/* Redirect to dashboard if logged in, otherwise to login */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          
+          {/* Handle 404 - can be replaced with a proper NotFound component */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

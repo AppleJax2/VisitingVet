@@ -53,4 +53,86 @@ export const checkAuthStatus = async () => {
   }
 };
 
+// Profile management
+export const createUpdateProfile = async (profileData) => {
+  try {
+    const response = await api.post('/profiles/visiting-vet', profileData);
+    return response.data;
+  } catch (error) {
+    console.error('Profile update error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Profile update failed');
+  }
+};
+
+export const getMyProfile = async () => {
+  try {
+    const response = await api.get('/profiles/visiting-vet/me');
+    return response.data;
+  } catch (error) {
+    console.error('Get profile error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get profile');
+  }
+};
+
+export const getProfileById = async (profileId) => {
+  try {
+    const response = await api.get(`/profiles/visiting-vet/${profileId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get profile error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get profile');
+  }
+};
+
+export const listProfiles = async () => {
+  try {
+    const response = await api.get('/profiles/visiting-vet');
+    return response.data;
+  } catch (error) {
+    console.error('List profiles error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to list profiles');
+  }
+};
+
+// Service management
+export const createService = async (serviceData) => {
+  try {
+    const response = await api.post('/profiles/visiting-vet/services', serviceData);
+    return response.data;
+  } catch (error) {
+    console.error('Create service error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to create service');
+  }
+};
+
+export const updateService = async (serviceId, serviceData) => {
+  try {
+    const response = await api.put(`/profiles/visiting-vet/services/${serviceId}`, serviceData);
+    return response.data;
+  } catch (error) {
+    console.error('Update service error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update service');
+  }
+};
+
+export const deleteService = async (serviceId) => {
+  try {
+    const response = await api.delete(`/profiles/visiting-vet/services/${serviceId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Delete service error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to delete service');
+  }
+};
+
+export const getServicesByProfile = async (profileId) => {
+  try {
+    const response = await api.get(`/profiles/visiting-vet/${profileId}/services`);
+    return response.data;
+  } catch (error) {
+    console.error('Get services error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get services');
+  }
+};
+
 export default api; 

@@ -4,6 +4,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./src/config/db');
 const authRoutes = require('./src/routes/authRoutes');
+const profileRoutes = require('./src/routes/profileRoutes');
+const serviceRoutes = require('./src/routes/serviceRoutes');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -29,7 +31,8 @@ app.use(cors(corsOptions));
 
 // Mount routers
 app.use('/api/auth', authRoutes);
-// Add other routes here later (e.g., /api/providers, /api/appointments)
+app.use('/api/profiles', profileRoutes);
+app.use('/api/profiles', serviceRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {
