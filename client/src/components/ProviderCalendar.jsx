@@ -1,13 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import enUS from 'date-fns/locale/en-US';
 import { Container, Row, Col, Card, Spinner, Alert, Button, Modal } from 'react-bootstrap';
 import { getMyAppointmentsProvider, getMyAvailability } from '../services/api';
 import AppointmentDetailModal from './AppointmentDetailModal';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-// Setup localizer for react-big-calendar
-const localizer = momentLocalizer(moment);
+// Setup date-fns localizer
+const locales = {
+  'en-US': enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 const ProviderCalendar = () => {
   const [appointments, setAppointments] = useState([]);
@@ -56,37 +67,46 @@ const ProviderCalendar = () => {
     
     // Add availability blocks as events if they exist
     if (availability && availability.weeklySchedule) {
-      // Current view's start date (beginning of week)
-      const startOfWeek = moment(viewDate).startOf('week').toDate();
+      // Current view's start date (beginning of week, using date-fns)
+      const currentWeekStart = startOfWeek(viewDate, { locales }); 
       
       // Add each day's availability as events
       availability.weeklySchedule.forEach(daySchedule => {
         if (daySchedule.isAvailable) {
-          // Calculate the date for this day in the current view week
-          const dayDate = moment(startOfWeek).add(daySchedule.dayOfWeek, 'days');
-          
-          // Parse start and end times
-          const [startHours, startMinutes] = daySchedule.startTime.split(':').map(Number);
-          const [endHours, endMinutes] = daySchedule.endTime.split(':').map(Number);
-          
-          // Create availability block event
-          const availabilityStart = dayDate.clone().hours(startHours).minutes(startMinutes).toDate();
-          const availabilityEnd = dayDate.clone().hours(endHours).minutes(endMinutes).toDate();
-          
-          events.push({
-            id: `availability-${daySchedule.dayOfWeek}`,
-            title: 'Available Hours',
-            start: availabilityStart,
-            end: availabilityEnd,
-            allDay: false,
-            resource: { type: 'availability' },
-            style: {
-              backgroundColor: 'rgba(200, 230, 201, 0.5)', // Light green with transparency
-              color: '#1b5e20',
-              borderColor: '#81c784',
-              opacity: 0.7
-            }
-          });
+          // Calculate the date for this day in the current view week (using date-fns)
+          const dayIndex = daySchedule.dayOfWeek; // Assuming 0 = Sunday, 1 = Monday...
+          const dayDate = new Date(currentWeekStart);
+          dayDate.setDate(currentWeekStart.getDate() + dayIndex);
+
+          // Parse start and end times (assuming HH:mm format)
+          try {
+            const [startHours, startMinutes] = daySchedule.startTime.split(':').map(Number);
+            const [endHours, endMinutes] = daySchedule.endTime.split(':').map(Number);
+            
+            // Create availability block event
+            const availabilityStart = new Date(dayDate);
+            availabilityStart.setHours(startHours, startMinutes, 0, 0);
+
+            const availabilityEnd = new Date(dayDate);
+            availabilityEnd.setHours(endHours, endMinutes, 0, 0);
+            
+            events.push({
+              id: `availability-${daySchedule.dayOfWeek}`,
+              title: 'Available Hours',
+              start: availabilityStart,
+              end: availabilityEnd,
+              allDay: false,
+              resource: { type: 'availability' },
+              style: {
+                backgroundColor: 'rgba(200, 230, 201, 0.5)', // Light green with transparency
+                color: '#1b5e20',
+                borderColor: '#81c784',
+                opacity: 0.7
+              }
+            });
+          } catch (parseError) {
+            console.error("Error parsing availability time:", daySchedule.startTime, daySchedule.endTime, parseError);
+          }
         }
       });
     }
