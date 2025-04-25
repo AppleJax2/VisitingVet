@@ -135,4 +135,35 @@ export const getServicesByProfile = async (profileId) => {
   }
 };
 
+// Availability management
+export const getMyAvailability = async () => {
+  try {
+    const response = await api.get('/availability/me');
+    return response.data;
+  } catch (error) {
+    console.error('Get availability error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get availability');
+  }
+};
+
+export const updateAvailability = async (availabilityData) => {
+  try {
+    const response = await api.post('/availability/me', availabilityData);
+    return response.data;
+  } catch (error) {
+    console.error('Update availability error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update availability');
+  }
+};
+
+export const getProviderAvailability = async (profileId) => {
+  try {
+    const response = await api.get(`/availability/${profileId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Get provider availability error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get provider availability');
+  }
+};
+
 export default api; 

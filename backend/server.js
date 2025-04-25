@@ -6,6 +6,7 @@ const connectDB = require('./src/config/db');
 const authRoutes = require('./src/routes/authRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
 const serviceRoutes = require('./src/routes/serviceRoutes');
+const availabilityRoutes = require('./src/routes/availabilityRoutes');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -33,6 +34,7 @@ app.use(cors(corsOptions));
 app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/profiles', serviceRoutes);
+app.use('/api/availability', availabilityRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {

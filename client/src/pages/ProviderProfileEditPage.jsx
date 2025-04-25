@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Card, Row, Col, Alert, Spinner, ListGroup, Modal } from 'react-bootstrap';
+import { Container, Form, Button, Card, Row, Col, Alert, Spinner, ListGroup, Modal, Tabs, Tab } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getMyProfile, createUpdateProfile, createService, updateService, deleteService, checkAuthStatus } from '../services/api';
+import AvailabilityManager from '../components/AvailabilityManager';
 
 function ProviderProfileEditPage() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ function ProviderProfileEditPage() {
   const [success, setSuccess] = useState('');
   const [profile, setProfile] = useState(null);
   const [services, setServices] = useState([]);
+  const [activeTab, setActiveTab] = useState('profile');
   
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -234,207 +236,223 @@ function ProviderProfileEditPage() {
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
       
-      <Row>
-        <Col md={6}>
-          <Card className="mb-4">
-            <Card.Header>
-              <h4>Personal & Professional Information</h4>
-            </Card.Header>
-            <Card.Body>
-              <Form onSubmit={handleProfileSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Professional Bio</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    name="bio"
-                    value={profileForm.bio}
-                    onChange={handleProfileChange}
-                    required
-                    placeholder="Describe your professional background and expertise..."
-                  />
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Credentials</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="credentials"
-                    value={profileForm.credentials}
-                    onChange={handleProfileChange}
-                    placeholder="DVM, DACVS, etc. (comma separated)"
-                  />
-                  <Form.Text className="text-muted">
-                    Enter your credentials separated by commas
-                  </Form.Text>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Years of Experience</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="yearsExperience"
-                    value={profileForm.yearsExperience}
-                    onChange={handleProfileChange}
-                    min="0"
-                  />
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Profile Photo URL</Form.Label>
-                  <Form.Control
-                    type="url"
-                    name="photoUrl"
-                    value={profileForm.photoUrl}
-                    onChange={handleProfileChange}
-                    placeholder="https://example.com/your-photo.jpg"
-                  />
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>License Information</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="licenseInfo"
-                    value={profileForm.licenseInfo}
-                    onChange={handleProfileChange}
-                    required
-                    placeholder="License number, state, etc."
-                  />
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Insurance Information</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="insuranceInfo"
-                    value={profileForm.insuranceInfo}
-                    onChange={handleProfileChange}
-                    required
-                    placeholder="Insurance provider, policy number, etc."
-                  />
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Clinic Affiliations</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="clinicAffiliations"
-                    value={profileForm.clinicAffiliations}
-                    onChange={handleProfileChange}
-                    placeholder="Clinic names (comma separated)"
-                  />
-                  <Form.Text className="text-muted">
-                    Enter clinic names separated by commas
-                  </Form.Text>
-                </Form.Group>
-                
-                <Button variant="primary" type="submit" disabled={isLoading}>
-                  {isLoading ? 'Saving...' : 'Save Profile'}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
+      <Tabs
+        activeKey={activeTab}
+        onSelect={(k) => setActiveTab(k)}
+        className="mb-4"
+      >
+        <Tab eventKey="profile" title="Profile & Services">
+          <Row>
+            <Col md={6}>
+              <Card className="mb-4">
+                <Card.Header>
+                  <h4>Personal & Professional Information</h4>
+                </Card.Header>
+                <Card.Body>
+                  <Form onSubmit={handleProfileSubmit}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Professional Bio</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="bio"
+                        value={profileForm.bio}
+                        onChange={handleProfileChange}
+                        required
+                        placeholder="Describe your professional background and expertise..."
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Credentials</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="credentials"
+                        value={profileForm.credentials}
+                        onChange={handleProfileChange}
+                        placeholder="DVM, DACVS, etc. (comma separated)"
+                      />
+                      <Form.Text className="text-muted">
+                        Enter your credentials separated by commas
+                      </Form.Text>
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Years of Experience</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="yearsExperience"
+                        value={profileForm.yearsExperience}
+                        onChange={handleProfileChange}
+                        min="0"
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Profile Photo URL</Form.Label>
+                      <Form.Control
+                        type="url"
+                        name="photoUrl"
+                        value={profileForm.photoUrl}
+                        onChange={handleProfileChange}
+                        placeholder="https://example.com/your-photo.jpg"
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>License Information</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="licenseInfo"
+                        value={profileForm.licenseInfo}
+                        onChange={handleProfileChange}
+                        required
+                        placeholder="License number, state, etc."
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Insurance Information</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="insuranceInfo"
+                        value={profileForm.insuranceInfo}
+                        onChange={handleProfileChange}
+                        required
+                        placeholder="Insurance provider, policy number, etc."
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Clinic Affiliations</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="clinicAffiliations"
+                        value={profileForm.clinicAffiliations}
+                        onChange={handleProfileChange}
+                        placeholder="Clinic names (comma separated)"
+                      />
+                      <Form.Text className="text-muted">
+                        Enter clinic names separated by commas
+                      </Form.Text>
+                    </Form.Group>
+                    
+                    <Button variant="primary" type="submit" disabled={isLoading}>
+                      {isLoading ? 'Saving...' : 'Save Profile'}
+                    </Button>
+                  </Form>
+                </Card.Body>
+              </Card>
+            </Col>
+            
+            <Col md={6}>
+              <Card className="mb-4">
+                <Card.Header>
+                  <h4>Service Area</h4>
+                </Card.Header>
+                <Card.Body>
+                  <Form>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Service Area Description</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="serviceAreaDescription"
+                        value={profileForm.serviceAreaDescription}
+                        onChange={handleProfileChange}
+                        placeholder="Describe the areas you serve..."
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Service Radius (km)</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="serviceAreaRadiusKm"
+                        value={profileForm.serviceAreaRadiusKm}
+                        onChange={handleProfileChange}
+                        min="0"
+                        placeholder="How far are you willing to travel?"
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Service Area ZIP Codes</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="serviceAreaZipCodes"
+                        value={profileForm.serviceAreaZipCodes}
+                        onChange={handleProfileChange}
+                        placeholder="ZIP codes you serve (comma separated)"
+                      />
+                      <Form.Text className="text-muted">
+                        Enter ZIP codes separated by commas
+                      </Form.Text>
+                    </Form.Group>
+                  </Form>
+                </Card.Body>
+              </Card>
+              
+              <Card>
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                  <h4>Services Offered</h4>
+                  <Button variant="success" size="sm" onClick={() => openServiceModal()}>
+                    Add New Service
+                  </Button>
+                </Card.Header>
+                <Card.Body>
+                  {services.length === 0 ? (
+                    <Alert variant="info">
+                      You haven't added any services yet. Add your first service to get started.
+                    </Alert>
+                  ) : (
+                    <ListGroup>
+                      {services.map((service) => (
+                        <ListGroup.Item key={service._id} className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h5>{service.name}</h5>
+                            <p className="mb-1">{service.description}</p>
+                            <small>
+                              {service.estimatedDurationMinutes} mins • ${service.price} ({service.priceType}) • 
+                              {service.offeredLocation === 'InHome' ? 'In-Home' : 
+                               service.offeredLocation === 'InClinic' ? 'In-Clinic' : 'Both'}
+                            </small>
+                          </div>
+                          <div>
+                            <Button 
+                              variant="outline-primary" 
+                              size="sm" 
+                              className="me-2"
+                              onClick={() => openServiceModal(service)}
+                            >
+                              Edit
+                            </Button>
+                            <Button 
+                              variant="outline-danger" 
+                              size="sm"
+                              onClick={() => handleDeleteService(service._id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Tab>
         
-        <Col md={6}>
-          <Card className="mb-4">
-            <Card.Header>
-              <h4>Service Area</h4>
-            </Card.Header>
-            <Card.Body>
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Label>Service Area Description</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    name="serviceAreaDescription"
-                    value={profileForm.serviceAreaDescription}
-                    onChange={handleProfileChange}
-                    placeholder="Describe the areas you serve..."
-                  />
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Service Radius (km)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="serviceAreaRadiusKm"
-                    value={profileForm.serviceAreaRadiusKm}
-                    onChange={handleProfileChange}
-                    min="0"
-                    placeholder="How far are you willing to travel?"
-                  />
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Service Area ZIP Codes</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="serviceAreaZipCodes"
-                    value={profileForm.serviceAreaZipCodes}
-                    onChange={handleProfileChange}
-                    placeholder="ZIP codes you serve (comma separated)"
-                  />
-                  <Form.Text className="text-muted">
-                    Enter ZIP codes separated by commas
-                  </Form.Text>
-                </Form.Group>
-              </Form>
-            </Card.Body>
-          </Card>
-          
-          <Card>
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <h4>Services Offered</h4>
-              <Button variant="success" size="sm" onClick={() => openServiceModal()}>
-                Add New Service
-              </Button>
-            </Card.Header>
-            <Card.Body>
-              {services.length === 0 ? (
-                <Alert variant="info">
-                  You haven't added any services yet. Add your first service to get started.
-                </Alert>
-              ) : (
-                <ListGroup>
-                  {services.map((service) => (
-                    <ListGroup.Item key={service._id} className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h5>{service.name}</h5>
-                        <p className="mb-1">{service.description}</p>
-                        <small>
-                          {service.estimatedDurationMinutes} mins • ${service.price} ({service.priceType}) • 
-                          {service.offeredLocation === 'InHome' ? 'In-Home' : 
-                           service.offeredLocation === 'InClinic' ? 'In-Clinic' : 'Both'}
-                        </small>
-                      </div>
-                      <div>
-                        <Button 
-                          variant="outline-primary" 
-                          size="sm" 
-                          className="me-2"
-                          onClick={() => openServiceModal(service)}
-                        >
-                          Edit
-                        </Button>
-                        <Button 
-                          variant="outline-danger" 
-                          size="sm"
-                          onClick={() => handleDeleteService(service._id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+        <Tab eventKey="availability" title="Availability">
+          <Row>
+            <Col md={12}>
+              <AvailabilityManager />
+            </Col>
+          </Row>
+        </Tab>
+      </Tabs>
       
       {/* Service Modal */}
       <Modal show={showServiceModal} onHide={() => setShowServiceModal(false)}>
