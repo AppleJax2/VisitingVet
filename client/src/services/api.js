@@ -492,6 +492,16 @@ export const adminRejectVerification = async (requestId, reason) => {
   }
 };
 
+export const adminCreateUser = async (userData) => {
+  try {
+    const response = await api.post('/admin/users/create', userData);
+    return response.data; // Assuming backend returns { success: true, user: ... } or { success: false, error: ... }
+  } catch (error) {
+    console.error('Admin create user error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to create user');
+  }
+};
+
 export const adminGetActionLogs = async (page = 1, limit = 50, filters = {}) => {
   try {
     const response = await api.get('/admin/logs', { params: { page, limit, ...filters } });
