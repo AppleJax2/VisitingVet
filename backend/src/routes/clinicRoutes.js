@@ -3,12 +3,12 @@ const {
   getClinicAppointments,
   getClinicStaff
 } = require('../controllers/clinicController');
-const { protect, restrictTo } = require('../middleware/authMiddleware'); // Assuming auth middleware exists
+const { protect, authorize } = require('../middleware/authMiddleware'); // Correctly import authorize
 
 const router = express.Router();
 
 // Apply authentication and role restriction (Clinic) to all clinic routes
-router.use(protect, restrictTo('Clinic'));
+router.use(protect, authorize('Clinic')); // Use authorize instead of restrictTo
 
 router.route('/appointments').get(getClinicAppointments);
 router.route('/staff').get(getClinicStaff);
