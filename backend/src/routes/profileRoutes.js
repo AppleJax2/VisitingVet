@@ -4,10 +4,14 @@ const {
   getMyProfile,
   getProfileById,
   listProfiles,
+  searchProfiles
 } = require('../controllers/profileController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
+
+// Add a dedicated search route (public)
+router.get('/visiting-vet/search', searchProfiles);
 
 // Routes for visiting vet profiles
 router.route('/visiting-vet')

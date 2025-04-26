@@ -523,4 +523,18 @@ export const adminCreateUpdateProfile = async (userId, profileData) => {
   }
 };
 
+// --- Public/General API Functions ---
+
+// Add the search function
+export const searchProviders = async (params = {}) => {
+  try {
+    // Params could include: page, limit, search, animalTypes, specialtyServices, location
+    const response = await api.get('/profiles/visiting-vet/search', { params });
+    return response.data; // Expected format: { success: true, data: [], pagination: {} }
+  } catch (error) {
+    console.error('Search providers error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to search for providers');
+  }
+};
+
 export default api; 
