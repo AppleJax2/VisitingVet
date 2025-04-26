@@ -1,15 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { login, checkAuthStatus } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
-import { Form, Button, Container, Row, Col, Card, Alert, Spinner, Toast, ToastContainer } from 'react-bootstrap';
-import { Envelope, Lock, BoxArrowInRight, Check2Circle } from 'react-bootstrap-icons';
-import theme from '../utils/theme';
-import './AuthPages.css'; // We'll create this CSS file for login and register pages
+import { 
+  Form, 
+  Button, 
+  Container, 
+  Row, 
+  Col, 
+  Card, 
+  Alert, 
+  Spinner, 
+  Toast, 
+  ToastContainer 
+} from 'react-bootstrap';
+import { 
+  Envelope, 
+  Lock, 
+  BoxArrowInRight, 
+  Check2Circle, 
+  ShieldCheck, 
+  Calendar,
+  GeoAlt
+} from 'react-bootstrap-icons';
+import './AuthPages.css';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [showToast, setShowToast] = useState(false);
@@ -42,7 +61,7 @@ function LoginPage() {
     setIsLoading(true);
     
     try {
-      const data = await login({ email, password });
+      const data = await login({ email, password, rememberMe });
       
       if (data && data.success) {
         // Handle successful login
@@ -73,8 +92,8 @@ function LoginPage() {
 
   if (isChecking) {
     return (
-      <div className="auth-loading-container">
-        <Spinner animation="border" role="status" variant="primary">
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 76px)' }}>
+        <Spinner animation="border" variant="primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
       </div>
@@ -82,7 +101,7 @@ function LoginPage() {
   }
 
   return (
-    <div className="auth-page login-page">
+    <div className="auth-page">
       {/* Toast notification for success messages */}
       <ToastContainer position="top-end" className="p-3">
         <Toast 
@@ -100,66 +119,85 @@ function LoginPage() {
         </Toast>
       </ToastContainer>
       
-      {/* Main content */}
-      <Container fluid>
-        <Row className="min-vh-100 auth-container">
-          {/* Left Section - Illustration */}
-          <Col lg={6} className="auth-image-container d-none d-lg-flex">
-            <div className="auth-image-overlay"></div>
-            <div className="auth-image-content">
-              <div className="auth-logo mb-5">
-                <h1 className="display-4">VisitingVet</h1>
-                <p className="lead">Quality Veterinary Care At Your Doorstep</p>
-              </div>
-              <div className="auth-tagline">
-                <h2>Welcome Back!</h2>
-                <p>Log in to access your account and manage your veterinary services.</p>
-              </div>
-              <div className="auth-features">
-                <div className="auth-feature-item">
-                  <Check2Circle size={20} />
-                  <span>Connect with verified veterinary professionals</span>
-                </div>
-                <div className="auth-feature-item">
-                  <Check2Circle size={20} />
-                  <span>Manage appointments effortlessly</span>
-                </div>
-                <div className="auth-feature-item">
-                  <Check2Circle size={20} />
-                  <span>Get care delivered right to your doorstep</span>
-                </div>
-              </div>
-            </div>
-          </Col>
-
-          {/* Right Section - Login Form */}
-          <Col lg={6} className="auth-form-container d-flex align-items-center justify-content-center">
-            <div className="auth-form-wrapper">
-              <div className="auth-form-header text-center mb-4 d-lg-none">
-                <h1 className="h2 mb-2">VisitingVet</h1>
-                <p>Quality Care, Convenient Service</p>
-              </div>
-              
-              <Card className="auth-card">
-                <Card.Body className="p-4 p-md-5">
-                  <div className="text-center mb-4">
-                    <h2 className="h3 mb-3">Sign In</h2>
-                    <p className="text-muted">Enter your credentials to access your account</p>
+      <Container>
+        <Row className="justify-content-center">
+          <Col lg={10} xl={9}>
+            <Card className="auth-card overflow-hidden">
+              <Row className="g-0">
+                {/* Left sidebar with features */}
+                <Col lg={5} className="auth-sidebar d-none d-lg-flex">
+                  <div>
+                    <div className="auth-logo">
+                      <svg 
+                        width="28" 
+                        height="28" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <path d="M14 10h.01M10 14h.01M8.5 8.5h.01M18.5 8.5h.01M18.5 14.5h.01M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0z"/>
+                        <path d="M7 15.5c1 1 3.2 2 5.5 2s4-.5 5.5-2"/>
+                      </svg>
+                      <h4>VisitingVet</h4>
+                    </div>
+                    
+                    <h2>Welcome Back!</h2>
+                    <p>Log in to access your account and manage your veterinary services.</p>
+                    
+                    <ul className="auth-features">
+                      <li>
+                        <ShieldCheck />
+                        Connect with verified veterinary professionals
+                      </li>
+                      <li>
+                        <Calendar />
+                        Manage appointments effortlessly
+                      </li>
+                      <li>
+                        <GeoAlt />
+                        Get care delivered right to your doorstep
+                      </li>
+                    </ul>
                   </div>
-
-                  {error && (
-                    <Alert variant="danger" className="mb-4">
-                      {error}
-                    </Alert>
-                  )}
-                  
-                  <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-4" controlId="formBasicEmail">
-                      <Form.Label>Email address</Form.Label>
-                      <div className="input-group">
-                        <span className="input-group-text">
-                          <Envelope />
-                        </span>
+                </Col>
+                
+                {/* Right side with form */}
+                <Col lg={7}>
+                  <div className="auth-content">
+                    <div className="d-flex justify-content-center mb-4 d-lg-none">
+                      <div className="auth-logo">
+                        <svg 
+                          width="28" 
+                          height="28" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="#577E46" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round"
+                        >
+                          <path d="M14 10h.01M10 14h.01M8.5 8.5h.01M18.5 8.5h.01M18.5 14.5h.01M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0z"/>
+                          <path d="M7 15.5c1 1 3.2 2 5.5 2s4-.5 5.5-2"/>
+                        </svg>
+                        <h4 style={{ color: '#577E46' }}>VisitingVet</h4>
+                      </div>
+                    </div>
+                    
+                    <h2>Sign In</h2>
+                    <p>Enter your credentials to access your account</p>
+                    
+                    {error && (
+                      <div className="auth-error">
+                        {error}
+                      </div>
+                    )}
+                    
+                    <Form onSubmit={handleSubmit} className="auth-form">
+                      <Form.Group className="mb-3" controlId="formBasicEmail">
+                        <Form.Label>Email address</Form.Label>
                         <Form.Control
                           type="email"
                           placeholder="Enter your email"
@@ -167,22 +205,16 @@ function LoginPage() {
                           onChange={(e) => setEmail(e.target.value)}
                           required
                           disabled={isLoading}
-                          className="auth-input"
                         />
-                      </div>
-                    </Form.Group>
+                      </Form.Group>
 
-                    <Form.Group className="mb-4" controlId="formBasicPassword">
-                      <div className="d-flex justify-content-between align-items-center mb-1">
-                        <Form.Label className="mb-0">Password</Form.Label>
-                        <Link to="/forgot-password" className="auth-link small">
-                          Forgot Password?
-                        </Link>
-                      </div>
-                      <div className="input-group">
-                        <span className="input-group-text">
-                          <Lock />
-                        </span>
+                      <Form.Group className="mb-3" controlId="formBasicPassword">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <Form.Label className="mb-0">Password</Form.Label>
+                          <Link to="/forgot-password" className="forgot-password">
+                            Forgot Password?
+                          </Link>
+                        </div>
                         <Form.Control
                           type="password"
                           placeholder="Enter your password"
@@ -190,59 +222,50 @@ function LoginPage() {
                           onChange={(e) => setPassword(e.target.value)}
                           required
                           disabled={isLoading}
-                          className="auth-input"
                         />
+                      </Form.Group>
+                      
+                      <Form.Group className="mb-3" controlId="formBasicCheckbox">
+                        <Form.Check
+                          type="checkbox"
+                          label="Remember me"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          disabled={isLoading}
+                        />
+                      </Form.Group>
+                      
+                      <Button 
+                        variant="primary" 
+                        type="submit" 
+                        disabled={isLoading}
+                        className="btn-primary w-100"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              aria-hidden="true"
+                              className="me-2"
+                            />
+                            Signing in...
+                          </>
+                        ) : (
+                          "Sign In"
+                        )}
+                      </Button>
+                      
+                      <div className="auth-footer">
+                        Don't have an account? <Link to="/register">Create Account</Link>
                       </div>
-                    </Form.Group>
-                    
-                    <Form.Group className="mb-4" controlId="formBasicCheckbox">
-                      <Form.Check
-                        type="checkbox"
-                        label="Remember me"
-                        className="auth-checkbox"
-                      />
-                    </Form.Group>
-                    
-                    <Button 
-                      type="submit" 
-                      className="auth-button w-100"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Spinner
-                            as="span"
-                            animation="border"
-                            size="sm"
-                            role="status"
-                            aria-hidden="true"
-                            className="me-2"
-                          />
-                          Signing in...
-                        </>
-                      ) : (
-                        <>
-                          <BoxArrowInRight className="me-2" />
-                          Sign In
-                        </>
-                      )}
-                    </Button>
-                  </Form>
-                  
-                  <div className="auth-alternate mt-4 text-center">
-                    <p className="mb-0">
-                      Don't have an account? <Link to="/register" className="auth-link">Create Account</Link>
-                    </p>
+                    </Form>
                   </div>
-                </Card.Body>
-              </Card>
-              
-              <div className="auth-footer text-center mt-4">
-                <p className="small text-muted mb-0">
-                  &copy; {new Date().getFullYear()} VisitingVet. All rights reserved.
-                </p>
-              </div>
-            </div>
+                </Col>
+              </Row>
+            </Card>
           </Col>
         </Row>
       </Container>

@@ -17,6 +17,7 @@ import AddReminderPage from './pages/AddReminderPage';
 import PetProfilePage from './pages/PetProfilePage';
 import ManageRemindersPage from './pages/ManageRemindersPage';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import './App.css';
 import { Spinner, Container } from 'react-bootstrap';
 
@@ -79,9 +80,9 @@ const PrivateRoute = ({ allowedRoles }) => {
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div className="App d-flex flex-column min-vh-100">
         <Header />
-        <div className="main-content">
+        <div className="main-content flex-grow-1">
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
@@ -118,6 +119,11 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
+        {/* Footer is included on all pages except for admin routes */}
+        <Routes>
+          <Route path="/admin/*" element={null} />
+          <Route path="*" element={<Footer />} />
+        </Routes>
       </div>
     </Router>
   );
