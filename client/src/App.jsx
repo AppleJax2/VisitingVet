@@ -36,9 +36,9 @@ const PrivateRoute = ({ allowedRoles }) => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const { success, user } = await checkAuthStatus();
-        if (success && user) {
-          setUserRole(user.role);
+        const data = await checkAuthStatus();
+        if (data && data.success && data.user) {
+          setUserRole(data.user.role);
         } else {
           setUserRole(null);
         }
@@ -90,26 +90,27 @@ function App() {
             <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
             <Route path="/search-providers" element={<ProviderSearchPage />} />
             
-            {/* Standard Protected Routes (using DashboardPage's internal check for now) */}
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/provider-profile" element={<ProviderProfileEditPage />} /> 
-            <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
-            <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
-            <Route path="/add-pet" element={<AddPetPage />} />
-            <Route path="/my-pets" element={<MyPetsPage />} />
-            <Route path="/add-reminder" element={<AddReminderPage />} />
-            <Route path="/pet/:petId" element={<PetProfilePage />} />
-            <Route path="/manage-reminders" element={<ManageRemindersPage />} />
+            {/* Standard Protected Routes - use PrivateRoute with appropriate role checks */}
+            <Route element={<PrivateRoute allowedRoles={['PetOwner', 'MVSProvider', 'Clinic', 'Admin']} />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/provider-profile" element={<ProviderProfileEditPage />} /> 
+              <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
+              <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
+              <Route path="/add-pet" element={<AddPetPage />} />
+              <Route path="/my-pets" element={<MyPetsPage />} />
+              <Route path="/add-reminder" element={<AddReminderPage />} />
+              <Route path="/pet/:petId" element={<PetProfilePage />} />
+              <Route path="/manage-reminders" element={<ManageRemindersPage />} />
+            </Route>
 
             {/* Admin Protected Routes */}
             <Route element={<PrivateRoute allowedRoles={['Admin']} />}>
-              <Route path="/admin" element={<AdminLayout />}> { /* Wrap admin pages in layout */}
-                <Route index element={<AdminDashboardPage />} /> { /* Default admin page */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboardPage />} />
                 <Route path="users" element={<AdminUserListPage />} />
                 <Route path="verifications" element={<AdminVerificationListPage />} />
                 <Route path="logs" element={<AdminLogPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />
-                 {/* Add more admin sub-routes here */}
               </Route>
             </Route>
             

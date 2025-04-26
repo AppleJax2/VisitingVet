@@ -39,9 +39,21 @@ const Header = () => {
       await logout();
       setUser(null);
       setIsAuthenticated(false);
+      
+      // Clear any stored tokens or session information
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
+      
       navigate('/login');
     } catch (err) {
       console.error('Logout failed', err);
+      
+      // Still clear state and storage even if API call fails
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
+      navigate('/login');
     }
   };
 

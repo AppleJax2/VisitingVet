@@ -17,27 +17,23 @@ function DashboardPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const verifyUser = async () => {
+    const fetchUserData = async () => {
       setLoading(true);
       setError('');
       try {
         const data = await checkAuthStatus();
         if (data && data.success) {
           setUser(data.user);
-        } else {
-          // Not authenticated or error
-          navigate('/login');
         }
       } catch (err) {
-        setError('Session check failed. Please login again.');
-        navigate('/login');
+        setError('Failed to load user data. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    verifyUser();
-  }, [navigate]);
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
     try {
