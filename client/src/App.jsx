@@ -11,6 +11,10 @@ import MyPetOwnerAppointmentsPage from './pages/MyPetOwnerAppointmentsPage';
 import ProviderAppointmentsPage from './pages/ProviderAppointmentsPage';
 import LandingPage from './pages/LandingPage';
 import AddPetPage from './pages/AddPetPage';
+import MyPetsPage from './pages/MyPetsPage';
+import AddReminderPage from './pages/AddReminderPage';
+import PetProfilePage from './pages/PetProfilePage';
+import ManageRemindersPage from './pages/ManageRemindersPage';
 import Header from './components/Header';
 import './App.css';
 
@@ -41,6 +45,10 @@ function App() {
             <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
             <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
             <Route path="/add-pet" element={<AddPetPage />} />
+            <Route path="/my-pets" element={<MyPetsPage />} />
+            <Route path="/add-reminder" element={<AddReminderPage />} />
+            <Route path="/pet/:petId" element={<PetProfilePage />} />
+            <Route path="/manage-reminders" element={<ManageRemindersPage />} />
             
             {/* Handle 404 - can be replaced with a proper NotFound component */}
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -22,6 +22,7 @@ const MyPetOwnerAppointmentsPage = () => {
   // State for appointment details modal
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState('PetOwner'); // Assuming this page is only for PetOwners
   
   // State for cancellation modal
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -38,6 +39,7 @@ const MyPetOwnerAppointmentsPage = () => {
           return;
         }
         
+        setCurrentUserRole(data.user.role); // Store user role
         if (data.user.role !== 'PetOwner') {
           navigate('/dashboard');
           return;
@@ -126,6 +128,21 @@ const MyPetOwnerAppointmentsPage = () => {
     setSelectedAppointmentId(appointmentId);
     setShowDetailModal(true);
   };
+  
+  // Handle closing details modal
+  const handleCloseDetailModal = () => {
+      setSelectedAppointmentId(null);
+      setShowDetailModal(false);
+      // Potentially refetch appointments if status might have changed via modal action
+      // fetchAppointments(); 
+  };
+  
+  // Handler for when the detail modal updates an appointment (e.g., cancellation)
+  const handleAppointmentUpdate = (updatedAppointment) => {
+      setAppointments(appointments.map(app => 
+        app._id === updatedAppointment._id ? updatedAppointment : app
+      ));
+  };
 
   return (
     <Container className="py-5">
@@ -208,7 +225,7 @@ const MyPetOwnerAppointmentsPage = () => {
                                 className="me-2"
                                 onClick={() => handleViewDetails(appointment._id)}
                               >
-                                Details
+                                View Details
                               </Button>
                               {appointment.status === 'Requested' || appointment.status === 'Confirmed' ? (
                                 <Button
@@ -265,7 +282,7 @@ const MyPetOwnerAppointmentsPage = () => {
                                 size="sm"
                                 onClick={() => handleViewDetails(appointment._id)}
                               >
-                                Details
+                                View Details
                               </Button>
                             </td>
                           </tr>
@@ -279,13 +296,6 @@ const MyPetOwnerAppointmentsPage = () => {
           )}
         </>
       )}
-      
-      {/* Appointment Details Modal */}
-      <AppointmentDetailModal
-        show={showDetailModal}
-        onHide={() => setShowDetailModal(false)}
-        appointmentId={selectedAppointmentId}
-      />
       
       {/* Cancellation Modal */}
       <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)}>
@@ -328,6 +338,17 @@ const MyPetOwnerAppointmentsPage = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+      
+      {/* Appointment Detail Modal */}
+      {selectedAppointmentId && (
+        <AppointmentDetailModal 
+            show={showDetailModal}
+            onHide={handleCloseDetailModal}
+            appointmentId={selectedAppointmentId}
+            userRole={currentUserRole}
+            onUpdate={handleAppointmentUpdate} // Pass update handler
+        />
+      )}
     </Container>
   );
 };

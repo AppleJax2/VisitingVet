@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Row, Col, Card, Table, Button, Badge, Form, Tabs, Tab } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Card, Table, Button, Badge, Form, Tabs, Tab, Spinner, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   Calendar3, Clock, GeoAlt, Cash, Star, 
@@ -10,9 +10,22 @@ import {
 import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
 import 'chart.js/auto';
+import { fetchClinicAppointments, fetchClinicStaff } from '../../services/api';
+import AppointmentDetailModal from '../AppointmentDetailModal';
+import { format } from 'date-fns';
 
 const ClinicDashboard = ({ user }) => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [appointmentsError, setAppointmentsError] = useState('');
+  const [staff, setStaff] = useState([]);
+  const [loadingStaff, setLoadingStaff] = useState(true);
+  const [staffError, setStaffError] = useState('');
+  
+  // Modal State
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   
   // Sample data for demonstration
   const clinicStats = {
@@ -22,122 +35,61 @@ const ClinicDashboard = ({ user }) => {
     totalEarnings: 9850
   };
 
-  const staffList = [
-    {
-      id: 1,
-      name: 'Dr. Sarah Johnson',
-      role: 'Veterinarian',
-      specialty: 'Small Animals',
-      appointmentsToday: 5,
-      status: 'active',
-      image: 'https://randomuser.me/api/portraits/women/68.jpg'
-    },
-    {
-      id: 2,
-      name: 'Dr. Michael Chen',
-      role: 'Veterinarian',
-      specialty: 'Exotic Animals',
-      appointmentsToday: 3,
-      status: 'active',
-      image: 'https://randomuser.me/api/portraits/men/32.jpg'
-    },
-    {
-      id: 3,
-      name: 'Dr. Emily Rodriguez',
-      role: 'Veterinarian',
-      specialty: 'Surgical Procedures',
-      appointmentsToday: 2,
-      status: 'break',
-      image: 'https://randomuser.me/api/portraits/women/33.jpg'
-    },
-    {
-      id: 4,
-      name: 'Jessica Martinez',
-      role: 'Veterinary Technician',
-      specialty: 'General Care',
-      appointmentsToday: 4,
-      status: 'active',
-      image: 'https://randomuser.me/api/portraits/women/44.jpg'
-    }
-  ];
+  useEffect(() => {
+    loadAppointments(selectedDate);
+    loadStaff();
+    // TODO: Load stats, inventory, chart data
+  }, [selectedDate]); // Reload appointments when date changes
 
-  const appointments = [
-    {
-      id: 1,
-      time: '09:00 AM',
-      client: 'Robert Adams',
-      petName: 'Max',
-      petType: 'Dog - Golden Retriever',
-      service: 'Wellness Checkup',
-      assignedTo: 'Dr. Sarah Johnson',
-      status: 'confirmed'
-    },
-    {
-      id: 2,
-      time: '10:30 AM',
-      client: 'Jennifer Wilson',
-      petName: 'Bella',
-      petType: 'Cat - Siamese',
-      service: 'Vaccination',
-      assignedTo: 'Dr. Michael Chen',
-      status: 'confirmed'
-    },
-    {
-      id: 3,
-      time: '11:45 AM',
-      client: 'Mark Thompson',
-      petName: 'Charlie',
-      petType: 'Dog - Beagle',
-      service: 'Dental Cleaning',
-      assignedTo: 'Dr. Emily Rodriguez',
-      status: 'pending'
-    },
-    {
-      id: 4,
-      time: '01:15 PM',
-      client: 'Lisa Martinez',
-      petName: 'Daisy',
-      petType: 'Cat - Persian',
-      service: 'Checkup',
-      assignedTo: 'Dr. Sarah Johnson',
-      status: 'confirmed'
-    },
-    {
-      id: 5,
-      time: '03:00 PM',
-      client: 'James Wilson',
-      petName: 'Rocky',
-      petType: 'Dog - Bulldog',
-      service: 'Surgery Consultation',
-      assignedTo: 'Dr. Emily Rodriguez',
-      status: 'confirmed'
-    }
-  ];
+  const loadAppointments = async (date) => {
+      setLoadingAppointments(true);
+      setAppointmentsError('');
+      try {
+          const response = await fetchClinicAppointments(user?.clinicId, date); // Assuming clinicId is available on user
+          if (response.success) {
+              setAppointments(response.appointments || []);
+          } else {
+              setAppointmentsError(response.error || 'Failed to load appointments for this date.');
+          }
+      } catch (err) {
+          console.error('Error fetching clinic appointments:', err);
+          setAppointmentsError(err.message || 'An error occurred fetching appointments.');
+      } finally {
+          setLoadingAppointments(false);
+      }
+  };
 
-  const inventoryAlerts = [
-    {
-      id: 1,
-      item: 'Rabies Vaccine',
-      status: 'low',
-      currentStock: 5,
-      minRequired: 10
-    },
-    {
-      id: 2,
-      item: 'Feline Distemper Vaccine',
-      status: 'low',
-      currentStock: 3,
-      minRequired: 8
-    },
-    {
-      id: 3,
-      item: 'Surgical Gloves',
-      status: 'ok',
-      currentStock: 120,
-      minRequired: 50
-    }
-  ];
+  const loadStaff = async () => {
+      setLoadingStaff(true);
+      setStaffError('');
+      try {
+          const response = await fetchClinicStaff(user?.clinicId);
+          if (response.success) {
+              setStaff(response.staff || []);
+          } else {
+              setStaffError(response.error || 'Failed to load staff list.');
+          }
+      } catch (err) {
+          console.error('Error fetching clinic staff:', err);
+          setStaffError(err.message || 'An error occurred fetching staff.');
+      } finally {
+          setLoadingStaff(false);
+      }
+  };
   
+  // Modal Handlers
+  const handleShowDetails = (id) => {
+      setSelectedAppointmentId(id);
+      setShowDetailModal(true);
+  };
+  
+  const handleHideDetails = () => {
+      setSelectedAppointmentId(null);
+      setShowDetailModal(false);
+      // Option to refetch appointments if modal changed status
+      loadAppointments(selectedDate); 
+  };
+
   // Chart data
   const revenueData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -411,9 +363,14 @@ const ClinicDashboard = ({ user }) => {
               </div>
             </Card.Header>
             <Card.Body>
-              {appointments.map((appointment) => (
+              {loadingAppointments && <div className="text-center"><Spinner animation="border" /></div>}
+              {appointmentsError && <Alert variant="danger">{appointmentsError}</Alert>}
+              {!loadingAppointments && !appointmentsError && appointments.length === 0 && (
+                  <p className="text-center text-muted">No appointments scheduled for {format(new Date(selectedDate+'T00:00:00Z'), 'PPP')}.</p>
+              )}
+              {!loadingAppointments && !appointmentsError && appointments.map((appointment) => (
                 <Row 
-                  key={appointment.id} 
+                  key={appointment._id} 
                   style={styles.appointmentRow}
                   className="align-items-center"
                 >

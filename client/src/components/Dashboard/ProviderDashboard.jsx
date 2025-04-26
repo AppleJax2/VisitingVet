@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Row, Col, Card, Table, Button, Badge, Form } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Card, Table, Button, Badge, Form, Spinner, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   Calendar3, Clock, GeoAlt, Cash, Star, 
@@ -9,9 +9,22 @@ import {
 import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
 import 'chart.js/auto';
+import { getMyAppointmentsProvider, updateAppointmentStatus } from '../../services/api';
+import AppointmentDetailModal from '../AppointmentDetailModal';
+import { format } from 'date-fns';
 
 const ProviderDashboard = ({ user }) => {
   const [dateRange, setDateRange] = useState('week');
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [appointmentsError, setAppointmentsError] = useState('');
+  const [activity, setActivity] = useState([]);
+  const [loadingActivity, setLoadingActivity] = useState(true);
+  const [statsData, setStatsData] = useState({});
+  const [loadingStats, setLoadingStats] = useState(true);
+  
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   
   // Sample data for demonstration
   const stats = {
@@ -260,6 +273,63 @@ const ProviderDashboard = ({ user }) => {
     }
   };
 
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    setLoadingAppointments(true);
+    setAppointmentsError('');
+    try {
+      const upcomingStatuses = ['Requested', 'Confirmed'];
+      const confirmedResponse = await getMyAppointmentsProvider('Confirmed');
+      const requestedResponse = await getMyAppointmentsProvider('Requested');
+      
+      let fetchedAppointments = [];
+      if (confirmedResponse.success) {
+          fetchedAppointments = fetchedAppointments.concat(confirmedResponse.data || []);
+      }
+      if (requestedResponse.success) {
+          fetchedAppointments = fetchedAppointments.concat(requestedResponse.data || []);
+      }
+      
+      fetchedAppointments.sort((a, b) => new Date(a.appointmentTime) - new Date(b.appointmentTime));
+      
+      setAppointments(fetchedAppointments);
+      
+    } catch (err) {
+      console.error('Error fetching provider appointments:', err);
+      setAppointmentsError('Failed to load appointments. Please try again.');
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
+
+  const handleUpdateStatus = async (appointmentId, newStatus) => {
+      try {
+          const response = await updateAppointmentStatus(appointmentId, newStatus);
+          if (response.success) {
+              fetchAppointments();
+          } else {
+              setAppointmentsError(response.error || `Failed to ${newStatus.toLowerCase()} appointment.`);
+          }
+      } catch (err) {
+          console.error(`Error updating appointment status to ${newStatus}:`, err);
+          setAppointmentsError(err.message || `An error occurred while updating the appointment.`);
+      }
+  };
+  
+  const handleShowDetails = (id) => {
+      setSelectedAppointmentId(id);
+      setShowDetailModal(true);
+  };
+  
+  const handleHideDetails = () => {
+      setSelectedAppointmentId(null);
+      setShowDetailModal(false);
+      fetchAppointments(); 
+  };
+
   return (
     <div className="provider-dashboard">
       {/* Stats Cards */}
@@ -405,6 +475,11 @@ const ProviderDashboard = ({ user }) => {
               </Link>
             </Card.Header>
             <Card.Body>
+              {loadingAppointments && <div className="text-center"><Spinner animation="border" /></div>}
+              {appointmentsError && <Alert variant="danger">{appointmentsError}</Alert>}
+              {!loadingAppointments && !appointmentsError && appointments.length === 0 && (
+                  <p className="text-center text-muted">No upcoming appointments found.</p>
+              )}
               {upcomingAppointments.map((appointment) => (
                 <Card key={appointment.id} style={styles.appointmentCard}>
                   <Card.Body>

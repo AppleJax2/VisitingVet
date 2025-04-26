@@ -1,246 +1,175 @@
-import { useState, useEffect } from 'react';
-import { Modal, Button, Spinner, Alert, Row, Col, Badge, Card } from 'react-bootstrap';
-import { getAppointmentDetails } from '../services/api';
-import { formatDate } from '../utils/dateUtils';
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, Spinner, Alert, Row, Col, Badge, ListGroup } from 'react-bootstrap';
+import { CalendarEvent, Clock, GeoAlt, Person, Tag, CardText, CheckCircle, XCircle, ExclamationTriangle } from 'react-bootstrap-icons';
+import { getAppointmentDetails, cancelAppointmentByPetOwner } from '../services/api';
+import { format } from 'date-fns';
+import theme from '../utils/theme';
 
-const AppointmentDetailModal = ({ show, onHide, appointmentId }) => {
+function AppointmentDetailModal({ show, onHide, appointmentId, userRole, onUpdate }) {
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [cancelError, setCancelError] = useState('');
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  // Fetch appointment details when the modal opens
   useEffect(() => {
-    if (show && appointmentId) {
-      fetchAppointmentDetails();
-    }
-  }, [show, appointmentId]);
-
-  const fetchAppointmentDetails = async () => {
-    try {
+    const loadDetails = async () => {
+      if (!appointmentId) return;
       setLoading(true);
       setError('');
-      
-      const response = await getAppointmentDetails(appointmentId);
+      setCancelError('');
+      setShowCancelConfirm(false);
+      setCancellationReason('');
+      try {
+        const response = await getAppointmentDetails(appointmentId);
+        if (response.success) {
+          setAppointment(response.data);
+        } else {
+          setError(response.error || 'Failed to load appointment details.');
+        }
+      } catch (err) {
+        console.error('Error loading appointment details:', err);
+        setError(err.message || 'An error occurred while fetching details.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (show) {
+      loadDetails();
+    }
+  }, [appointmentId, show]);
+
+  const handleCancel = async () => {
+    if (!appointment || userRole !== 'PetOwner') return;
+    
+    setIsCancelling(true);
+    setCancelError('');
+    try {
+      const response = await cancelAppointmentByPetOwner(appointment._id, cancellationReason);
       if (response.success) {
         setAppointment(response.data);
+        setShowCancelConfirm(false);
+        if (onUpdate) onUpdate(response.data);
+      } else {
+        setCancelError(response.error || 'Failed to cancel appointment.');
       }
     } catch (err) {
-      setError('Failed to load appointment details. Please try again.');
-      console.error('Error fetching appointment details:', err);
+      console.error('Error cancelling appointment:', err);
+      setCancelError(err.message || 'An error occurred during cancellation.');
     } finally {
-      setLoading(false);
+      setIsCancelling(false);
     }
   };
 
-  // Format price for display
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price);
+  const renderStatusBadge = (status) => {
+    let variant = 'secondary';
+    let icon = null;
+    switch (status) {
+      case 'Confirmed': variant = 'success'; icon = <CheckCircle className="me-1"/>; break;
+      case 'Requested': variant = 'warning'; icon = <Clock className="me-1"/>; break;
+      case 'Completed': variant = 'info'; icon = <CheckCircle className="me-1"/>; break;
+      case 'Cancelled': 
+      case 'CancelledByOwner': 
+      case 'CancelledByProvider': variant = 'danger'; icon = <XCircle className="me-1"/>; break;
+      default: variant = 'secondary';
+    }
+    return <Badge bg={variant} className="fs-6">{icon}{status}</Badge>;
   };
 
-  // Get status badge
-  const getStatusBadge = (status) => {
-    const variants = {
-      Requested: 'info',
-      Confirmed: 'success',
-      Cancelled: 'danger',
-      CancelledByOwner: 'warning',
-      Completed: 'secondary'
-    };
-    
-    return (
-      <Badge bg={variants[status] || 'light'}>
-        {status === 'CancelledByOwner' ? 'Cancelled by Owner' : status}
-      </Badge>
-    );
-  };
-
-  // Render appointment details
-  const renderAppointmentDetails = () => {
-    if (!appointment) return null;
-    
-    const {
-      appointmentTime, 
-      estimatedEndTime, 
-      status, 
-      notes,
-      service,
-      providerProfile,
-      animalDetails,
-      customFieldResponses,
-      cancellationReason,
-      cancelledBy,
-      cancellationTime,
-      completionNotes,
-      followUpRecommended,
-      followUpNotes
-    } = appointment;
-    
-    return (
-      <>
-        <Row className="mb-3">
-          <Col md={6}>
-            <h5 className="mb-1">Service Details</h5>
-            <p className="mb-0"><strong>Service:</strong> {service?.name || 'Unknown Service'}</p>
-            <p className="mb-0"><strong>Description:</strong> {service?.description || 'No description'}</p>
-            <p className="mb-0">
-              <strong>Price:</strong> {service?.price ? formatPrice(service.price) : 'Contact for pricing'}
-            </p>
-            <p className="mb-0">
-              <strong>Duration:</strong> {service?.estimatedDurationMinutes || 0} minutes
-            </p>
-            <p className="mb-0">
-              <strong>Animal Type:</strong> {service?.animalType || 'Not specified'}
-            </p>
-          </Col>
-          <Col md={6}>
-            <h5 className="mb-1">Provider Details</h5>
-            <p className="mb-0">
-              <strong>Email:</strong> {providerProfile?.user?.email || 'Unknown'}
-            </p>
-            <p className="mb-0">
-              <strong>Business:</strong> {providerProfile?.businessName || 'Individual Practice'}
-            </p>
-            <p className="mb-0">
-              <strong>Experience:</strong> {providerProfile?.yearsExperience || 0} years
-            </p>
-            <p className="mb-0">
-              <strong>Animal Types:</strong> {providerProfile?.animalTypes?.join(', ') || 'Not specified'}
-            </p>
-          </Col>
-        </Row>
-        
-        <Row className="mb-3">
-          <Col md={6}>
-            <h5 className="mb-1">Appointment Time</h5>
-            <p className="mb-0">
-              <strong>Start:</strong> {formatDate(appointmentTime, 'MMM dd, yyyy h:mm a')}
-            </p>
-            <p className="mb-0">
-              <strong>End:</strong> {formatDate(estimatedEndTime, 'MMM dd, yyyy h:mm a')}
-            </p>
-            <p className="mb-0 mt-2">
-              <strong>Status:</strong> {getStatusBadge(status)}
-            </p>
-          </Col>
-          <Col md={6}>
-            {animalDetails && Object.keys(animalDetails).some(key => animalDetails[key]) && (
-              <>
-                <h5 className="mb-1">Animal Details</h5>
-                {animalDetails.name && <p className="mb-0"><strong>Name:</strong> {animalDetails.name}</p>}
-                {animalDetails.type && <p className="mb-0"><strong>Type:</strong> {animalDetails.type}</p>}
-                {animalDetails.breed && <p className="mb-0"><strong>Breed:</strong> {animalDetails.breed}</p>}
-                {animalDetails.age && <p className="mb-0"><strong>Age:</strong> {animalDetails.age}</p>}
-                {animalDetails.weight && <p className="mb-0"><strong>Weight:</strong> {animalDetails.weight}</p>}
-              </>
-            )}
-          </Col>
-        </Row>
-        
-        {/* Notes Section */}
-        {notes && (
-          <div className="mb-3">
-            <h5>Appointment Notes</h5>
-            <Card>
-              <Card.Body>
-                <p className="mb-0">{notes}</p>
-              </Card.Body>
-            </Card>
-          </div>
-        )}
-        
-        {/* Cancellation Details */}
-        {(status === 'Cancelled' || status === 'CancelledByOwner') && (
-          <div className="mb-3">
-            <h5>Cancellation Details</h5>
-            <Card bg="light">
-              <Card.Body>
-                <p className="mb-0"><strong>Cancelled By:</strong> {cancelledBy || 'Unknown'}</p>
-                {cancellationTime && (
-                  <p className="mb-0">
-                    <strong>Cancelled On:</strong> {formatDate(cancellationTime, 'MMM dd, yyyy h:mm a')}
-                  </p>
-                )}
-                {cancellationReason && (
-                  <p className="mb-0"><strong>Reason:</strong> {cancellationReason}</p>
-                )}
-              </Card.Body>
-            </Card>
-          </div>
-        )}
-        
-        {/* Completion Details */}
-        {status === 'Completed' && (
-          <div className="mb-3">
-            <h5>Completion Details</h5>
-            <Card bg="light">
-              <Card.Body>
-                {completionNotes && (
-                  <p className="mb-0"><strong>Notes:</strong> {completionNotes}</p>
-                )}
-                {followUpRecommended && (
-                  <div className="mt-2">
-                    <p className="mb-0"><strong>Follow-Up Recommended</strong></p>
-                    {followUpNotes && <p className="mb-0">{followUpNotes}</p>}
-                  </div>
-                )}
-              </Card.Body>
-            </Card>
-          </div>
-        )}
-        
-        {/* Custom Fields */}
-        {customFieldResponses && customFieldResponses.length > 0 && (
-          <div className="mb-3">
-            <h5>Additional Information</h5>
-            <Card>
-              <Card.Body>
-                {customFieldResponses.map((field, index) => (
-                  <p key={index} className="mb-1">
-                    <strong>{field.fieldName}:</strong> {field.response}
-                  </p>
-                ))}
-              </Card.Body>
-            </Card>
-          </div>
-        )}
-      </>
-    );
-  };
+  const canCancel = appointment && userRole === 'PetOwner' && (
+    appointment.status === 'Requested' || appointment.status === 'Confirmed'
+  );
 
   return (
-    <Modal
-      show={show}
-      onHide={onHide}
-      size="lg"
-      centered
-    >
+    <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>Appointment Details</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {loading ? (
-          <div className="text-center py-4">
-            <Spinner animation="border" />
-            <p className="mt-2">Loading appointment details...</p>
-          </div>
-        ) : error ? (
-          <Alert variant="danger">{error}</Alert>
-        ) : !appointment ? (
-          <Alert variant="info">No appointment information available.</Alert>
-        ) : (
-          renderAppointmentDetails()
+        {loading && <div className="text-center"><Spinner animation="border" /></div>}
+        {error && <Alert variant="danger">{error}</Alert>}
+        
+        {appointment && !loading && (
+          <>
+            <Row className="mb-3">
+              <Col md={8}>
+                <h4>{appointment.service?.name || 'Appointment'}</h4>
+                {userRole === 'PetOwner' && 
+                  <p className="text-muted mb-0">With: {appointment.providerProfile?.businessName || appointment.providerProfile?.user?.email || 'Provider'}</p>
+                }
+                {userRole !== 'PetOwner' && 
+                  <p className="text-muted mb-0">Client: {appointment.petOwner?.email || 'Client'}</p>
+                }
+              </Col>
+              <Col md={4} className="text-md-end">
+                {renderStatusBadge(appointment.status)}
+              </Col>
+            </Row>
+
+            <ListGroup variant="flush">
+              <ListGroup.Item><Person className="me-2"/> <strong>{userRole === 'PetOwner' ? 'Provider' : 'Client'}:</strong> {userRole === 'PetOwner' ? (appointment.providerProfile?.businessName || appointment.providerProfile?.user?.email) : appointment.petOwner?.email}</ListGroup.Item>
+              <ListGroup.Item><CalendarEvent className="me-2"/> <strong>Date:</strong> {format(new Date(appointment.appointmentTime), 'PPP')}</ListGroup.Item>
+              <ListGroup.Item><Clock className="me-2"/> <strong>Time:</strong> {format(new Date(appointment.appointmentTime), 'p')} (Estimated End: {format(new Date(appointment.estimatedEndTime), 'p')})</ListGroup.Item>
+              <ListGroup.Item><Tag className="me-2"/> <strong>Service:</strong> {appointment.service?.name} (${appointment.service?.price})</ListGroup.Item>
+              <ListGroup.Item><GeoAlt className="me-2"/> <strong>Location:</strong> {appointment.appointmentLocation || appointment.providerProfile?.serviceArea?.address || 'Provider Address'}</ListGroup.Item>
+              {appointment.notes && <ListGroup.Item><CardText className="me-2"/> <strong>Notes:</strong> {appointment.notes}</ListGroup.Item>}
+              
+              {(appointment.status.startsWith('Cancelled')) && (
+                <ListGroup.Item>
+                  <ExclamationTriangle className="me-2 text-danger"/> 
+                  <strong>Cancelled By:</strong> {appointment.cancelledBy || 'Unknown'} on {format(new Date(appointment.cancellationTime), 'Pp')}
+                  {appointment.cancellationReason && <div className="mt-1 ps-4 fst-italic">Reason: {appointment.cancellationReason}</div>}
+                </ListGroup.Item>
+              )}
+              {appointment.status === 'Completed' && (
+                <ListGroup.Item>
+                  <CheckCircle className="me-2 text-info"/> 
+                  <strong>Completion Notes:</strong> {appointment.completionNotes || 'N/A'}
+                  {appointment.followUpRecommended && <div className="mt-1 ps-4"><strong>Follow-up Recommended:</strong> {appointment.followUpNotes || 'Yes'}</div>}
+                </ListGroup.Item>
+              )}
+            </ListGroup>
+
+            {showCancelConfirm && (
+              <div className="mt-3 p-3 border rounded bg-light">
+                <h5>Confirm Cancellation</h5>
+                <Form.Group className="mb-2">
+                  <Form.Label>Reason for cancellation (optional)</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    value={cancellationReason}
+                    onChange={(e) => setCancellationReason(e.target.value)}
+                    placeholder="Provide a reason..."
+                  />
+                </Form.Group>
+                {cancelError && <Alert variant="danger" size="sm">{cancelError}</Alert>}
+                <Button variant="danger" onClick={handleCancel} disabled={isCancelling} className="me-2">
+                  {isCancelling ? <Spinner size="sm"/> : 'Confirm Cancel'}
+                </Button>
+                <Button variant="secondary" onClick={() => setShowCancelConfirm(false)} disabled={isCancelling}>
+                  Keep Appointment
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </Modal.Body>
       <Modal.Footer>
+        {canCancel && !showCancelConfirm && (
+          <Button variant="outline-danger" onClick={() => setShowCancelConfirm(true)}>
+            Cancel Appointment
+          </Button>
+        )}
         <Button variant="secondary" onClick={onHide}>
           Close
         </Button>
       </Modal.Footer>
     </Modal>
   );
-};
+}
 
 export default AppointmentDetailModal; 

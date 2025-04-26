@@ -10,6 +10,8 @@ const availabilityRoutes = require('./src/routes/availabilityRoutes');
 const appointmentRoutes = require('./src/routes/appointmentRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const petRoutes = require('./src/routes/petRoutes');
+const reminderRoutes = require('./src/routes/reminderRoutes');
+const clinicRoutes = require('./src/routes/clinicRoutes');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -41,6 +43,8 @@ app.use('/api/availability', availabilityRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/pets', petRoutes);
+app.use('/api/reminders', reminderRoutes);
+app.use('/api/clinics', clinicRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {

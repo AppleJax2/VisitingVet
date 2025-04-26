@@ -7,6 +7,7 @@ import {
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { fetchPetOwnerDashboardData, fetchUserReminders, fetchUserPets, fetchUpcomingAppointments } from '../../services/api';
+import AppointmentDetailModal from '../AppointmentDetailModal';
 
 const PetOwnerDashboard = ({ user }) => {
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
@@ -18,6 +19,10 @@ const PetOwnerDashboard = ({ user }) => {
     reminders: true
   });
   const [error, setError] = useState(null);
+  
+  // Modal State
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -52,6 +57,22 @@ const PetOwnerDashboard = ({ user }) => {
     
     loadDashboardData();
   }, [user?._id]);
+
+  // Reload data if an appointment is updated via the modal
+  const handleAppointmentUpdate = (updatedAppointment) => {
+     loadDashboardData(); // Simple reload for now
+  };
+  
+  // Modal handlers
+  const handleShowDetails = (id) => {
+      setSelectedAppointmentId(id);
+      setShowDetailModal(true);
+  };
+  
+  const handleHideDetails = () => {
+      setSelectedAppointmentId(null);
+      setShowDetailModal(false);
+  };
 
   // Styles
   const styles = {
@@ -252,8 +273,7 @@ const PetOwnerDashboard = ({ user }) => {
                           <Button 
                             variant="outline-primary" 
                             size="sm"
-                            as={Link}
-                            to={`/appointment/${appointment._id}`}
+                            onClick={() => handleShowDetails(appointment._id)}
                             style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
                           >
                             Details
@@ -463,6 +483,17 @@ const PetOwnerDashboard = ({ user }) => {
           </Card>
         </Col>
       </Row>
+
+      {/* Appointment Detail Modal */}
+      {selectedAppointmentId && (
+        <AppointmentDetailModal 
+            show={showDetailModal}
+            onHide={handleHideDetails}
+            appointmentId={selectedAppointmentId}
+            userRole={user?.role}
+            onUpdate={handleAppointmentUpdate}
+        />
+      )}
     </div>
   );
 };

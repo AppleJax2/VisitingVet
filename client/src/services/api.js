@@ -286,13 +286,16 @@ export const fetchUserPets = async () => {
   }
 };
 
-export const fetchUserReminders = async () => {
+export const fetchUserReminders = async (filters = {}) => {
   try {
-    const response = await api.get('/reminders');
+    // Filters could include { isComplete: boolean, petId: string }
+    const response = await api.get('/reminders', { params: filters });
     return response.data;
   } catch (error) {
     console.error('Fetch reminders error:', error.response?.data || error.message);
-    throw error.response?.data || new Error('Failed to fetch reminders');
+    // Return default structure on error to prevent crashes in component
+    // return { success: false, reminders: [], error: error.response?.data?.error || 'Failed to fetch reminders' };
+    throw error.response?.data || new Error('Failed to fetch reminders'); 
   }
 };
 
@@ -349,5 +352,62 @@ export const deletePet = async (petId) => {
     throw error.response?.data || new Error('Failed to delete pet');
   }
 };
+
+// Reminder management
+export const addReminder = async (reminderData) => {
+  try {
+    const response = await api.post('/reminders', reminderData);
+    return response.data;
+  } catch (error) {
+    console.error('Add reminder error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to add reminder');
+  }
+};
+
+export const updateReminder = async (reminderId, updateData) => {
+  try {
+    const response = await api.put(`/reminders/${reminderId}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error(`Update reminder ${reminderId} error:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update reminder');
+  }
+};
+
+export const deleteReminder = async (reminderId) => {
+  try {
+    const response = await api.delete(`/reminders/${reminderId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Delete reminder ${reminderId} error:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to delete reminder');
+  }
+};
+
+// Clinic related functions
+export const fetchClinicAppointments = async (clinicId, date) => {
+  try {
+    // Assuming clinicId might be inferred on backend or passed explicitly
+    // Backend needs to handle filtering by date and potentially by provider within the clinic
+    const response = await api.get(`/clinics/appointments`, { params: { date } }); 
+    return response.data;
+  } catch (error) {
+    console.error('Fetch clinic appointments error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch clinic appointments');
+  }
+};
+
+export const fetchClinicStaff = async (clinicId) => {
+    try {
+        // Backend needs to return staff associated with the clinic
+        const response = await api.get(`/clinics/staff`);
+        return response.data;
+    } catch (error) {
+        console.error('Fetch clinic staff error:', error.response?.data || error.message);
+        throw error.response?.data || new Error('Failed to fetch clinic staff');
+    }
+};
+
+// TODO: Add functions for clinic stats, inventory, reports, adding staff/appointments etc.
 
 export default api; 

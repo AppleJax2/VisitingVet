@@ -170,6 +170,11 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           text: 'My Pets',
         },
         {
+          path: '/manage-reminders',
+          icon: <Bell style={sidebarStyles.navIcon} />,
+          text: 'Reminders',
+        },
+        {
           path: '/profile',
           icon: <Gear style={sidebarStyles.navIcon} />,
           text: 'Settings',
