@@ -320,10 +320,10 @@ exports.getActionLogs = async (req, res) => {
 
 /**
  * @desc    Create a new user by Admin
- * @route   POST /api/admin/users
+ * @route   POST /api/admin/users/create
  * @access  Private/Admin
  */
-exports.createUserByAdmin = async (req, res) => {
+exports.adminCreateUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   // Basic validation
@@ -332,14 +332,14 @@ exports.createUserByAdmin = async (req, res) => {
   }
 
   // Check if role is valid (adjust based on your User model enum if applicable)
-  const validRoles = ['PetOwner', 'MVSProvider', 'Clinic', 'Admin'];
+  const validRoles = ['PetOwner', 'MVSProvider', 'Clinic'];
   if (!validRoles.includes(role)) {
-    return res.status(400).json({ success: false, error: 'Invalid user role provided' });
+    return res.status(400).json({ success: false, error: `Invalid user role provided. Valid roles: ${validRoles.join(', ')}` });
   }
 
   try {
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({ success: false, error: 'User already exists with this email' });
     }
@@ -350,9 +350,8 @@ exports.createUserByAdmin = async (req, res) => {
       email,
       password, // Password hashing is handled by the pre-save hook in User model
       role,
-      // Set verification based on policy - maybe verify automatically if created by admin?
-      // isVerified: role !== 'Admin', // Example: Auto-verify non-admins
-      // verificationStatus: role !== 'Admin' ? 'Approved' : 'Pending', // Example
+      isVerified: true,
+      verificationStatus: 'Approved',
     });
 
     // Log admin action
@@ -372,7 +371,10 @@ exports.createUserByAdmin = async (req, res) => {
     // Handle potential validation errors from Mongoose model
     if (error.name === 'ValidationError') {
         const messages = Object.values(error.errors).map(val => val.message);
-        return res.status(400).json({ success: false, error: messages });
+        return res.status(400).json({ success: false, error: messages.join('. ') });
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, error: 'Email already exists.' });
     }
     res.status(500).json({ success: false, error: 'Server error during user creation' });
   }
@@ -380,42 +382,57 @@ exports.createUserByAdmin = async (req, res) => {
 
 /**
  * @desc    Create/Update a VisitingVetProfile for a specific user by Admin
- * @route   POST /api/admin/profiles/:userId
+ * @route   PUT /api/admin/users/:userId/profile
  * @access  Private/Admin
  */
-exports.createUpdateProfileByAdmin = async (req, res) => {
+exports.adminCreateUpdateProfile = async (req, res) => {
   const { userId } = req.params;
   const profileData = req.body;
 
-  // Validate that the target user exists and is a provider
-  const targetUser = await User.findById(userId);
-  if (!targetUser) {
-    return res.status(404).json({ success: false, error: 'Target user not found' });
-  }
-  if (targetUser.role !== 'MVSProvider') {
-    return res.status(400).json({ success: false, error: 'Target user is not a Mobile Veterinary Service Provider' });
-  }
-
-  // Ensure the 'user' field in the profile data matches the target user ID
-  profileData.user = userId;
-
   try {
+    // Validate that the target user exists and is a provider
+    const targetUser = await User.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({ success: false, error: 'Target user not found' });
+    }
+    if (!['MVSProvider', 'Clinic'].includes(targetUser.role)) {
+        return res.status(400).json({ success: false, error: 'Target user must be a Mobile Provider or Clinic to have a profile managed this way.' });
+    }
+
+    // Ensure the 'user' field in the profile data is not attempted to be changed
+    delete profileData.user; 
+    delete profileData.password;
+    delete profileData.email;
+    delete profileData.role;
+
+    // Find existing profile or prepare for creation
     let profile = await VisitingVetProfile.findOne({ user: userId });
+    let logActionType = 'UpdateProfileByAdmin';
+    let logMessage = 'Admin updated profile';
+    let statusCode = 200; // OK for update
 
     if (profile) {
       // Update existing profile
-      profile = await VisitingVetProfile.findOneAndUpdate({ user: userId }, profileData, {
+      profile = await VisitingVetProfile.findOneAndUpdate({ user: userId }, { $set: profileData }, {
         new: true,
         runValidators: true,
+        context: 'query' // Important for some validators
       });
-      await logAdminAction(req.user.id, userId, 'UpdateProfileByAdmin', 'Admin updated provider profile');
+      logActionType = 'UpdateProfileByAdmin';
+      logMessage = 'Admin updated provider profile';
     } else {
-      // Create new profile
+      // Create new profile - ensure user field is set
+      profileData.user = userId;
       profile = await VisitingVetProfile.create(profileData);
-      await logAdminAction(req.user.id, userId, 'CreateProfileByAdmin', 'Admin created provider profile');
+      logActionType = 'CreateProfileByAdmin';
+      logMessage = 'Admin created provider profile';
+      statusCode = 201; // Created
     }
 
-    res.status(200).json({
+    // Log the action
+    await logAdminAction(req.user.id, userId, logActionType, logMessage);
+
+    res.status(statusCode).json({
       success: true,
       data: profile,
     });
@@ -423,7 +440,7 @@ exports.createUpdateProfileByAdmin = async (req, res) => {
     console.error('Error creating/updating profile by admin:', error);
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map(val => val.message);
-      return res.status(400).json({ success: false, error: messages });
+      return res.status(400).json({ success: false, error: messages.join('. ') });
     }
     res.status(500).json({ success: false, error: 'Server error during profile update' });
   }
