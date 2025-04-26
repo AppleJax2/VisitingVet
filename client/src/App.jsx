@@ -28,6 +28,7 @@ import AdminUserListPage from './pages/Admin/AdminUserListPage';
 import AdminVerificationListPage from './pages/Admin/AdminVerificationListPage';
 import AdminLogPage from './pages/Admin/AdminLogPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
+import AdminEditProfilePage from './pages/Admin/AdminEditProfilePage';
 
 // Protected route component with role check
 const PrivateRoute = ({ allowedRoles }) => {
@@ -109,6 +110,7 @@ function App() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboardPage />} />
                 <Route path="users" element={<AdminUserListPage />} />
+                <Route path="edit-profile/:userId" element={<AdminEditProfilePage />} />
                 <Route path="verifications" element={<AdminVerificationListPage />} />
                 <Route path="logs" element={<AdminLogPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />

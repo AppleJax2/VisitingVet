@@ -2,6 +2,8 @@ const express = require('express');
 const {
   getAllUsers,
   getUserDetails,
+  createUserByAdmin,
+  createUpdateProfileByAdmin,
   banUser,
   unbanUser,
   verifyUser,
@@ -19,11 +21,15 @@ router.use(protect);
 router.use(authorize('Admin')); // Use existing authorize middleware
 
 // User Management Routes
+router.post('/users', createUserByAdmin);
 router.get('/users', getAllUsers);
 router.get('/users/:userId', getUserDetails);
 router.put('/users/:userId/ban', banUser);
 router.put('/users/:userId/unban', unbanUser);
 router.put('/users/:userId/verify', verifyUser);
+
+// Profile Management (Admin)
+router.post('/profiles/:userId', createUpdateProfileByAdmin);
 
 // Verification Routes
 router.get('/verifications/pending', getPendingVerifications);

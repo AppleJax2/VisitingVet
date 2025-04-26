@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const AdminActionLog = require('../models/AdminActionLog');
 const VerificationRequest = require('../models/VerificationRequest');
+const VisitingVetProfile = require('../models/VisitingVetProfile');
 
 // Helper function to log admin actions
 const logAdminAction = async (adminUserId, targetUserId, actionType, reason = '', details = {}) => {
@@ -315,4 +316,115 @@ exports.getActionLogs = async (req, res) => {
       console.error('Error getting admin action logs:', error);
       res.status(500).json({ success: false, error: 'Server error' });
     }
+};
+
+/**
+ * @desc    Create a new user by Admin
+ * @route   POST /api/admin/users
+ * @access  Private/Admin
+ */
+exports.createUserByAdmin = async (req, res) => {
+  const { name, email, password, role } = req.body;
+
+  // Basic validation
+  if (!name || !email || !password || !role) {
+    return res.status(400).json({ success: false, error: 'Please provide name, email, password, and role' });
+  }
+
+  // Check if role is valid (adjust based on your User model enum if applicable)
+  const validRoles = ['PetOwner', 'MVSProvider', 'Clinic', 'Admin'];
+  if (!validRoles.includes(role)) {
+    return res.status(400).json({ success: false, error: 'Invalid user role provided' });
+  }
+
+  try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, error: 'User already exists with this email' });
+    }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password, // Password hashing is handled by the pre-save hook in User model
+      role,
+      // Set verification based on policy - maybe verify automatically if created by admin?
+      // isVerified: role !== 'Admin', // Example: Auto-verify non-admins
+      // verificationStatus: role !== 'Admin' ? 'Approved' : 'Pending', // Example
+    });
+
+    // Log admin action
+    await logAdminAction(req.user.id, user._id, 'CreateUserByAdmin', `Created user with role: ${role}`, { email, role });
+
+    // Exclude password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.status(201).json({
+      success: true,
+      data: userResponse,
+    });
+
+  } catch (error) {
+    console.error('Error creating user by admin:', error);
+    // Handle potential validation errors from Mongoose model
+    if (error.name === 'ValidationError') {
+        const messages = Object.values(error.errors).map(val => val.message);
+        return res.status(400).json({ success: false, error: messages });
+    }
+    res.status(500).json({ success: false, error: 'Server error during user creation' });
+  }
+};
+
+/**
+ * @desc    Create/Update a VisitingVetProfile for a specific user by Admin
+ * @route   POST /api/admin/profiles/:userId
+ * @access  Private/Admin
+ */
+exports.createUpdateProfileByAdmin = async (req, res) => {
+  const { userId } = req.params;
+  const profileData = req.body;
+
+  // Validate that the target user exists and is a provider
+  const targetUser = await User.findById(userId);
+  if (!targetUser) {
+    return res.status(404).json({ success: false, error: 'Target user not found' });
+  }
+  if (targetUser.role !== 'MVSProvider') {
+    return res.status(400).json({ success: false, error: 'Target user is not a Mobile Veterinary Service Provider' });
+  }
+
+  // Ensure the 'user' field in the profile data matches the target user ID
+  profileData.user = userId;
+
+  try {
+    let profile = await VisitingVetProfile.findOne({ user: userId });
+
+    if (profile) {
+      // Update existing profile
+      profile = await VisitingVetProfile.findOneAndUpdate({ user: userId }, profileData, {
+        new: true,
+        runValidators: true,
+      });
+      await logAdminAction(req.user.id, userId, 'UpdateProfileByAdmin', 'Admin updated provider profile');
+    } else {
+      // Create new profile
+      profile = await VisitingVetProfile.create(profileData);
+      await logAdminAction(req.user.id, userId, 'CreateProfileByAdmin', 'Admin created provider profile');
+    }
+
+    res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  } catch (error) {
+    console.error('Error creating/updating profile by admin:', error);
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({ success: false, error: messages });
+    }
+    res.status(500).json({ success: false, error: 'Server error during profile update' });
+  }
 }; 

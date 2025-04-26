@@ -1,11 +1,109 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Badge, Spinner, Alert, Pagination, InputGroup, FormControl, Modal, Form } from 'react-bootstrap';
-import { adminGetAllUsers, adminBanUser, adminUnbanUser, adminVerifyUser } from '../../services/api';
-import { PersonDashFill, PersonCheckFill, PersonXFill, CheckCircleFill, XCircleFill, Search } from 'react-bootstrap-icons';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Table, Button, Badge, Spinner, Alert, Pagination, InputGroup, FormControl, Modal, Form, Row, Col } from 'react-bootstrap';
+import { adminGetAllUsers, adminBanUser, adminUnbanUser, adminVerifyUser, adminCreateUser } from '../../services/api';
+import { PersonDashFill, PersonCheckFill, PersonXFill, CheckCircleFill, XCircleFill, Search, PersonPlusFill, PencilSquare } from 'react-bootstrap-icons';
 import { format } from 'date-fns';
 import debounce from 'lodash.debounce';
+import { useNavigate } from 'react-router-dom';
+
+// Create User Modal Component
+const CreateUserModal = ({ show, onHide, onUserCreated }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('PetOwner'); // Default role
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createError, setCreateError] = useState('');
+
+  const resetForm = () => {
+    setName('');
+    setEmail('');
+    setPassword('');
+    setRole('PetOwner');
+    setIsSubmitting(false);
+    setCreateError('');
+  };
+
+  const handleCreateUser = async () => {
+    setIsSubmitting(true);
+    setCreateError('');
+    try {
+      const response = await adminCreateUser({ name, email, password, role });
+      if (response.success) {
+        onUserCreated(); // Callback to refresh the list
+        resetForm();
+        onHide(); // Close modal
+      } else {
+        setCreateError(response.error || 'Failed to create user.');
+      }
+    } catch (err) {
+      setCreateError(err.message || 'An error occurred.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal show={show} onHide={onHide} onExited={resetForm}> // Reset form on modal close transition end
+      <Modal.Header closeButton>
+        <Modal.Title>Create New User</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {createError && <Alert variant="danger">{createError}</Alert>}
+        <Form onSubmit={(e) => { e.preventDefault(); handleCreateUser(); }}>
+          <Form.Group className="mb-3" controlId="createUserName">
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="createUserEmail">
+            <Form.Label>Email address</Form.Label>
+            <Form.Control
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="createUserPassword">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6} // Add min length validation
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="createUserRole">
+            <Form.Label>Role</Form.Label>
+            <Form.Select value={role} onChange={(e) => setRole(e.target.value)} required>
+              <option value="PetOwner">Pet Owner</option>
+              <option value="MVSProvider">Mobile Vet Provider</option>
+              <option value="Clinic">Clinic</option>
+              <option value="Admin">Admin</option>
+            </Form.Select>
+          </Form.Group>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onHide} disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={handleCreateUser} disabled={isSubmitting || !name || !email || password.length < 6 || !role}>
+          {isSubmitting ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : 'Create User'}
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
 
 const AdminUserListPage = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,8 +113,10 @@ const AdminUserListPage = () => {
   const [showBanModal, setShowBanModal] = useState(false);
   const [userToBan, setUserToBan] = useState(null);
   const [banReason, setBanReason] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false); // State for create user modal
 
-  const fetchUsers = async (page = 1, search = '') => {
+  // Use useCallback for fetchUsers to prevent unnecessary re-renders/debounce issues
+  const fetchUsers = useCallback(async (page = 1, search = '') => {
     setLoading(true);
     setError('');
     try {
@@ -40,11 +140,11 @@ const AdminUserListPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchUsers(currentPage, searchTerm);
-  }, [currentPage]); // Refetch only when page changes
+  }, [currentPage, fetchUsers]); // Refetch only when page changes
 
   // Debounced search handler
   const debouncedSearch = debounce((term) => {
@@ -112,6 +212,14 @@ const AdminUserListPage = () => {
     }
   };
 
+  // Add handler for showing create modal
+  const handleShowCreateModal = () => setShowCreateModal(true);
+  const handleCloseCreateModal = () => setShowCreateModal(false);
+
+  const handleUserCreated = () => {
+    fetchUsers(currentPage, searchTerm); // Refresh user list after creation
+  };
+
   const renderPaginationItems = () => {
     if (!pagination.pages || pagination.pages <= 1) return null;
 
@@ -162,14 +270,23 @@ const AdminUserListPage = () => {
       <h2 className="mb-4">User Management</h2>
       {error && <Alert variant="danger">{error}</Alert>}
 
-      <InputGroup className="mb-3">
-        <InputGroup.Text><Search /></InputGroup.Text>
-        <FormControl
-          placeholder="Search by name or email..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-      </InputGroup>
+      <Row className="mb-3">
+        <Col md={8}>
+          <InputGroup>
+            <InputGroup.Text><Search /></InputGroup.Text>
+            <FormControl
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </InputGroup>
+        </Col>
+        <Col md={4} className="text-end">
+          <Button variant="primary" onClick={handleShowCreateModal}>
+            <PersonPlusFill className="me-2" /> Create User
+          </Button>
+        </Col>
+      </Row>
 
       {loading ? (
         <div className="text-center"><Spinner animation="border" /></div>
@@ -223,6 +340,18 @@ const AdminUserListPage = () => {
                           <PersonXFill />
                         </Button>
                       ) : null}
+                      {/* Add Manage Profile Button for MVSProvider */}
+                      {user.role === 'MVSProvider' && (
+                        <Button 
+                          variant="outline-info" 
+                          size="sm" 
+                          className="me-1" 
+                          title="Manage Profile" 
+                          onClick={() => navigate(`/admin/edit-profile/${user._id}`)}
+                        >
+                          <PencilSquare />
+                        </Button>
+                      )}
                       {/* Add Edit/Warning buttons later */}
                     </td>
                   </tr>
@@ -266,6 +395,13 @@ const AdminUserListPage = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Create User Modal */}
+      <CreateUserModal 
+        show={showCreateModal} 
+        onHide={handleCloseCreateModal} 
+        onUserCreated={handleUserCreated}
+      />
 
     </Container>
   );
