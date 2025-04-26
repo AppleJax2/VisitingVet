@@ -517,4 +517,49 @@ exports.getAppointmentDetails = async (req, res) => {
       error: 'Server error'
     });
   }
+};
+
+// @desc    Get pet owner's upcoming appointments
+// @route   GET /api/appointments/my-appointments/upcoming
+// @access  Private (PetOwner)
+exports.getUpcomingAppointments = async (req, res) => {
+  try {
+    // Check if user is a PetOwner
+    const user = await User.findById(req.user.id);
+    if (user.role !== 'PetOwner') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only pet owners can access their appointments'
+      });
+    }
+    
+    // Get limit from query params or use default of 3
+    const limit = parseInt(req.query.limit) || 3;
+    
+    // Get upcoming appointments for this pet owner
+    const appointments = await Appointment.find({ 
+      petOwner: req.user.id,
+      appointmentTime: { $gte: new Date() },
+      status: { $in: ['Requested', 'Confirmed'] }
+    })
+      .populate({
+        path: 'providerProfile',
+        populate: { path: 'user', select: 'email' }
+      })
+      .populate('service')
+      .sort({ appointmentTime: 1 })
+      .limit(limit);
+    
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      data: appointments
+    });
+  } catch (error) {
+    console.error('Error fetching upcoming appointments:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
 }; 

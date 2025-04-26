@@ -7,12 +7,14 @@ const {
   getMyAppointmentsProvider,
   updateAppointmentStatus,
   cancelAppointmentByPetOwner,
-  getAppointmentDetails
+  getAppointmentDetails,
+  getUpcomingAppointments
 } = require('../controllers/appointmentController');
 
 // Protected routes (require authentication)
 router.post('/', protect, authorize('PetOwner'), requestAppointment);
 router.get('/my-appointments', protect, authorize('PetOwner'), getMyPetOwnerAppointments);
+router.get('/my-appointments/upcoming', protect, authorize('PetOwner'), getUpcomingAppointments);
 
 // Provider routes
 router.get('/provider', protect, authorize('MVSProvider'), getMyAppointmentsProvider);
