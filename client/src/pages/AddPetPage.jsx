@@ -39,8 +39,14 @@ function AddPetPage() {
     }
 
     try {
-      // TODO: Call the actual API function
-      const result = await addPet(petData); 
+      // Convert age to number before sending
+      const dataToSend = {
+        ...petData,
+        age: Number(petData.age)
+      };
+
+      // Call the actual API function
+      const result = await addPet(dataToSend); 
       console.log('Pet added:', result);
       
       setSuccess(`Pet "${petData.name}" added successfully!`);

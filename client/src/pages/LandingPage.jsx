@@ -155,11 +155,11 @@ const LandingPage = () => {
           <Row className="g-4">
             {[
               {
-                icon: <HeartPulse size={24} />,
+                icon: <HeartPulse size={30} className="mb-2" style={{ color: theme.colors.secondary.main }} />,
                 title: "Small Animal Care",
                 description: "Complete care for dogs, cats, and other household pets in the comfort of your home.",
-                image: "/assets/images/landing-page/small-animal.jpg",
-                fallback: "https://images.unsplash.com/photo-1536590158209-e9d94d14c4f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                image: '/assets/images/landing-page/small_animal_care.jpg',
+                fallback: "",
                 link: "/search-providers?animalType=Small%20Animal"
               },
               {
