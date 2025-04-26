@@ -410,4 +410,96 @@ export const fetchClinicStaff = async (clinicId) => {
 
 // TODO: Add functions for clinic stats, inventory, reports, adding staff/appointments etc.
 
+// --- Admin API Functions ---
+
+export const adminGetAllUsers = async (page = 1, limit = 25, filters = {}) => {
+  try {
+    const response = await api.get('/admin/users', { params: { page, limit, ...filters } });
+    return response.data; // Should include data and pagination
+  } catch (error) {
+    console.error('Admin get users error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch users');
+  }
+};
+
+export const adminGetUserDetails = async (userId) => {
+  try {
+    const response = await api.get(`/admin/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Admin get user details error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch user details');
+  }
+};
+
+export const adminBanUser = async (userId, reason) => {
+  try {
+    const response = await api.put(`/admin/users/${userId}/ban`, { reason });
+    return response.data;
+  } catch (error) {
+    console.error('Admin ban user error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to ban user');
+  }
+};
+
+export const adminUnbanUser = async (userId) => {
+  try {
+    const response = await api.put(`/admin/users/${userId}/unban`);
+    return response.data;
+  } catch (error) {
+    console.error('Admin unban user error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to unban user');
+  }
+};
+
+export const adminVerifyUser = async (userId) => {
+  try {
+    const response = await api.put(`/admin/users/${userId}/verify`);
+    return response.data;
+  } catch (error) {
+    console.error('Admin verify user error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to verify user');
+  }
+};
+
+export const adminGetPendingVerifications = async (page = 1, limit = 10) => {
+  try {
+    const response = await api.get('/admin/verifications/pending', { params: { page, limit } });
+    return response.data; // Should include data and pagination
+  } catch (error) {
+    console.error('Admin get pending verifications error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch pending verifications');
+  }
+};
+
+export const adminApproveVerification = async (requestId) => {
+  try {
+    const response = await api.put(`/admin/verifications/${requestId}/approve`);
+    return response.data;
+  } catch (error) {
+    console.error('Admin approve verification error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to approve verification');
+  }
+};
+
+export const adminRejectVerification = async (requestId, reason) => {
+  try {
+    const response = await api.put(`/admin/verifications/${requestId}/reject`, { reason });
+    return response.data;
+  } catch (error) {
+    console.error('Admin reject verification error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to reject verification');
+  }
+};
+
+export const adminGetActionLogs = async (page = 1, limit = 50, filters = {}) => {
+  try {
+    const response = await api.get('/admin/logs', { params: { page, limit, ...filters } });
+    return response.data; // Should include data and pagination
+  } catch (error) {
+    console.error('Admin get action logs error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch action logs');
+  }
+};
+
 export default api; 

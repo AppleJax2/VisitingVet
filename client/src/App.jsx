@@ -1,6 +1,7 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { checkAuthStatus } from './services/api';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -17,13 +18,63 @@ import PetProfilePage from './pages/PetProfilePage';
 import ManageRemindersPage from './pages/ManageRemindersPage';
 import Header from './components/Header';
 import './App.css';
+import { Spinner, Container } from 'react-bootstrap';
 
-// Basic protected route component (can be enhanced later)
-// For now, DashboardPage handles its own auth check
-// const ProtectedRoute = ({ children }) => {
-//   const isAuthenticated = // ... logic to check auth state ...
-//   return isAuthenticated ? children : <Navigate to="/login" />;
-// };
+// Import Admin components (assuming paths)
+import AdminLayout from './components/Admin/AdminLayout';
+import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
+import AdminUserListPage from './pages/Admin/AdminUserListPage';
+import AdminVerificationListPage from './pages/Admin/AdminVerificationListPage';
+import AdminLogPage from './pages/Admin/AdminLogPage';
+import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
+
+// Protected route component with role check
+const PrivateRoute = ({ allowedRoles }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const verifyUser = async () => {
+      try {
+        const { success, user } = await checkAuthStatus();
+        if (success && user) {
+          setUserRole(user.role);
+        } else {
+          setUserRole(null);
+        }
+      } catch (error) {
+        setUserRole(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    verifyUser();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 120px)' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </Container>
+    );
+  }
+
+  if (!userRole) {
+    // Not authenticated
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    // Not authorized for this role
+    // Redirect to a general dashboard or an unauthorized page
+    return <Navigate to="/dashboard" replace />; 
+  }
+
+  // Authorized: render the nested routes using Outlet
+  return <Outlet />;
+};
 
 function App() {
   return (
@@ -39,9 +90,9 @@ function App() {
             <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
             <Route path="/search-providers" element={<ProviderSearchPage />} />
             
-            {/* Protected Routes */}
+            {/* Standard Protected Routes (using DashboardPage's internal check for now) */}
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/provider-profile" element={<ProviderProfileEditPage />} />
+            <Route path="/provider-profile" element={<ProviderProfileEditPage />} /> 
             <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
             <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
             <Route path="/add-pet" element={<AddPetPage />} />
@@ -49,6 +100,18 @@ function App() {
             <Route path="/add-reminder" element={<AddReminderPage />} />
             <Route path="/pet/:petId" element={<PetProfilePage />} />
             <Route path="/manage-reminders" element={<ManageRemindersPage />} />
+
+            {/* Admin Protected Routes */}
+            <Route element={<PrivateRoute allowedRoles={['Admin']} />}>
+              <Route path="/admin" element={<AdminLayout />}> { /* Wrap admin pages in layout */}
+                <Route index element={<AdminDashboardPage />} /> { /* Default admin page */}
+                <Route path="users" element={<AdminUserListPage />} />
+                <Route path="verifications" element={<AdminVerificationListPage />} />
+                <Route path="logs" element={<AdminLogPage />} />
+                <Route path="settings" element={<AdminSettingsPage />} />
+                 {/* Add more admin sub-routes here */}
+              </Route>
+            </Route>
             
             {/* Handle 404 - can be replaced with a proper NotFound component */}
             <Route path="*" element={<Navigate to="/" replace />} />

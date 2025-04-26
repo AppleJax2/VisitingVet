@@ -1,519 +1,548 @@
 import React from 'react';
 import { Container, Row, Col, Card, Button, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { Search, Check2Circle, Shield, Clock, Award, People, ArrowRight } from 'react-bootstrap-icons';
+import { 
+  Search, Check2Circle, Shield, Clock, Award, 
+  People, ArrowRight, Star, GeoAlt, Calendar3, 
+  CardChecklist, HeartPulse, TelephonePlus
+} from 'react-bootstrap-icons';
 import theme from '../utils/theme';
+import './LandingPage.css'; // Import the CSS file
+
+// Import images for hero section background
+// Note: You'll need to add these images to your assets folder
+// The paths below assume you'll create these directories and add appropriate images
 
 const LandingPage = () => {
   return (
     <div className="landing-page">
-      {/* Hero Section */}
-      <section className="hero-section" style={{
-        background: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80") no-repeat center center/cover`,
-      }}>
-        <Container>
-          <div className="text-center py-5 fade-in">
-            <h1 className="display-4 fw-bold mb-4">Quality Veterinary Care That Comes To You</h1>
-            <p className="lead mb-5">Connect with trusted mobile veterinary services for all your animals - from pets to farm animals.</p>
-            <div className="d-flex justify-content-center gap-3">
-              <Button 
-                as={Link} 
-                to="/search-providers" 
-                className="btn-lg"
-                style={{
-                  backgroundColor: theme.colors.secondary.main,
-                  borderColor: theme.colors.secondary.main,
-                  color: theme.colors.text.white,
-                  fontWeight: 'bold',
-                }}
-              >
-                Find a Vet
-              </Button>
-              <Button 
-                as={Link} 
-                to="/register" 
-                variant="outline-light" 
-                className="btn-lg"
-              >
-                Join as a Provider
-              </Button>
-            </div>
-          </div>
+      {/* Hero Section - Modern Design with Animated Content */}
+      <section className="hero-section position-relative overflow-hidden">
+        <div className="hero-bg-container position-absolute w-100 h-100">
+          <div className="hero-bg-overlay position-absolute w-100 h-100"></div>
+        </div>
+        <Container className="position-relative py-5">
+          <Row className="align-items-center min-vh-75">
+            <Col lg={7} className="py-5">
+              <div className="hero-content fade-in">
+                <span className="badge py-2 px-3 mb-3" style={{ 
+                  backgroundColor: theme.colors.accent.gold,
+                  color: theme.colors.text.primary 
+                }}>Trusted Veterinary Care</span>
+                <h1 className="display-4 fw-bold mb-4">Expert Veterinary Care <br/>At Your Doorstep</h1>
+                <p className="lead mb-5 text-white-80">Connect with verified mobile veterinary professionals for all your animals - from household pets to farm animals. Quality care that comes to you.</p>
+                <div className="d-flex flex-wrap gap-3">
+                  <Button 
+                    as={Link} 
+                    to="/search-providers" 
+                    size="lg"
+                    className="btn-primary-gradient"
+                    style={{
+                      background: `linear-gradient(90deg, ${theme.colors.secondary.main}, ${theme.colors.secondary.light})`,
+                      borderColor: 'transparent',
+                      color: theme.colors.text.white,
+                      fontWeight: 'bold',
+                      padding: '0.8rem 1.8rem',
+                      boxShadow: '0 4px 15px rgba(172, 81, 10, 0.35)',
+                    }}
+                  >
+                    <Search className="me-2" /> Find a Vet Near You
+                  </Button>
+                  <Button 
+                    as={Link} 
+                    to="/register" 
+                    variant="outline-light" 
+                    size="lg"
+                    style={{
+                      fontWeight: '600',
+                      padding: '0.8rem 1.8rem',
+                      borderWidth: '2px'
+                    }}
+                  >
+                    Join as a Provider
+                  </Button>
+                </div>
+              </div>
+            </Col>
+            <Col lg={5} className="d-none d-lg-block">
+              <div className="hero-image-container p-4 fade-in" style={{ animationDelay: '0.4s' }}>
+                <div className="hero-image-wrapper position-relative" style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '20px',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+                  padding: '15px',
+                }}>
+                  <img 
+                    src="/assets/images/landing-page/hero-vet.png" 
+                    alt="Mobile veterinarian with pet" 
+                    className="img-fluid w-100 rounded-3"
+                    style={{ maxHeight: '450px', objectFit: 'cover' }}
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80';
+                      e.target.alt = 'Fallback image of veterinarian with pet';
+                    }}
+                  />
+                  <div className="stats-card position-absolute" style={{
+                    bottom: '30px',
+                    right: '-20px',
+                    background: 'white',
+                    padding: '15px 20px',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                    width: '180px'
+                  }}>
+                    <div className="d-flex align-items-center mb-2">
+                      <div style={{
+                        backgroundColor: `${theme.colors.accent.gold}30`,
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: '10px'
+                      }}>
+                        <Star className="text-warning" size={20} />
+                      </div>
+                      <div>
+                        <div className="fs-6 fw-bold">4.9/5.0</div>
+                        <div className="text-muted small">Customer Rating</div>
+                      </div>
+                    </div>
+                    <hr className="my-2" />
+                    <div className="d-flex align-items-center">
+                      <div style={{
+                        backgroundColor: `${theme.colors.primary.main}20`,
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: '10px'
+                      }}>
+                        <Check2Circle className="text-success" size={20} />
+                      </div>
+                      <div>
+                        <div className="fs-6 fw-bold">100+</div>
+                        <div className="text-muted small">Verified Providers</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Col>
+          </Row>
         </Container>
       </section>
 
-      {/* Service Types Section */}
+      {/* Features Section - Card-based with Icons */}
+      <section className="py-5" style={{ backgroundColor: theme.colors.background.white }}>
+        <Container>
+          <div className="text-center mb-5">
+            <span className="badge px-3 py-2 mb-2" style={{ 
+              backgroundColor: `${theme.colors.primary.main}20`, 
+              color: theme.colors.primary.main 
+            }}>OUR SERVICES</span>
+            <h2 className="fw-bold" style={{ color: theme.colors.primary.dark }}>Comprehensive Veterinary Services</h2>
+            <p className="text-muted mx-auto" style={{ maxWidth: '700px' }}>
+              From routine checkups to specialized treatments, our mobile veterinary professionals bring a wide range of services directly to you.
+            </p>
+          </div>
+          
+          <Row className="g-4">
+            {[
+              {
+                icon: <HeartPulse size={24} />,
+                title: "Small Animal Care",
+                description: "Complete care for dogs, cats, and other household pets in the comfort of your home.",
+                image: "/assets/images/landing-page/small-animal.jpg",
+                fallback: "https://images.unsplash.com/photo-1536590158209-e9d94d14c4f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                link: "/search-providers?animalType=Small%20Animal"
+              },
+              {
+                icon: <GeoAlt size={24} />,
+                title: "Equine Services",
+                description: "Specialized care for horses including checkups, dental work, and emergency services.",
+                image: "/assets/images/landing-page/equine.jpg",
+                fallback: "https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                link: "/search-providers?animalType=Equine"
+              },
+              {
+                icon: <TelephonePlus size={24} />,
+                title: "Farm Animal Care",
+                description: "Expert care for farm animals with on-site visits to your farm or ranch.",
+                image: "/assets/images/landing-page/farm-animal.jpg",
+                fallback: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                link: "/search-providers?animalType=Large%20Animal"
+              }
+            ].map((service, index) => (
+              <Col md={4} key={index}>
+                <Card className="h-100 border-0 shadow-hover fade-in" style={{ 
+                  animationDelay: `${0.1 * (index + 1)}s`,
+                  transition: 'all 0.3s ease',
+                  borderRadius: theme.borderRadius.lg,
+                  overflow: 'hidden'
+                }}>
+                  <div className="position-relative service-image-container" style={{ height: '200px' }}>
+                    <img 
+                      src={service.image} 
+                      alt={service.title}
+                      className="w-100 h-100" 
+                      style={{ objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.target.src = service.fallback;
+                        e.target.alt = `Fallback image for ${service.title}`;
+                      }}
+                    />
+                    <div className="service-icon position-absolute" style={{
+                      bottom: '-20px',
+                      left: '20px',
+                      backgroundColor: theme.colors.primary.main,
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      boxShadow: theme.shadows.md
+                    }}>
+                      {service.icon}
+                    </div>
+                  </div>
+                  <Card.Body className="pt-4">
+                    <Card.Title className="fs-5 fw-bold" style={{ color: theme.colors.primary.main }}>{service.title}</Card.Title>
+                    <Card.Text className="mb-3 text-muted">
+                      {service.description}
+                    </Card.Text>
+                    <Link 
+                      to={service.link}
+                      className="btn btn-sm"
+                      style={{
+                        backgroundColor: 'transparent',
+                        color: theme.colors.primary.main,
+                        fontWeight: '600',
+                        padding: '0.5rem 1rem',
+                        borderRadius: theme.borderRadius.md,
+                        border: `1px solid ${theme.colors.primary.main}`,
+                      }}
+                    >
+                      Learn More <ArrowRight size={14} className="ms-1" />
+                    </Link>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </Container>
+      </section>
+
+      {/* How It Works Section - Timeline Style */}
       <section className="py-5" style={{ backgroundColor: theme.colors.background.light }}>
         <Container>
-          <h2 className="text-center mb-5" style={{ color: theme.colors.primary.dark }}>Veterinary Services For All Animals</h2>
-          <Row className="g-4">
-            <Col md={4}>
-              <Card className="h-100 shadow-sm border-0 fade-in" style={{ animationDelay: '0.1s' }}>
-                <Card.Img variant="top" src="https://images.unsplash.com/photo-1536590158209-e9d94d14c4f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" />
-                <Card.Body className="text-center">
-                  <Card.Title style={{ color: theme.colors.primary.main }}>Small Animal Care</Card.Title>
-                  <Card.Text>
-                    Comprehensive care for dogs, cats, rabbits, ferrets, and other household pets in the comfort of your home.
-                  </Card.Text>
-                  <Button 
-                    as={Link} 
-                    to="/search-providers?animalType=Small%20Animal"
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: theme.colors.primary.main,
-                      color: theme.colors.primary.main,
-                    }}
-                    className="mt-2"
-                  >
-                    Find Small Animal Vets
-                  </Button>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={4}>
-              <Card className="h-100 shadow-sm border-0 fade-in" style={{ animationDelay: '0.2s' }}>
-                <Card.Img variant="top" src="https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" />
-                <Card.Body className="text-center">
-                  <Card.Title style={{ color: theme.colors.primary.main }}>Equine Services</Card.Title>
-                  <Card.Text>
-                    Specialized care for horses including routine check-ups, dental work, vaccinations, and emergency services.
-                  </Card.Text>
-                  <Button 
-                    as={Link} 
-                    to="/search-providers?animalType=Equine"
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: theme.colors.primary.main,
-                      color: theme.colors.primary.main,
-                    }}
-                    className="mt-2"
-                  >
-                    Find Equine Vets
-                  </Button>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={4}>
-              <Card className="h-100 shadow-sm border-0 fade-in" style={{ animationDelay: '0.3s' }}>
-                <Card.Img variant="top" src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" />
-                <Card.Body className="text-center">
-                  <Card.Title style={{ color: theme.colors.primary.main }}>Farm & Large Animal Care</Card.Title>
-                  <Card.Text>
-                    Expert care for cattle, sheep, goats, pigs, and other farm animals with on-site visits to your farm or ranch.
-                  </Card.Text>
-                  <Button 
-                    as={Link} 
-                    to="/search-providers?animalType=Large%20Animal"
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: theme.colors.primary.main,
-                      color: theme.colors.primary.main,
-                    }}
-                    className="mt-2"
-                  >
-                    Find Farm Animal Vets
-                  </Button>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Specialty Services Section */}
-      <section className="py-5">
-        <Container>
-          <h2 className="text-center mb-2" style={{ color: theme.colors.primary.dark }}>Specialty Services</h2>
-          <p className="text-center text-muted mb-5">Discover providers offering specialized veterinary services</p>
-          <Row className="g-4">
-            <Col md={3}>
-              <Card className="text-center h-100 shadow-sm border-0 fade-in" style={{ animationDelay: '0.1s' }}>
-                <Card.Body>
-                  <div className="icon-wrapper mb-3">
-                    <div 
-                      style={{ 
-                        backgroundColor: theme.colors.background.light,
+          <div className="text-center mb-5">
+            <span className="badge px-3 py-2 mb-2" style={{ 
+              backgroundColor: `${theme.colors.secondary.main}20`, 
+              color: theme.colors.secondary.main 
+            }}>SIMPLE PROCESS</span>
+            <h2 className="fw-bold" style={{ color: theme.colors.primary.dark }}>How It Works</h2>
+            <p className="text-muted mx-auto" style={{ maxWidth: '700px' }}>
+              Getting quality veterinary care for your animals has never been easier with our simple three-step process.
+            </p>
+          </div>
+          
+          <div className="how-it-works-timeline position-relative">
+            {/* Vertical line for desktop */}
+            <div className="d-none d-md-block position-absolute" style={{
+              width: '2px',
+              backgroundColor: `${theme.colors.primary.main}30`,
+              top: '20px',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1
+            }}></div>
+            
+            <Row className="g-5">
+              {[
+                {
+                  icon: <Search size={28} />,
+                  title: "Search & Find",
+                  description: "Browse qualified veterinary providers that specialize in your animal's needs in your area.",
+                  color: theme.colors.primary.main
+                },
+                {
+                  icon: <Calendar3 size={28} />,
+                  title: "Book an Appointment",
+                  description: "Schedule a convenient time for the veterinarian to visit your location.",
+                  color: theme.colors.secondary.main
+                },
+                {
+                  icon: <CardChecklist size={28} />,
+                  title: "Receive Quality Care",
+                  description: "Get professional veterinary services delivered directly to your doorstep.",
+                  color: theme.colors.accent.gold
+                }
+              ].map((step, index) => (
+                <Col md={4} key={index} className="mb-md-0 mb-4">
+                  <div className="text-center fade-in" style={{ 
+                    animationDelay: `${0.2 * (index + 1)}s`,
+                    position: 'relative',
+                    zIndex: 2
+                  }}>
+                    <div className="step-number position-relative mb-4">
+                      <div style={{ 
+                        width: '80px',
+                        height: '80px',
                         borderRadius: '50%',
-                        width: '70px',
-                        height: '70px',
+                        backgroundColor: `${step.color}20`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        margin: '0 auto'
-                      }}
-                    >
-                      <img 
-                        src="https://cdn-icons-png.flaticon.com/512/2138/2138441.png" 
-                        alt="Farrier Services" 
-                        style={{ height: '40px', width: '40px' }}
-                      />
+                        margin: '0 auto',
+                        position: 'relative'
+                      }}>
+                        <div style={{ 
+                          backgroundColor: step.color,
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white'
+                        }}>
+                          {step.icon}
+                        </div>
+                        <div className="step-number-badge position-absolute" style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '50%',
+                          backgroundColor: 'white',
+                          border: `2px solid ${step.color}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          top: 0,
+                          right: 0,
+                          color: step.color,
+                          fontWeight: 'bold',
+                          fontSize: '14px'
+                        }}>
+                          {index + 1}
+                        </div>
+                      </div>
                     </div>
+                    <h4 className="fw-bold mb-3" style={{ color: step.color }}>{step.title}</h4>
+                    <p className="text-muted mb-0">{step.description}</p>
                   </div>
-                  <Card.Title style={{ color: theme.colors.primary.main }}>Farrier Services</Card.Title>
-                  <Card.Text>
-                    Professional hoof care and horseshoeing by experienced farriers.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-center h-100 shadow-sm border-0 fade-in" style={{ animationDelay: '0.2s' }}>
-                <Card.Body>
-                  <div className="icon-wrapper mb-3">
-                    <div 
-                      style={{ 
-                        backgroundColor: theme.colors.background.light,
-                        borderRadius: '50%',
-                        width: '70px',
-                        height: '70px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto'
-                      }}
-                    >
-                      <img 
-                        src="https://cdn-icons-png.flaticon.com/512/2332/2332039.png" 
-                        alt="Dental Care" 
-                        style={{ height: '40px', width: '40px' }}
-                      />
-                    </div>
-                  </div>
-                  <Card.Title style={{ color: theme.colors.primary.main }}>Dental Care</Card.Title>
-                  <Card.Text>
-                    Specialized dental services for all animals to maintain oral health.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-center h-100 shadow-sm border-0 fade-in" style={{ animationDelay: '0.3s' }}>
-                <Card.Body>
-                  <div className="icon-wrapper mb-3">
-                    <div 
-                      style={{ 
-                        backgroundColor: theme.colors.background.light,
-                        borderRadius: '50%',
-                        width: '70px',
-                        height: '70px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto'
-                      }}
-                    >
-                      <img 
-                        src="https://cdn-icons-png.flaticon.com/512/2447/2447774.png" 
-                        alt="Mobile Diagnostics" 
-                        style={{ height: '40px', width: '40px' }}
-                      />
-                    </div>
-                  </div>
-                  <Card.Title style={{ color: theme.colors.primary.main }}>Mobile Diagnostics</Card.Title>
-                  <Card.Text>
-                    Advanced diagnostic services including ultrasound and X-ray at your location.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-center h-100 shadow-sm border-0 fade-in" style={{ animationDelay: '0.4s' }}>
-                <Card.Body>
-                  <div className="icon-wrapper mb-3">
-                    <div 
-                      style={{ 
-                        backgroundColor: theme.colors.background.light,
-                        borderRadius: '50%',
-                        width: '70px',
-                        height: '70px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto'
-                      }}
-                    >
-                      <img 
-                        src="https://cdn-icons-png.flaticon.com/512/3588/3588552.png" 
-                        alt="Reproductive Services" 
-                        style={{ height: '40px', width: '40px' }}
-                      />
-                    </div>
-                  </div>
-                  <Card.Title style={{ color: theme.colors.primary.main }}>Reproductive Services</Card.Title>
-                  <Card.Text>
-                    Breeding management, artificial insemination, and reproductive health care.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-          <div className="text-center mt-4">
+                </Col>
+              ))}
+            </Row>
+          </div>
+          
+          <div className="text-center mt-5">
             <Button 
               as={Link} 
               to="/search-providers"
+              size="lg"
+              className="px-4 py-3"
               style={{
                 backgroundColor: theme.colors.secondary.main,
                 borderColor: theme.colors.secondary.main,
+                borderRadius: theme.borderRadius.md,
+                boxShadow: '0 4px 15px rgba(172, 81, 10, 0.2)',
               }}
-              className="mt-3"
             >
-              Browse All Services <ArrowRight className="ms-1" />
+              Find a Veterinarian Now <ArrowRight className="ms-2" />
             </Button>
           </div>
         </Container>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-5" style={{ backgroundColor: theme.colors.background.tan }}>
+      {/* Testimonials Section - Modern Carousel */}
+      <section className="py-5 position-relative overflow-hidden">
         <Container>
-          <h2 className="text-center mb-5" style={{ color: theme.colors.primary.dark }}>How It Works</h2>
-          <Row className="g-4">
-            <Col md={4}>
-              <div className="text-center fade-in" style={{ animationDelay: '0.1s' }}>
-                <div className="icon-wrapper mb-3">
-                  <div 
-                    style={{ 
-                      backgroundColor: theme.colors.accent.lightGreen,
-                      borderRadius: '50%',
-                      width: '80px',
-                      height: '80px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '0 auto'
-                    }}
-                  >
-                    <Search size={40} style={{ color: theme.colors.primary.dark }} />
-                  </div>
-                </div>
-                <h4 style={{ color: theme.colors.primary.main }}>Search</h4>
-                <p>Find qualified veterinary providers that specialize in your animal's needs and serve your area.</p>
-              </div>
-            </Col>
-            <Col md={4}>
-              <div className="text-center fade-in" style={{ animationDelay: '0.2s' }}>
-                <div className="icon-wrapper mb-3">
-                  <div 
-                    style={{ 
-                      backgroundColor: theme.colors.accent.lightGreen,
-                      borderRadius: '50%',
-                      width: '80px',
-                      height: '80px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '0 auto'
-                    }}
-                  >
-                    <Clock size={40} style={{ color: theme.colors.primary.dark }} />
-                  </div>
-                </div>
-                <h4 style={{ color: theme.colors.primary.main }}>Book</h4>
-                <p>Schedule an appointment at a time that's convenient for you and your animals.</p>
-              </div>
-            </Col>
-            <Col md={4}>
-              <div className="text-center fade-in" style={{ animationDelay: '0.3s' }}>
-                <div className="icon-wrapper mb-3">
-                  <div 
-                    style={{ 
-                      backgroundColor: theme.colors.accent.lightGreen,
-                      borderRadius: '50%',
-                      width: '80px',
-                      height: '80px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '0 auto'
-                    }}
-                  >
-                    <Check2Circle size={40} style={{ color: theme.colors.primary.dark }} />
-                  </div>
-                </div>
-                <h4 style={{ color: theme.colors.primary.main }}>Receive Care</h4>
-                <p>Get quality veterinary care delivered directly to your home, farm, or ranch.</p>
-              </div>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-5">
-        <Container>
-          <h2 className="text-center mb-5" style={{ color: theme.colors.primary.dark }}>What Our Users Say</h2>
+          <div className="text-center mb-5">
+            <span className="badge px-3 py-2 mb-2" style={{ 
+              backgroundColor: `${theme.colors.accent.gold}20`, 
+              color: theme.colors.accent.gold 
+            }}>TESTIMONIALS</span>
+            <h2 className="fw-bold" style={{ color: theme.colors.primary.dark }}>What Our Clients Say</h2>
+            <p className="text-muted mx-auto" style={{ maxWidth: '700px' }}>
+              Hear from pet owners and farmers who have experienced the convenience and quality of our mobile veterinary services.
+            </p>
+          </div>
+          
           <Carousel 
-            variant="dark" 
-            indicators={false} 
-            className="testimonial-carousel py-3"
+            fade
+            indicators={false}
             interval={5000}
-            style={{
-              backgroundColor: theme.colors.background.light,
-              borderRadius: theme.borderRadius.lg,
-              padding: '20px',
-            }}
+            className="testimonial-carousel py-3"
+            prevIcon={<span aria-hidden="true" className="carousel-control-icon prev" />}
+            nextIcon={<span aria-hidden="true" className="carousel-control-icon next" />}
           >
-            <Carousel.Item>
-              <div className="testimonial-item text-center px-md-5 px-3 py-3">
-                <div className="mb-4">
-                  <img
-                    src="https://randomuser.me/api/portraits/women/54.jpg"
-                    alt="Testimonial"
-                    className="rounded-circle"
-                    width="100"
-                    height="100"
-                    style={{ border: `4px solid ${theme.colors.accent.gold}` }}
-                  />
+            {[
+              {
+                image: "https://randomuser.me/api/portraits/women/54.jpg",
+                text: "Having a vet come to our farm has been a game-changer. Our cattle receive prompt care without the stress of transportation. The scheduling system is seamless!",
+                name: "Sarah Johnson",
+                role: "Cattle Farmer"
+              },
+              {
+                image: "https://randomuser.me/api/portraits/men/32.jpg",
+                text: "As a small animal veterinarian, this platform has helped me connect with more clients and manage my schedule efficiently. The support team is always helpful.",
+                name: "Dr. Michael Chen",
+                role: "Small Animal Veterinarian"
+              },
+              {
+                image: "https://randomuser.me/api/portraits/women/28.jpg",
+                text: "My elderly cat gets anxious at clinics, so having a vet come to us has been wonderful. The booking process was easy and the vet was professional and caring.",
+                name: "Lisa Martinez",
+                role: "Pet Owner"
+              }
+            ].map((testimonial, index) => (
+              <Carousel.Item key={index}>
+                <div className="testimonial-container py-4">
+                  <Row className="justify-content-center">
+                    <Col md={10} lg={8}>
+                      <Card className="border-0 shadow-lg" style={{
+                        borderRadius: theme.borderRadius.lg,
+                        overflow: 'hidden'
+                      }}>
+                        <Card.Body className="p-0">
+                          <Row className="g-0">
+                            <Col md={4} className="d-none d-md-block" style={{
+                              backgroundColor: theme.colors.primary.main,
+                              position: 'relative'
+                            }}>
+                              <div className="testimonial-quote-icon position-absolute" style={{
+                                top: '30px',
+                                left: '30px',
+                                opacity: 0.2,
+                                color: 'white',
+                                fontSize: '4rem'
+                              }}>
+                                "
+                              </div>
+                              <div className="d-flex flex-column justify-content-center align-items-center h-100 p-4">
+                                <div className="testimonial-image mb-3" style={{
+                                  width: '100px',
+                                  height: '100px',
+                                  borderRadius: '50%',
+                                  overflow: 'hidden',
+                                  border: '3px solid white'
+                                }}>
+                                  <img 
+                                    src={testimonial.image} 
+                                    alt={testimonial.name}
+                                    className="w-100 h-100"
+                                    style={{ objectFit: 'cover' }}
+                                  />
+                                </div>
+                                <h5 className="text-white mb-1">{testimonial.name}</h5>
+                                <p className="text-white-50 mb-0 small">{testimonial.role}</p>
+                              </div>
+                            </Col>
+                            <Col md={8}>
+                              <div className="p-4 p-md-5 d-flex flex-column justify-content-center h-100">
+                                <div className="d-md-none d-flex align-items-center mb-4">
+                                  <img 
+                                    src={testimonial.image} 
+                                    alt={testimonial.name}
+                                    className="rounded-circle me-3"
+                                    style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                                  />
+                                  <div>
+                                    <h5 className="mb-0">{testimonial.name}</h5>
+                                    <p className="text-muted mb-0 small">{testimonial.role}</p>
+                                  </div>
+                                </div>
+                                <div className="mb-4">
+                                  <Star className="text-warning me-1" />
+                                  <Star className="text-warning me-1" />
+                                  <Star className="text-warning me-1" />
+                                  <Star className="text-warning me-1" />
+                                  <Star className="text-warning" />
+                                </div>
+                                <p className="testimonial-text mb-0 fs-5">"{testimonial.text}"</p>
+                              </div>
+                            </Col>
+                          </Row>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  </Row>
                 </div>
-                <p className="testimonial-text mb-3 fs-5 mx-auto" style={{ maxWidth: '700px' }}>
-                  "Having a vet come to our farm has been a game-changer. Our cattle receive prompt care without the stress of transportation. The scheduling system is seamless!"
-                </p>
-                <h5 className="mb-0" style={{ color: theme.colors.primary.main }}>Sarah Johnson</h5>
-                <p className="text-muted">Cattle Farmer</p>
-              </div>
-            </Carousel.Item>
-            <Carousel.Item>
-              <div className="testimonial-item text-center px-md-5 px-3 py-3">
-                <div className="mb-4">
-                  <img
-                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                    alt="Testimonial"
-                    className="rounded-circle"
-                    width="100"
-                    height="100"
-                    style={{ border: `4px solid ${theme.colors.accent.gold}` }}
-                  />
-                </div>
-                <p className="testimonial-text mb-3 fs-5 mx-auto" style={{ maxWidth: '700px' }}>
-                  "As a small animal veterinarian, this platform has helped me connect with more clients and manage my schedule efficiently. The support team is always helpful."
-                </p>
-                <h5 className="mb-0" style={{ color: theme.colors.primary.main }}>Dr. Michael Chen</h5>
-                <p className="text-muted">Small Animal Veterinarian</p>
-              </div>
-            </Carousel.Item>
-            <Carousel.Item>
-              <div className="testimonial-item text-center px-md-5 px-3 py-3">
-                <div className="mb-4">
-                  <img
-                    src="https://randomuser.me/api/portraits/women/28.jpg"
-                    alt="Testimonial"
-                    className="rounded-circle"
-                    width="100"
-                    height="100"
-                    style={{ border: `4px solid ${theme.colors.accent.gold}` }}
-                  />
-                </div>
-                <p className="testimonial-text mb-3 fs-5 mx-auto" style={{ maxWidth: '700px' }}>
-                  "My elderly cat gets anxious at clinics, so having a vet come to us has been wonderful. The booking process was easy and the vet was professional and caring."
-                </p>
-                <h5 className="mb-0" style={{ color: theme.colors.primary.main }}>Lisa Martinez</h5>
-                <p className="text-muted">Pet Owner</p>
-              </div>
-            </Carousel.Item>
+              </Carousel.Item>
+            ))}
           </Carousel>
         </Container>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-5 text-center text-white" style={{
-        background: `linear-gradient(rgba(18, 68, 56, 0.8), rgba(87, 126, 70, 0.8)), url("https://images.unsplash.com/photo-1551892374-ecf8754cf8b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80") no-repeat center center/cover`,
-        padding: '60px 0',
+      {/* Call to Action Section */}
+      <section className="py-5 position-relative" style={{
+        background: `linear-gradient(rgba(18, 68, 56, 0.9), rgba(87, 126, 70, 0.9)), url("/assets/images/landing-page/cta-bg.jpg") no-repeat center center/cover`,
+        padding: '80px 0',
       }}>
-        <Container>
-          <h2 className="mb-4">Join Our Network of Veterinary Professionals</h2>
-          <p className="lead mb-4">Expand your practice, set your own schedule, and connect with clients who need your expertise</p>
-          <Button 
-            as={Link} 
-            to="/register" 
-            size="lg"
-            style={{
-              backgroundColor: theme.colors.secondary.main,
-              borderColor: theme.colors.secondary.main,
-              color: theme.colors.text.white,
-              fontWeight: 'bold',
-            }}
-          >
-            Register as a Provider
-          </Button>
-        </Container>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="py-5" style={{ backgroundColor: theme.colors.background.light }}>
-        <Container>
-          <h2 className="text-center mb-5" style={{ color: theme.colors.primary.dark }}>Why Choose VisitingVet</h2>
-          <Row className="g-4">
-            <Col md={4}>
-              <div className="d-flex align-items-start mb-4 fade-in" style={{ animationDelay: '0.1s' }}>
-                <div className="me-3">
-                  <div 
-                    style={{ 
-                      backgroundColor: theme.colors.accent.lightGreen,
-                      borderRadius: '50%',
-                      width: '50px',
-                      height: '50px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Shield size={25} style={{ color: theme.colors.primary.dark }} />
-                  </div>
-                </div>
-                <div>
-                  <h4 style={{ color: theme.colors.primary.main }}>Verified Professionals</h4>
-                  <p className="text-muted">All our veterinary providers go through a verification process to ensure quality care.</p>
-                </div>
-              </div>
-            </Col>
-            <Col md={4}>
-              <div className="d-flex align-items-start mb-4 fade-in" style={{ animationDelay: '0.2s' }}>
-                <div className="me-3">
-                  <div 
-                    style={{ 
-                      backgroundColor: theme.colors.accent.lightGreen,
-                      borderRadius: '50%',
-                      width: '50px',
-                      height: '50px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <People size={25} style={{ color: theme.colors.primary.dark }} />
-                  </div>
-                </div>
-                <div>
-                  <h4 style={{ color: theme.colors.primary.main }}>For All Animals</h4>
-                  <p className="text-muted">From household pets to large farm animals, we connect you with the right specialist.</p>
-                </div>
-              </div>
-            </Col>
-            <Col md={4}>
-              <div className="d-flex align-items-start mb-4 fade-in" style={{ animationDelay: '0.3s' }}>
-                <div className="me-3">
-                  <div 
-                    style={{ 
-                      backgroundColor: theme.colors.accent.lightGreen,
-                      borderRadius: '50%',
-                      width: '50px',
-                      height: '50px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Award size={25} style={{ color: theme.colors.primary.dark }} />
-                  </div>
-                </div>
-                <div>
-                  <h4 style={{ color: theme.colors.primary.main }}>Specialized Care</h4>
-                  <p className="text-muted">Access to specialists like farriers, equine dentists, and large animal surgeons.</p>
-                </div>
+        <Container className="text-center text-white">
+          <Row className="justify-content-center">
+            <Col lg={8}>
+              <h2 className="fw-bold mb-4">Join Our Growing Network of Veterinary Professionals</h2>
+              <p className="lead mb-4">Expand your practice, set your own schedule, and connect with clients who need your expertise</p>
+              <div className="d-flex justify-content-center gap-3 flex-wrap">
+                <Button 
+                  as={Link} 
+                  to="/register" 
+                  size="lg"
+                  className="px-4"
+                  style={{
+                    backgroundColor: theme.colors.secondary.main,
+                    borderColor: theme.colors.secondary.main,
+                    color: theme.colors.text.white,
+                    fontWeight: 'bold',
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+                  }}
+                >
+                  Register as a Provider
+                </Button>
+                <Button 
+                  as={Link} 
+                  to="/login" 
+                  variant="outline-light" 
+                  size="lg"
+                  className="px-4"
+                  style={{
+                    fontWeight: '600',
+                    borderWidth: '2px'
+                  }}
+                >
+                  Sign In
+                </Button>
               </div>
             </Col>
           </Row>
         </Container>
+
+        {/* Decorative elements */}
+        <div className="position-absolute" style={{
+          width: '200px',
+          height: '200px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(255,255,255,0.05)',
+          top: '-100px',
+          left: '-100px'
+        }}></div>
+        <div className="position-absolute" style={{
+          width: '300px',
+          height: '300px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(255,255,255,0.05)',
+          bottom: '-150px',
+          right: '-150px'
+        }}></div>
       </section>
     </div>
   );

@@ -49,6 +49,35 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '/assets/default-profile.png',
   },
+
+  // Admin & Verification Fields
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  verificationStatus: {
+    type: String,
+    enum: ['NotSubmitted', 'Pending', 'Approved', 'Rejected'],
+    default: 'NotSubmitted',
+  },
+  verificationDocuments: [{
+    documentType: String, // e.g., 'License', 'Certification'
+    fileUrl: String, // URL to the uploaded document (e.g., S3)
+    submittedAt: Date,
+  }],
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
+  banReason: {
+    type: String,
+    default: '',
+  },
+  warningLevel: {
+    type: Number,
+    default: 0, // Represents number of warnings or severity level
+  },
+
   // Add other fields common to all users later if needed
   // Specific role details might be in separate linked collections or embedded
 }, { timestamps: true });
