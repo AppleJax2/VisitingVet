@@ -13,6 +13,13 @@ import './LandingPage.css'; // Import the CSS file
 // Note: You'll need to add these images to your assets folder
 // The paths below assume you'll create these directories and add appropriate images
 
+// Update image fallback URLs with veterinary-themed images
+const heroVetImage = "https://images.unsplash.com/photo-1581888227599-779811939961?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+const smallAnimalImage = "https://images.unsplash.com/photo-1548767797-d8c844163c4c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+const equineImage = "https://images.unsplash.com/photo-1534307980202-7429ecd55b4b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+const farmAnimalImage = "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+const ctaBgImage = "https://images.unsplash.com/photo-1551730459-92db2a308d6a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+
 const LandingPage = () => {
   return (
     <div className="landing-page">
@@ -25,10 +32,7 @@ const LandingPage = () => {
           <Row className="align-items-center min-vh-75">
             <Col lg={7} className="py-5">
               <div className="hero-content fade-in">
-                <span className="badge py-2 px-3 mb-3" style={{ 
-                  backgroundColor: theme.colors.accent.gold,
-                  color: theme.colors.text.primary 
-                }}>Trusted Veterinary Care</span>
+                <span className="badge py-2 px-3 mb-3 section-badge-accent">Trusted Veterinary Care</span>
                 <h1 className="display-4 fw-bold mb-4">Expert Veterinary Care <br/>At Your Doorstep</h1>
                 <p className="lead mb-5 text-white-80">Connect with verified mobile veterinary professionals for all your animals - from household pets to farm animals. Quality care that comes to you.</p>
                 <div className="d-flex flex-wrap gap-3">
@@ -37,14 +41,6 @@ const LandingPage = () => {
                     to="/search-providers" 
                     size="lg"
                     className="btn-primary-gradient"
-                    style={{
-                      background: `linear-gradient(90deg, ${theme.colors.secondary.main}, ${theme.colors.secondary.light})`,
-                      borderColor: 'transparent',
-                      color: theme.colors.text.white,
-                      fontWeight: 'bold',
-                      padding: '0.8rem 1.8rem',
-                      boxShadow: '0 4px 15px rgba(172, 81, 10, 0.35)',
-                    }}
                   >
                     <Search className="me-2" /> Find a Vet Near You
                   </Button>
@@ -53,11 +49,7 @@ const LandingPage = () => {
                     to="/register" 
                     variant="outline-light" 
                     size="lg"
-                    style={{
-                      fontWeight: '600',
-                      padding: '0.8rem 1.8rem',
-                      borderWidth: '2px'
-                    }}
+                    className="fw-semibold px-4 py-3 border-2"
                   >
                     Join as a Provider
                   </Button>
@@ -66,44 +58,17 @@ const LandingPage = () => {
             </Col>
             <Col lg={5} className="d-none d-lg-block">
               <div className="hero-image-container p-4 fade-in" style={{ animationDelay: '0.4s' }}>
-                <div className="hero-image-wrapper position-relative" style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  borderRadius: '20px',
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
-                  padding: '15px',
-                }}>
+                <div className="hero-image-wrapper">
                   <img 
-                    src="/assets/images/landing-page/hero-vet.png" 
+                    src={heroVetImage}
                     alt="Mobile veterinarian with pet" 
                     className="img-fluid w-100 rounded-3"
                     style={{ maxHeight: '450px', objectFit: 'cover' }}
-                    onError={(e) => {
-                      e.target.src = 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80';
-                      console.log('Hero image fallback loaded');
-                    }}
                     loading="eager"
                   />
-                  <div className="stats-card position-absolute" style={{
-                    bottom: '30px',
-                    right: '-20px',
-                    background: 'white',
-                    padding: '15px 20px',
-                    borderRadius: '12px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                    width: '180px'
-                  }}>
+                  <div className="stats-card position-absolute">
                     <div className="d-flex align-items-center mb-2">
-                      <div style={{
-                        backgroundColor: `${theme.colors.accent.gold}30`,
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '10px'
-                      }}>
+                      <div className="stats-icon stats-icon-warning">
                         <Star className="text-warning" size={20} />
                       </div>
                       <div>
@@ -113,16 +78,7 @@ const LandingPage = () => {
                     </div>
                     <hr className="my-2" />
                     <div className="d-flex align-items-center">
-                      <div style={{
-                        backgroundColor: `${theme.colors.primary.main}20`,
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '10px'
-                      }}>
+                      <div className="stats-icon stats-icon-primary">
                         <Check2Circle className="text-success" size={20} />
                       </div>
                       <div>
@@ -139,15 +95,12 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section - Card-based with Icons */}
-      <section className="py-5" style={{ backgroundColor: theme.colors.background.white }}>
+      <section className="py-5 bg-white">
         <Container>
           <div className="text-center mb-5">
-            <span className="badge px-3 py-2 mb-2" style={{ 
-              backgroundColor: `${theme.colors.primary.main}20`, 
-              color: theme.colors.primary.main 
-            }}>OUR SERVICES</span>
-            <h2 className="fw-bold" style={{ color: theme.colors.primary.dark }}>Comprehensive Veterinary Services</h2>
-            <p className="text-muted mx-auto" style={{ maxWidth: '700px' }}>
+            <span className="badge px-3 py-2 mb-2 section-badge-primary">OUR SERVICES</span>
+            <h2 className="section-title">Comprehensive Veterinary Services</h2>
+            <p className="text-muted section-description">
               From routine checkups to specialized treatments, our mobile veterinary professionals bring a wide range of services directly to you.
             </p>
           </div>
@@ -155,81 +108,50 @@ const LandingPage = () => {
           <Row className="g-4">
             {[
               {
-                icon: <HeartPulse size={30} className="mb-2" style={{ color: theme.colors.secondary.main }} />,
+                icon: <HeartPulse size={30} className="mb-2 text-secondary" />,
                 title: "Small Animal Care",
                 description: "Complete care for dogs, cats, and other household pets in the comfort of your home.",
-                image: '/assets/images/landing-page/small_animal_care.jpg',
-                fallback: "",
+                image: smallAnimalImage,
                 link: "/search-providers?animalType=Small%20Animal"
               },
               {
                 icon: <GeoAlt size={24} />,
                 title: "Equine Services",
                 description: "Specialized care for horses including checkups, dental work, and emergency services.",
-                image: "/assets/images/landing-page/equine.jpg",
-                fallback: "https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                image: equineImage,
                 link: "/search-providers?animalType=Equine"
               },
               {
                 icon: <TelephonePlus size={24} />,
                 title: "Farm Animal Care",
                 description: "Expert care for farm animals with on-site visits to your farm or ranch.",
-                image: "/assets/images/landing-page/farm-animal.jpg",
-                fallback: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                image: farmAnimalImage,
                 link: "/search-providers?animalType=Large%20Animal"
               }
             ].map((service, index) => (
               <Col md={4} key={index}>
-                <Card className="h-100 border-0 shadow-hover fade-in" style={{ 
-                  animationDelay: `${0.1 * (index + 1)}s`,
-                  transition: 'all 0.3s ease',
-                  borderRadius: theme.borderRadius.lg,
-                  overflow: 'hidden'
-                }}>
+                <Card className="h-100 border-0 shadow-hover fade-in" 
+                  style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
                   <div className="position-relative service-image-container" style={{ height: '200px' }}>
                     <img 
                       src={service.image} 
                       alt={service.title}
                       className="w-100 h-100" 
                       style={{ objectFit: 'cover' }}
-                      onError={(e) => {
-                        e.target.src = service.fallback;
-                        console.log(`Fallback image loaded for ${service.title}`);
-                      }}
                       loading="lazy"
                     />
-                    <div className="service-icon position-absolute" style={{
-                      bottom: '-20px',
-                      left: '20px',
-                      backgroundColor: theme.colors.primary.main,
-                      width: '50px',
-                      height: '50px',
-                      borderRadius: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      boxShadow: theme.shadows.md
-                    }}>
+                    <div className="service-icon position-absolute">
                       {service.icon}
                     </div>
                   </div>
                   <Card.Body className="pt-4">
-                    <Card.Title className="fs-5 fw-bold" style={{ color: theme.colors.primary.main }}>{service.title}</Card.Title>
+                    <Card.Title className="fs-5 fw-bold text-primary">{service.title}</Card.Title>
                     <Card.Text className="mb-3 text-muted">
                       {service.description}
                     </Card.Text>
                     <Link 
                       to={service.link}
-                      className="btn btn-sm"
-                      style={{
-                        backgroundColor: 'transparent',
-                        color: theme.colors.primary.main,
-                        fontWeight: '600',
-                        padding: '0.5rem 1rem',
-                        borderRadius: theme.borderRadius.md,
-                        border: `1px solid ${theme.colors.primary.main}`,
-                      }}
+                      className="learn-more-link"
                     >
                       Learn More <ArrowRight size={14} className="ms-1" />
                     </Link>
@@ -242,15 +164,12 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works Section - Timeline Style */}
-      <section className="py-5" style={{ backgroundColor: theme.colors.background.light }}>
+      <section className="py-5 bg-light">
         <Container>
           <div className="text-center mb-5">
-            <span className="badge px-3 py-2 mb-2" style={{ 
-              backgroundColor: `${theme.colors.secondary.main}20`, 
-              color: theme.colors.secondary.main 
-            }}>SIMPLE PROCESS</span>
-            <h2 className="fw-bold" style={{ color: theme.colors.primary.dark }}>How It Works</h2>
-            <p className="text-muted mx-auto" style={{ maxWidth: '700px' }}>
+            <span className="badge px-3 py-2 mb-2 section-badge-secondary">SIMPLE PROCESS</span>
+            <h2 className="section-title">How It Works</h2>
+            <p className="text-muted section-description">
               Getting quality veterinary care for your animals has never been easier with our simple three-step process.
             </p>
           </div>
@@ -350,13 +269,7 @@ const LandingPage = () => {
               as={Link} 
               to="/search-providers"
               size="lg"
-              className="px-4 py-3"
-              style={{
-                backgroundColor: theme.colors.secondary.main,
-                borderColor: theme.colors.secondary.main,
-                borderRadius: theme.borderRadius.md,
-                boxShadow: '0 4px 15px rgba(172, 81, 10, 0.2)',
-              }}
+              className="btn-primary-gradient px-4 py-3"
             >
               Find a Veterinarian Now <ArrowRight className="ms-2" />
             </Button>
@@ -368,12 +281,9 @@ const LandingPage = () => {
       <section className="py-5 position-relative overflow-hidden">
         <Container>
           <div className="text-center mb-5">
-            <span className="badge px-3 py-2 mb-2" style={{ 
-              backgroundColor: `${theme.colors.accent.gold}20`, 
-              color: theme.colors.accent.gold 
-            }}>TESTIMONIALS</span>
-            <h2 className="fw-bold" style={{ color: theme.colors.primary.dark }}>What Our Clients Say</h2>
-            <p className="text-muted mx-auto" style={{ maxWidth: '700px' }}>
+            <span className="badge px-3 py-2 mb-2 section-badge-accent">TESTIMONIALS</span>
+            <h2 className="section-title">What Our Clients Say</h2>
+            <p className="text-muted section-description">
               Hear from pet owners and farmers who have experienced the convenience and quality of our mobile veterinary services.
             </p>
           </div>
@@ -485,8 +395,8 @@ const LandingPage = () => {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-5 position-relative" style={{
-        background: `linear-gradient(rgba(18, 68, 56, 0.9), rgba(87, 126, 70, 0.9)), url("/assets/images/landing-page/cta-bg.jpg") no-repeat center center/cover`,
+      <section className="cta-section py-5 position-relative" style={{
+        background: `linear-gradient(rgba(18, 68, 56, 0.9), rgba(87, 126, 70, 0.9)), url("${ctaBgImage}") no-repeat center center/cover`,
         padding: '80px 0',
       }}>
         <Container className="text-center text-white">
@@ -498,30 +408,18 @@ const LandingPage = () => {
                 <Button 
                   as={Link} 
                   to="/register" 
-                  size="lg"
-                  className="px-4"
-                  style={{
-                    backgroundColor: theme.colors.secondary.main,
-                    borderColor: theme.colors.secondary.main,
-                    color: theme.colors.text.white,
-                    fontWeight: 'bold',
-                    boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
-                  }}
+                  className="btn-primary-gradient px-4 py-3"
                 >
-                  Register as a Provider
+                  Register as Provider <ArrowRight className="ms-2" />
                 </Button>
                 <Button 
                   as={Link} 
-                  to="/login" 
+                  to="/about-providers" 
                   variant="outline-light" 
                   size="lg"
-                  className="px-4"
-                  style={{
-                    fontWeight: '600',
-                    borderWidth: '2px'
-                  }}
+                  className="fw-semibold px-4 py-3"
                 >
-                  Sign In
+                  Learn More
                 </Button>
               </div>
             </Col>

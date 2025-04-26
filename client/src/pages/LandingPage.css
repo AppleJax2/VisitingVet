@@ -1,5 +1,46 @@
 /* LandingPage.css - Updated with improved styling and responsiveness */
 
+/* Root variables from theme */
+:root {
+  /* Primary colors */
+  --primary-main: #577E46;
+  --primary-light: #6B9256;
+  --primary-dark: #3D5D2F;
+  
+  /* Secondary colors */
+  --secondary-main: #AC510A;
+  --secondary-light: #C76420;
+  --secondary-dark: #7F3C06;
+  
+  /* Background colors */
+  --background-light: #F6E6BB;
+  --background-white: #FFFFFF;
+  --background-tan: #F0DCA0;
+  --background-dark: #124438;
+  
+  /* Accent colors */
+  --accent-gold: #EDB75A;
+  --accent-darkGreen: #124438;
+  --accent-lightGreen: #A8B99F;
+  
+  /* Text colors */
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --text-light: #777777;
+  --text-white: #FFFFFF;
+  
+  /* Font families */
+  --heading-font: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --body-font: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Border radius */
+  --border-radius-sm: 3px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 24px;
+  --border-radius-round: 50%;
+}
+
 /* Global animation for page transitions */
 .landing-page {
   -webkit-animation: pageLoad 0.6s ease-in-out;
@@ -52,6 +93,79 @@
 
 .text-white-80 {
   color: rgba(255, 255, 255, 0.9);
+}
+
+/* Added hero image and stats styling */
+.hero-image-wrapper {
+  position: relative;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+  padding: 15px;
+}
+
+.hero-image-wrapper:hover {
+  transform: translateY(-5px);
+}
+
+.stats-card {
+  bottom: 30px;
+  right: -20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  width: 180px;
+  animation: fadeInRight 0.8s ease-out 0.5s forwards;
+  opacity: 0;
+}
+
+.stats-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.stats-icon-warning {
+  background-color: rgba(237, 183, 90, 0.3);
+}
+
+.stats-icon-primary {
+  background-color: rgba(87, 126, 70, 0.2);
+}
+
+/* Section Badge Styling */
+.section-badge-primary {
+  background-color: rgba(87, 126, 70, 0.2);
+  color: var(--primary-main);
+}
+
+.section-badge-secondary {
+  background-color: rgba(172, 81, 10, 0.2);
+  color: var(--secondary-main);
+}
+
+.section-badge-accent {
+  background-color: rgba(237, 183, 90, 0.2);
+  color: var(--accent-gold);
+}
+
+.section-title {
+  color: var(--primary-dark);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.section-description {
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Improved section spacing */
@@ -110,6 +224,16 @@ section.bg-light {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   transform: translateY(50%);
   transition: all 0.3s ease;
+  bottom: -20px;
+  left: 20px;
+  background-color: var(--primary-main);
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
 .shadow-hover:hover .service-icon {
@@ -196,6 +320,12 @@ section.bg-light {
 
 /* Enhanced Button Styles */
 .btn-primary-gradient {
+  background: linear-gradient(90deg, var(--secondary-main), var(--secondary-light));
+  border-color: transparent;
+  color: var(--text-white);
+  font-weight: bold;
+  padding: 0.8rem 1.8rem;
+  box-shadow: 0 4px 15px rgba(172, 81, 10, 0.35);
   transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
   position: relative;
   z-index: 1;
@@ -351,16 +481,6 @@ footer a:hover {
   }
 }
 
-/* Hero Image Enhancements */
-.hero-image-wrapper {
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.hero-image-wrapper:hover {
-  transform: translateY(-5px);
-}
-
 /* Button Improvements */
 .btn {
   font-weight: 600;
@@ -387,6 +507,10 @@ a.learn-more-link {
   font-weight: 600;
   transition: all 0.3s ease;
   text-decoration: none;
+  background-color: transparent;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--primary-main);
 }
 
 a.learn-more-link:hover {
