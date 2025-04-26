@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
-const User = require('../models/User'); // Adjust path if needed
-const VisitingVetProfile = require('../models/VisitingVetProfile'); // Adjust path if needed
+const User = require('../src/models/User'); // Corrected path
+const VisitingVetProfile = require('../src/models/VisitingVetProfile'); // Corrected path
 
 // Load env vars
-dotenv.config({ path: path.resolve(__dirname, '../config/config.env') }); // Adjust path to your .env file
+dotenv.config({ path: path.resolve(__dirname, '../src/config/config.env') }); // Corrected path to .env file inside src/config
 
 // Provider data scraped earlier (condensed for brevity)
 const providerData = [
