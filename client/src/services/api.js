@@ -512,4 +512,15 @@ export const adminGetActionLogs = async (page = 1, limit = 50, filters = {}) => 
   }
 };
 
+export const adminCreateUpdateProfile = async (userId, profileData) => {
+  try {
+    // Use PUT to update the profile for a specific user ID
+    const response = await api.put(`/admin/users/${userId}/profile`, profileData);
+    return response.data; // Assuming backend confirms success/returns updated profile
+  } catch (error) {
+    console.error(`Admin update profile for user ${userId} error:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update profile via admin');
+  }
+};
+
 export default api; 
