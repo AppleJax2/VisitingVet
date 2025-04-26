@@ -6,7 +6,8 @@ const {
   updatePet,
   deletePet
 } = require('../controllers/petController');
-const { protect, restrictTo } = require('../middleware/authMiddleware'); // Assuming auth middleware exists
+const { protect } = require('../middleware/authMiddleware'); // Correctly import protect
+const { restrictTo } = require('../controllers/authController'); // Correctly import restrictTo
 
 const router = express.Router();
 
