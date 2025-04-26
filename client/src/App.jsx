@@ -10,6 +10,7 @@ import ProviderSearchPage from './pages/ProviderSearchPage';
 import MyPetOwnerAppointmentsPage from './pages/MyPetOwnerAppointmentsPage';
 import ProviderAppointmentsPage from './pages/ProviderAppointmentsPage';
 import LandingPage from './pages/LandingPage';
+import AddPetPage from './pages/AddPetPage';
 import Header from './components/Header';
 import './App.css';
 
@@ -39,6 +40,7 @@ function App() {
             <Route path="/provider-profile" element={<ProviderProfileEditPage />} />
             <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
             <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
+            <Route path="/add-pet" element={<AddPetPage />} />
             
             {/* Handle 404 - can be replaced with a proper NotFound component */}
             <Route path="*" element={<Navigate to="/" replace />} />

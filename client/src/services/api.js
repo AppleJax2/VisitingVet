@@ -306,4 +306,48 @@ export const fetchUpcomingAppointments = async (limit = 3) => {
   }
 };
 
+export const addPet = async (petData) => {
+  try {
+    // Assuming the backend route is POST /pets
+    const response = await api.post('/pets', petData);
+    return response.data;
+  } catch (error) {
+    console.error('Add pet error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to add pet');
+  }
+};
+
+// Function to fetch details for a single pet (may be needed later)
+export const fetchPetById = async (petId) => {
+  try {
+    const response = await api.get(`/pets/${petId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Fetch pet ${petId} error:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch pet details');
+  }
+};
+
+// Function to update a pet (may be needed later)
+export const updatePet = async (petId, petData) => {
+  try {
+    const response = await api.put(`/pets/${petId}`, petData);
+    return response.data;
+  } catch (error) {
+    console.error(`Update pet ${petId} error:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update pet');
+  }
+};
+
+// Function to delete a pet (may be needed later)
+export const deletePet = async (petId) => {
+  try {
+    const response = await api.delete(`/pets/${petId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Delete pet ${petId} error:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to delete pet');
+  }
+};
+
 export default api; 
