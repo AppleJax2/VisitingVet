@@ -41,11 +41,20 @@ function DashboardPage() {
 
   const handleLogout = async () => {
     try {
+      // Try to call the API to logout
       await logout();
-      setUser(null);
-      navigate('/login');
     } catch (err) {
-      setError('Logout failed. Please try again.');
+      console.error('Logout failed on server side, continuing with client-side logout:', err);
+    } finally {
+      // Always clear the user state and redirect regardless of API success/failure
+      setUser(null);
+      
+      // Clear any stored tokens or session information
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
+      
+      // Navigate to login page
+      navigate('/login');
     }
   };
 

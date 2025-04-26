@@ -80,8 +80,9 @@ const LandingPage = () => {
                     style={{ maxHeight: '450px', objectFit: 'cover' }}
                     onError={(e) => {
                       e.target.src = 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80';
-                      e.target.alt = 'Fallback image of veterinarian with pet';
+                      console.log('Hero image fallback loaded');
                     }}
+                    loading="eager"
                   />
                   <div className="stats-card position-absolute" style={{
                     bottom: '30px',
@@ -193,8 +194,9 @@ const LandingPage = () => {
                       style={{ objectFit: 'cover' }}
                       onError={(e) => {
                         e.target.src = service.fallback;
-                        e.target.alt = `Fallback image for ${service.title}`;
+                        console.log(`Fallback image loaded for ${service.title}`);
                       }}
+                      loading="lazy"
                     />
                     <div className="service-icon position-absolute" style={{
                       bottom: '-20px',

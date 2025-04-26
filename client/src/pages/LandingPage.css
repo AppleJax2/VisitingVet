@@ -1,5 +1,21 @@
 /* LandingPage.css */
 
+/* Page-level animation */
+.landing-page {
+  -webkit-animation: pageLoad 0.6s ease-in-out;
+          animation: pageLoad 0.6s ease-in-out;
+}
+
+@-webkit-keyframes pageLoad {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes pageLoad {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 /* Hero Section Styling */
 .hero-section {
   min-height: 650px;
@@ -29,19 +45,54 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+/* Animations */
+.fade-in {
+  opacity: 0;
+  -webkit-animation: fadeIn 0.8s ease forwards;
+          animation: fadeIn 0.8s ease forwards;
+}
+
+@-webkit-keyframes fadeIn {
+  from { opacity: 0; -webkit-transform: translateY(20px); transform: translateY(20px); }
+  to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; -webkit-transform: translateY(20px); transform: translateY(20px); }
+  to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+}
+
 /* Services Card Hover Effect */
 .shadow-hover {
+  -webkit-transition: all 0.3s ease;
   transition: all 0.3s ease;
+  -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
 .shadow-hover:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+  -webkit-transform: translateY(-10px);
+          transform: translateY(-10px);
+  -webkit-box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* How It Works Timeline */
 .how-it-works-timeline {
   padding: 30px 0;
+}
+
+/* Service Image Container */
+.service-image-container {
+  overflow: hidden;
+}
+
+.service-image-container img {
+  transition: transform 0.5s ease;
+}
+
+.shadow-hover:hover .service-image-container img {
+  transform: scale(1.05);
 }
 
 /* Testimonial Carousel */
@@ -120,6 +171,32 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
+/* Card design improvements */
+.card {
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Badges */
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border-radius: 30px;
+  padding: 0.5rem 1rem !important;
+}
+
+/* Improved buttons */
+.btn {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
 /* Responsive Adjustments */
 @media (max-width: 992px) {
   .hero-section {
@@ -133,6 +210,10 @@
   
   .hero-content .btn {
     margin: 0 5px 10px;
+  }
+  
+  .btn {
+    padding: 0.6rem 1.2rem !important;
   }
 }
 
@@ -160,4 +241,14 @@
   .hero-content .lead {
     font-size: 1rem;
   }
+  
+  .service-image-container {
+    height: 180px !important;
+  }
+}
+
+/* Fix for mobile responsiveness */
+.container {
+  padding-left: 20px;
+  padding-right: 20px;
 } 

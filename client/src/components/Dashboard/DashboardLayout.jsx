@@ -269,17 +269,23 @@ const DashboardLayout = ({ children, user, onLogout }) => {
 
           {/* Logout */}
           <Nav.Item style={sidebarStyles.navItem}>
-            <a
-              href="#logout"
+            <Button
+              variant="link"
               onClick={(e) => {
                 e.preventDefault();
                 onLogout();
               }}
-              style={sidebarStyles.navLink}
+              style={{
+                ...sidebarStyles.navLink,
+                border: 'none',
+                background: 'none',
+                width: '100%',
+                textAlign: 'left'
+              }}
             >
               <BoxArrowRight style={sidebarStyles.navIcon} />
               <span style={sidebarStyles.navText}>Logout</span>
-            </a>
+            </Button>
           </Nav.Item>
         </Nav>
 
