@@ -127,10 +127,16 @@ const loginUser = async (req, res, next) => {
 // @route   POST /api/auth/logout
 // @access  Private (requires user to be logged in)
 const logoutUser = (req, res) => {
-  res.cookie('jwt', 'loggedout', {
-    expires: new Date(Date.now() + 10 * 1000), // Expire in 10 seconds
+  // Options must match those used in sendTokenResponse for clearing to work reliably
+  const options = {
+    expires: new Date(0), // Set expiry date to the past
     httpOnly: true,
-  });
+    secure: process.env.NODE_ENV === 'production', 
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    path: '/', // Explicitly set path, assuming it was default '/' when set
+  };
+
+  res.cookie('jwt', '', options); // Set cookie value to empty string
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
