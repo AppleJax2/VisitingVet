@@ -30,6 +30,11 @@ import AdminLogPage from './pages/Admin/AdminLogPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
 import AdminEditProfilePage from './pages/Admin/AdminEditProfilePage';
 
+// Import new pages
+import AboutUsPage from './pages/AboutUsPage';
+import ServicesPage from './pages/ServicesPage';
+import UserProfilePage from './pages/UserProfilePage'; // For Pet Owner profile/settings
+
 // Protected route component with role check
 const PrivateRoute = ({ allowedRoles }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -91,6 +96,8 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
             <Route path="/search-providers" element={<ProviderSearchPage />} />
+            <Route path="/about" element={<AboutUsPage />} />
+            <Route path="/services" element={<ServicesPage />} />
             
             {/* Standard Protected Routes - use PrivateRoute with appropriate role checks */}
             <Route element={<PrivateRoute allowedRoles={['PetOwner', 'MVSProvider', 'Clinic', 'Admin']} />}>
@@ -103,6 +110,7 @@ function App() {
               <Route path="/add-reminder" element={<AddReminderPage />} />
               <Route path="/pet/:petId" element={<PetProfilePage />} />
               <Route path="/manage-reminders" element={<ManageRemindersPage />} />
+              <Route path="/profile" element={<UserProfilePage />} />
             </Route>
 
             {/* Admin Protected Routes */}

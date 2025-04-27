@@ -14,7 +14,7 @@ function ProviderSearchPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [results, setResults] = useState([]);
   const [pagination, setPagination] = useState({});
@@ -49,10 +49,26 @@ function ProviderSearchPage() {
 
     try {
       const data = await searchProviders(params);
+      
       if (data && data.success) {
-        setResults(data.data || []);
-        setPagination(data.pagination || {});
-        setCurrentPage(data.pagination?.page || 1);
+        // Check if data is in data.data (search endpoint) or data.profiles (list endpoint)
+        const providerResults = data.data || data.profiles || [];
+        setResults(providerResults);
+        
+        // Handle pagination data which might be directly in data or in data.pagination
+        if (data.pagination) {
+          setPagination(data.pagination);
+          setCurrentPage(data.pagination.page || 1);
+        } else {
+          // Simple pagination if the backend doesn't provide it
+          setPagination({
+            page: page,
+            limit: params.limit || 9,
+            total: providerResults.length,
+            pages: 1, // Just one page if we don't know the total
+          });
+        }
+        
         // Update URL query params without full page reload
         navigate({ search: `?${createSearchParams(params)}` }, { replace: true });
       } else {
@@ -67,7 +83,7 @@ function ProviderSearchPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, searchLocation, selectedAnimalTypes, selectedSpecialties, navigate]); // Dependencies for useCallback
+  }, [searchTerm, searchLocation, selectedAnimalTypes, selectedSpecialties, navigate]);
 
   // Debounced search trigger
   const debouncedFetch = useCallback(debounce(() => fetchProviders(1), 500), [fetchProviders]);

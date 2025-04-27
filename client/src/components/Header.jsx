@@ -91,123 +91,60 @@ const Header = () => {
     const [isHovered, setIsHovered] = useState(false);
     
     return (
-      <Nav.Link 
-        as={Link} 
-        to={to}
-        className={`nav-link-custom mx-1 px-3 py-2 ${className || ''}`}
+      <Link 
+        to={to} 
+        className={`nav-link ${className || ''} ${isActive ? 'active' : ''}`}
         style={{
-          color: isHomePage && !scrolled ? '#ffffff' : theme.colors.text.primary,
-          fontWeight: isActive ? '600' : '500',
-          position: 'relative',
-          opacity: isActive ? 1 : 0.9,
-          transition: 'all 0.3s ease',
-          borderRadius: '6px',
-          ...(isHovered && {
-            background: isHomePage && !scrolled 
-              ? 'rgba(255, 255, 255, 0.1)' 
-              : 'rgba(87, 126, 70, 0.05)',
-            color: isHomePage && !scrolled ? theme.colors.accent.gold : theme.colors.primary.main,
-          }),
-          ...(isActive && {
-            color: isHomePage && !scrolled ? theme.colors.accent.gold : theme.colors.primary.main,
-          })
+          padding: '0.5rem 1rem',
+          fontWeight: 500,
+          transition: 'color 0.3s ease',
+          color: isHomePage && !scrolled && !isAuthenticated 
+              ? theme.colors.white 
+              : (isActive || isHovered ? theme.colors.primary.main : theme.colors.text.primary),
+          borderBottom: isActive ? `2px solid ${theme.colors.primary.main}` : '2px solid transparent', 
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {children}
-        {isActive && (
-          <span 
-            style={{ 
-              position: 'absolute', 
-              bottom: '0', 
-              left: '50%', 
-              width: '20px', 
-              height: '2px', 
-              background: isHomePage && !scrolled ? theme.colors.accent.gold : theme.colors.primary.main,
-              transform: 'translateX(-50%)',
-              borderRadius: '10px',
-              transition: 'all 0.3s ease'
-            }} 
-          />
-        )}
-      </Nav.Link>
+      </Link>
     );
   };
 
   return (
     <Navbar 
       expand="lg" 
-      fixed="top" 
-      className={`py-3 transition-all ${scrolled || !isHomePage ? 'navbar-scrolled' : 'navbar-transparent'}`}
-      style={{
-        background: scrolled || !isHomePage 
-          ? 'rgba(255, 255, 255, 0.95)' 
-          : 'transparent',
-        boxShadow: scrolled || !isHomePage 
-          ? '0 4px 20px rgba(0, 0, 0, 0.08)' 
-          : 'none',
-        backdropFilter: scrolled || !isHomePage 
-          ? 'blur(10px)' 
-          : 'none',
-        transition: 'all 0.3s ease',
-        zIndex: 1030,
-      }}
+      fixed="top"
+      className={`main-navbar ${scrolled || !isHomePage || isAuthenticated ? 'scrolled' : ''}`}
+      variant={scrolled || !isHomePage || isAuthenticated ? 'light' : 'dark'}
+      bg={scrolled || !isHomePage || isAuthenticated ? 'white' : 'transparent'}
     >
-      <Container>
-        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
-          <span 
-            style={{
-              fontFamily: theme.fonts.heading,
-              fontWeight: 'bold',
-              fontSize: '1.5rem',
-              color: scrolled || !isHomePage ? theme.colors.primary.main : '#fff',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <svg 
-              width="30" 
-              height="30" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="me-2"
-              style={{
-                color: scrolled || !isHomePage ? theme.colors.primary.main : theme.colors.accent.gold,
-              }}
-            >
-              <path d="M14 10h.01M10 14h.01M8.5 8.5h.01M18.5 8.5h.01M18.5 14.5h.01M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0z"/>
-              <path d="M7 15.5c1 1 3.2 2 5.5 2s4-.5 5.5-2"/>
-            </svg>
-            VisitingVet
+      <Container fluid="xl">
+        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center fw-bold">
+          <img
+            src={scrolled || !isHomePage || isAuthenticated ? "/assets/logo-primary.png" : "/assets/logo-white.png"} 
+            width="30"
+            height="30"
+            className="d-inline-block align-top me-2"
+            alt="VisitingVet Logo"
+          />
+          <span style={{ color: scrolled || !isHomePage || isAuthenticated ? theme.colors.primary.dark : theme.colors.white }}>
+             VisitingVet
           </span>
         </Navbar.Brand>
-        
-        <Navbar.Toggle 
-          aria-controls="basic-navbar-nav" 
-          className="border-0 shadow-none" 
-          style={{ 
-            color: scrolled || !isHomePage ? theme.colors.primary.main : '#fff',
-          }}
-        >
-          <List size={28} />
+        <Navbar.Toggle aria-controls="basic-navbar-nav" style={{ borderColor: 'rgba(255,255,255,0.3)' }}>
+           <List color={scrolled || !isHomePage || isAuthenticated ? theme.colors.text.primary : theme.colors.white} size={24} />
         </Navbar.Toggle>
-        
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="mx-auto">
-            <NavLink to="/">Home</NavLink>
-            <NavLink to="/search-providers">Find a Vet</NavLink>
-            <NavLink to="/about">About Us</NavLink>
-            <NavLink to="/services">Services</NavLink>
-          </Nav>
-          
-          <Nav className="ms-auto">
-            {isAuthenticated ? (
+          <Nav className="ms-auto align-items-center">
+            <NavLink to="/" className="mx-lg-1">Home</NavLink>
+            <NavLink to="/search-providers" className="mx-lg-1">Find a Vet</NavLink>
+            <NavLink to="/about" className="mx-lg-1">About Us</NavLink>
+            <NavLink to="/services" className="mx-lg-1">Services</NavLink>
+            {/* Add Blog Link if implemented later */}
+            {/* <NavLink to="/blog" className="mx-lg-1">Blog</NavLink> */}
+            
+            {loading ? (
               <div className="d-flex align-items-center">
                 <NotificationBell />
                 

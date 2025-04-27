@@ -537,4 +537,36 @@ export const searchProviders = async (params = {}) => {
   }
 };
 
+// --- User Profile Management ---
+
+/**
+ * Update user details (name, notifications, etc) for the logged-in user
+ * @param {Object} userData - Updated user data
+ * @returns {Promise<Object>} Response with updated user
+ */
+export const updateUserDetails = async (userData) => {
+  try {
+    const response = await api.put('/users/me', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Update user details error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update user details');
+  }
+};
+
+/**
+ * Change the password for the logged-in user
+ * @param {Object} passwordData - Object with currentPassword and newPassword
+ * @returns {Promise<Object>} Response with success status
+ */
+export const changePassword = async (passwordData) => {
+  try {
+    const response = await api.put('/users/me/password', passwordData);
+    return response.data;
+  } catch (error) {
+    console.error('Change password error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to change password');
+  }
+};
+
 export default api; 

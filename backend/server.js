@@ -13,6 +13,7 @@ const petRoutes = require('./src/routes/petRoutes');
 const reminderRoutes = require('./src/routes/reminderRoutes');
 const clinicRoutes = require('./src/routes/clinicRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -47,6 +48,7 @@ app.use('/api/pets', petRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/clinics', clinicRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/users', userRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {
