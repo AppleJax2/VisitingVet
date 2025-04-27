@@ -1,0 +1,319 @@
+# VISITING VET: MASTER DESIGN DOCUMENT
+
+## 1. PROJECT VISION AND GOALS
+
+VisitingVet is a comprehensive platform designed to connect pet owners with mobile veterinary service providers who offer in-home care. The platform aims to revolutionize pet healthcare by:
+
+- Providing convenient access to qualified veterinary professionals who can visit pets in their home environment
+- Reducing pet stress associated with clinic visits
+- Offering specialized care options for different animal types (small, large, exotic, farm animals, etc.)
+- Streamlining appointment scheduling, service discovery, and pet health management
+- Creating a trusted marketplace with verified providers and transparent reviews
+
+The platform serves the growing demand for mobile veterinary services while addressing the challenges of traditional clinic visits, particularly for pets with mobility issues, anxious pets, or owners with transportation limitations.
+
+## 2. USER PERSONAS AND USE CASES
+
+### 2.1 User Personas
+
+#### Pet Owners
+- **Characteristics**: Pet parents seeking convenient veterinary care
+- **Needs**: Easy scheduling, provider discovery, pet profile management
+- **Goals**: Access quality care with minimal stress for their pets
+
+#### Mobile Veterinary Service (MVS) Providers
+- **Characteristics**: Licensed veterinarians offering mobile services
+- **Needs**: Client acquisition, schedule management, service visibility
+- **Goals**: Grow their mobile practice with a streamlined booking system
+
+#### Veterinary Clinics
+- **Characteristics**: Traditional clinics extending services to include mobile options
+- **Needs**: Expanded client reach, organized mobile service scheduling
+- **Goals**: Diversify service offerings and increase revenue
+
+#### Platform Administrators
+- **Characteristics**: VisitingVet staff managing the platform
+- **Needs**: Provider verification, user management, content moderation
+- **Goals**: Maintain platform integrity and quality assurance
+
+### 2.2 Key Use Cases
+
+#### For Pet Owners:
+- Register and create profiles for themselves and their pets
+- Search for providers by location, specialty, and animal type
+- Schedule appointments with preferred providers
+- Manage pet medical records and history
+- Set medication/treatment reminders
+- View upcoming appointments
+- Receive notifications about appointment status changes
+
+#### For MVS Providers:
+- Create detailed professional profiles highlighting credentials and specialties
+- Define service offerings with descriptions, durations, and pricing
+- Set availability for appointments
+- Manage incoming appointment requests
+- View scheduled appointments and client information
+- Record visit notes and follow-up recommendations
+
+#### For Administrators:
+- Verify provider credentials and approve applications
+- Monitor platform activity and resolve disputes
+- Manage user accounts (warnings, bans if necessary)
+- Review verification documents
+- Generate reports on platform performance
+
+## 3. CORE FEATURES AND REQUIREMENTS
+
+### 3.1 User Authentication and Profiles
+- Multi-role registration (Pet Owner, MVS Provider, Clinic)
+- Secure authentication with password hashing
+- Profile management with contact information
+- Role-specific profile details
+- Profile image upload capability
+- Notification preferences management
+
+### 3.2 Pet Management
+- Comprehensive pet profiles (species, breed, age, medical history)
+- Multiple pets per owner
+- Pet image upload
+- Medical record tracking
+- Last checkup date tracking
+
+### 3.3 Provider Services and Availability
+- Detailed provider profiles with credentials and experience
+- Service definition with pricing options (flat, hourly, range)
+- Custom fields for service-specific information collection
+- Business hours and availability management
+- Service area definition by radius or zip codes
+- Specialty and animal type specialization
+- External scheduling option for providers with existing systems
+
+### 3.4 Appointment Management
+- Appointment scheduling with service selection
+- Time slot availability display
+- Appointment status tracking (Requested, Confirmed, Cancelled, Completed)
+- Cancellation management with reason tracking
+- Follow-up recommendations
+- Custom field responses collection
+- Notification system for appointment updates
+
+### 3.5 Search and Discovery
+- Provider search by location, service type, and animal specialization
+- Provider profile viewing with services and availability
+- Filter options for specific needs
+
+### 3.6 Notifications and Reminders
+- Multi-channel notifications (Email, SMS, In-app)
+- Appointment reminders
+- Custom medication/treatment reminders
+- Notification tracking for delivery confirmation
+
+### 3.7 Admin Dashboard
+- Provider verification workflow
+- User management controls
+- Action logging for accountability
+- Document verification system
+
+## 4. SYSTEM ARCHITECTURE AND TECH STACK
+
+### 4.1 Overall Architecture
+The application follows a modern client-server architecture with:
+- Frontend single-page application (SPA)
+- RESTful API backend
+- MongoDB database
+- Cloud-based file storage
+
+### 4.2 Tech Stack
+
+#### Frontend
+- **Framework**: React.js
+- **Routing**: React Router
+- **State Management**: Context API or Redux (based on component structure)
+- **UI Components**: Custom components with modern CSS
+- **Build Tool**: Webpack (inferred from structure)
+- **Deployment**: Netlify
+
+#### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (JSON Web Tokens)
+- **Password Hashing**: bcrypt.js
+- **Validation**: Custom middleware + Mongoose schema validation
+- **Deployment**: Render.com
+
+#### DevOps & Infrastructure
+- **Version Control**: Git
+- **CI/CD**: Automated deployments via Netlify and Render
+- **File Storage**: Cloud service (likely AWS S3 or similar)
+
+## 5. DATA MODELS AND FLOWS
+
+### 5.1 Core Data Models
+
+#### User
+- Basic profile information (email, name, phone)
+- Authentication details (hashed password)
+- Role information (PetOwner, MVSProvider, Clinic)
+- Notification preferences
+- Verification status and documents
+
+#### Pet
+- Owner reference
+- Basic information (name, species, breed, age)
+- Medical information (history, last checkup)
+- Profile image
+
+#### VisitingVetProfile
+- User reference
+- Professional details (bio, credentials, experience)
+- Service area information
+- License and insurance details
+- Business information
+- Animal type specializations
+- External scheduling options
+
+#### Service
+- Profile reference
+- Service details (name, description, duration)
+- Pricing information (price, price type)
+- Location options (in-home, in-clinic, both)
+- Animal type targeting
+- Custom fields for intake information
+
+#### Appointment
+- References to pet owner, provider, and service
+- Scheduling information (time, estimated duration)
+- Status tracking
+- Notes and follow-up information
+- Cancellation details if applicable
+- Custom field responses
+- Notification tracking
+
+#### Availability
+- Provider reference
+- Available time slots
+- Recurring availability patterns
+
+#### Reminder
+- User reference
+- Type and description
+- Target date/time
+- Recurrence pattern
+- Status tracking
+
+#### Notification
+- User reference
+- Content and type
+- Read status
+- Delivery channel and status
+
+#### AdminActionLog
+- Admin user reference
+- Action details and timestamp
+- Target entity information
+
+### 5.2 Data Flows
+
+#### Appointment Booking Flow
+1. Pet owner searches for providers
+2. Owner views provider profile and services
+3. Owner selects service and preferred time slot
+4. Owner submits appointment request with custom field responses
+5. Provider receives notification of new request
+6. Provider confirms or rejects the request
+7. Owner receives notification of status change
+8. Appointment is added to both parties' calendars
+
+#### Provider Verification Flow
+1. Provider registers as MVS Provider
+2. Provider uploads verification documents
+3. Admin reviews documents and credentials
+4. Admin approves or rejects verification request
+5. Provider receives notification of verification result
+6. If approved, provider profile becomes visible in search
+
+#### Notification Flow
+1. System event triggers notification creation
+2. Notification preferences determine delivery channels
+3. Notification is sent via selected channels
+4. Delivery status is tracked
+5. User can mark notifications as read
+
+## 6. ASSUMPTIONS AND DESIGN DECISIONS
+
+### 6.1 Business Model Assumptions
+- The platform likely operates on a commission or subscription model for providers
+- Provider verification is a manual process requiring admin approval
+- The platform supports both B2C (direct to pet owners) and potentially B2B (clinic partnerships)
+
+### 6.2 Technical Design Decisions
+- MongoDB chosen for flexibility with evolving data models
+- JWT authentication for stateless API design
+- Separate profiles for users and MVS provider details for clean separation of concerns
+- Custom fields in services to accommodate diverse service requirements
+- Multi-channel notifications to ensure reliable communication
+
+### 6.3 UX/UI Design Decisions
+- Mobile-first responsive design
+- Dashboard-centric interfaces for frequent users
+- Calendar-based scheduling interface
+- Clear status indicators for appointments
+
+## 7. IDENTIFIED GAPS AND ENHANCEMENT OPPORTUNITIES
+
+### 7.1 Potential Missing Features
+- Payment processing and billing management
+- Review and rating system for providers
+- Video consultation capabilities
+- Prescription management
+- Comprehensive medical record system
+- Integrated messaging between providers and pet owners
+- Analytics dashboard for providers to track business metrics
+- Mobile app versions for enhanced on-the-go experience
+
+### 7.2 Technical Improvement Opportunities
+- Real-time notifications using WebSockets
+- Advanced search with machine learning recommendations
+- Geolocation services for provider proximity
+- Integration with practice management software
+- Enhanced security features for medical data
+- Multi-language support for international expansion
+
+### 7.3 Business Growth Opportunities
+- Marketplace for pet products
+- Integration with pet insurance providers
+- Telemedicine capabilities where legally permitted
+- Membership/subscription models for recurring services
+- Educational content hub for pet health information
+
+## 8. IMPLEMENTATION PRIORITIES
+
+### 8.1 Phase 1: Core Platform (MVP)
+- User authentication and basic profiles
+- Pet profile management
+- Provider profile creation and service definition
+- Basic appointment scheduling
+- Email notifications
+
+### 8.2 Phase 2: Enhanced Experience
+- Advanced availability management
+- Custom fields for services
+- SMS notifications
+- Reminders system
+- Enhanced search capabilities
+
+### 8.3 Phase 3: Platform Growth
+- Review and rating system
+- Payment processing
+- Mobile applications
+- Analytics and reporting
+- Messaging system
+
+## 9. CONCLUSION
+
+VisitingVet represents a comprehensive solution to the growing demand for convenient, stress-free veterinary care. The platform's thoughtful design addresses the needs of both pet owners seeking quality care and veterinary professionals looking to expand their practice through mobile services.
+
+The architecture and technology choices provide a solid foundation for scalability and future enhancements, while the data model supports the complex relationships between users, providers, pets, services, and appointments.
+
+By focusing on user experience and streamlined workflows, VisitingVet has the potential to significantly impact how pet healthcare is delivered, making quality veterinary care more accessible while reducing stress for pets and their owners.
