@@ -9,6 +9,7 @@ const VisitingVetProfile = require('../models/VisitingVetProfile');
 const config = require('../config/config');
 const { PLATFORM_FEE_PERCENTAGE } = require('../config/constants');
 const notificationService = require('../services/notificationService');
+const Role = require('../models/Role');
 
 /**
  * @desc    Create a Stripe Payment Intent for an appointment
@@ -52,9 +53,30 @@ exports.createPaymentIntent = asyncHandler(async (req, res, next) => {
 
   // --- Check Provider Stripe Account Status ---
   if (!providerStripeAccountId || !providerProfile.stripeChargesEnabled || !providerProfile.stripePayoutsEnabled) {
-      console.error(`Provider ${providerProfile._id} cannot receive payments. Stripe Account ID: ${providerStripeAccountId}, Charges Enabled: ${providerProfile.stripeChargesEnabled}, Payouts Enabled: ${providerProfile.stripePayoutsEnabled}`);
-      // TODO: Notify admin/provider?
-      return next(new ErrorResponse('The service provider is not currently set up to receive payments.', 503)); // 503 Service Unavailable
+      const errorMsg = `Provider ${providerProfile._id} cannot receive payments. Stripe Account ID: ${providerStripeAccountId}, Charges Enabled: ${providerProfile.stripeChargesEnabled}, Payouts Enabled: ${providerProfile.stripePayoutsEnabled}`;
+      console.error(errorMsg);
+      
+      // Notify Admin and Provider (if possible)
+      try {
+          const adminUsers = await User.find({ role: await Role.findOne({ name: ROLES.Admin }).select('_id') }).select('_id');
+          const adminUserIds = adminUsers.map(admin => admin._id);
+          if (adminUserIds.length > 0) {
+               await notificationService.createNotification(adminUserIds, 'provider_payment_setup_issue', {
+                    providerUserId: providerProfile.user._id,
+                    providerName: providerProfile.businessName || providerProfile.user._id,
+                    reason: 'Account not ready for payments (missing ID, charges disabled, or payouts disabled)',
+                    attemptedAppointmentId: appointmentId
+               }, ['inApp']); // Send only inApp to admin to avoid spam
+          }
+          // Notify the provider themselves
+          await notificationService.createNotification(providerProfile.user._id, 'payment_setup_incomplete', {
+                reason: 'A payment was attempted but your Stripe account is not fully enabled for charges and payouts. Please complete your Stripe onboarding.'
+          }, ['email', 'inApp']);
+      } catch (notifyError) {
+          console.error("Failed to send notification about provider payment setup issue:", notifyError);
+      }
+
+      return next(new ErrorResponse('The service provider is not currently set up to receive payments. They have been notified.', 503)); // 503 Service Unavailable
   }
 
   // --- Payment Existence Check ---
