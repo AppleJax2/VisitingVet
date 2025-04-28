@@ -36,6 +36,17 @@ const verificationRequestSchema = new mongoose.Schema({
   reviewedAt: {
     type: Date,
   },
+  completedAt: { // Timestamp when status moved to Approved/Rejected
+    type: Date,
+  },
+  slaStatus: {
+    type: String,
+    enum: ['On Track', 'At Risk', 'Breached', 'Completed', 'N/A'],
+    default: 'N/A', // Initially not applicable until processing starts? Or 'On Track'? TBD
+  },
+  slaProcessingTimeHours: { // Store calculated processing time
+    type: Number,
+  },
 }, { timestamps: true });
 
 verificationRequestSchema.index({ user: 1, status: 1 });

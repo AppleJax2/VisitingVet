@@ -10,6 +10,7 @@ const UserActivityLog = require('../models/UserActivityLog'); // Import the mode
 const mongoose = require('mongoose');
 const { getSecureDownloadUrl } = require('../services/documentService'); // Import S3 service
 const { logDocumentAccess } = require('./documentController'); // Import logging function
+const slaTrackingService = require('../services/slaTrackingService'); // Import SLA Service
 
 // Helper function to log admin actions
 const logAdminAction = async (adminUserId, targetUserId, actionType, reason = '', details = {}) => {
@@ -272,6 +273,12 @@ exports.approveVerification = async (req, res) => {
         verificationRequest.reviewedAt = Date.now();
         await verificationRequest.save();
 
+        // Update SLA status after saving the status change
+        await slaTrackingService.updateSLAStatusAndDuration(verificationRequest).catch(slaError => {
+            logger.error(`SLA update failed for approved request ${requestId}:`, slaError);
+            // Non-critical error, proceed with response
+        });
+
         await logAdminAction(req.user.id, user._id, 'VerifyUser', 'Verification request approved');
 
         res.status(200).json({ success: true, message: 'Verification request approved successfully' });
@@ -304,6 +311,12 @@ exports.rejectVerification = async (req, res) => {
             verificationRequest.reviewedBy = req.user.id;
             verificationRequest.reviewedAt = Date.now();
             await verificationRequest.save();
+
+            // Update SLA status after saving the status change
+            await slaTrackingService.updateSLAStatusAndDuration(verificationRequest).catch(slaError => {
+                logger.error(`SLA update failed for rejected request (user not found case) ${requestId}:`, slaError);
+            });
+
             return res.status(404).json({ success: false, error: 'Associated user not found, request marked rejected' });
         }
 
@@ -318,6 +331,12 @@ exports.rejectVerification = async (req, res) => {
         verificationRequest.reviewedBy = req.user.id;
         verificationRequest.reviewedAt = Date.now();
         await verificationRequest.save();
+
+        // Update SLA status after saving the status change
+        await slaTrackingService.updateSLAStatusAndDuration(verificationRequest).catch(slaError => {
+            logger.error(`SLA update failed for rejected request ${requestId}:`, slaError);
+             // Non-critical error, proceed with response
+        });
 
         await logAdminAction(req.user.id, user._id, 'RejectVerification', reason || 'Verification request rejected');
 
