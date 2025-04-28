@@ -23,6 +23,14 @@ const ClinicDashboard = ({ user }) => {
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [staffError, setStaffError] = useState('');
   
+  // Add inventoryAlerts state with sample data
+  const [inventoryAlerts, setInventoryAlerts] = useState([
+    { id: 1, item: 'Flea & Tick Medication', currentStock: 5, minRequired: 15, status: 'low' },
+    { id: 2, item: 'Sterile Bandages', currentStock: 3, minRequired: 20, status: 'low' },
+    { id: 3, item: 'Antibiotics', currentStock: 12, minRequired: 10, status: 'ok' },
+    { id: 4, item: 'Pet Food Samples', currentStock: 25, minRequired: 15, status: 'ok' }
+  ]);
+  
   // Modal State
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
@@ -476,11 +484,11 @@ const ClinicDashboard = ({ user }) => {
               <h5 style={styles.sectionTitle} className="mb-0">Inventory Alerts</h5>
             </Card.Header>
             <Card.Body>
-              {inventoryAlerts.map((item) => (
+              {inventoryAlerts.map((item, index) => (
                 <div 
                   key={item.id}
                   className="d-flex justify-content-between align-items-center mb-3 pb-2"
-                  style={{ borderBottom: item.id !== inventoryAlerts.length ? `1px solid ${theme.colors.background.light}` : 'none' }}
+                  style={{ borderBottom: index !== inventoryAlerts.length - 1 ? `1px solid ${theme.colors.background.light}` : 'none' }}
                 >
                   <div>
                     <h6 className="mb-0">{item.item}</h6>
