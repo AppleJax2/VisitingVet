@@ -1,0 +1,127 @@
+.vaccination-history {
+    padding: 15px;
+    font-family: sans-serif;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.vaccination-history h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-item {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-left-width: 5px; /* Status indicator */
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.2s ease;
+}
+
+.history-item:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Status Border Colors */
+.history-item.status-verified {
+    border-left-color: #4CAF50; /* Green */
+}
+.history-item.status-pending {
+    border-left-color: #FFC107; /* Amber */
+}
+.history-item.status-rejected {
+    border-left-color: #F44336; /* Red */
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.item-details strong {
+    font-size: 1.1em;
+    color: #333;
+}
+
+.item-details .date {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.item-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    text-align: right;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.status-badge.status-verified {
+    background-color: #4CAF50;
+}
+.status-badge.status-pending {
+    background-color: #FFC107;
+    color: #333; /* Better contrast on yellow */
+}
+.status-badge.status-rejected {
+    background-color: #F44336;
+}
+
+.rejection-reason {
+    font-size: 0.85em;
+    color: #F44336;
+    font-style: italic;
+    max-width: 150px; /* Limit width */
+}
+
+.alert {
+    font-size: 0.85em;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.alert-expired {
+    color: #D32F2F; /* Darker Red */
+}
+
+.alert-upcoming {
+    color: #FFA000; /* Darker Amber */
+}
+
+.error-message {
+    color: #D8000C;
+    background-color: #FFD2D2;
+    border: 1px solid;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.loading-spinner {
+    padding: 20px;
+    text-align: center;
+    color: #555;
+} 

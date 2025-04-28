@@ -1,0 +1,143 @@
+.vaccination-upload {
+    padding: 20px;
+    font-family: sans-serif;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-width: 600px; /* Limit form width */
+    margin: 20px auto; /* Center form */
+}
+
+.vaccination-upload h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+/* Dropzone styles */
+.dropzone {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    color: #555;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dropzone.active {
+    border-color: #007bff;
+    background-color: #e9f5ff;
+}
+
+.dropzone p {
+    margin: 0;
+}
+
+.file-previews {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.file-previews h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.file-preview-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 0.9em;
+}
+
+.file-thumbnail {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border: 1px solid #eee;
+    border-radius: 3px;
+}
+
+.file-preview-item span {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-preview-item button {
+    background: none;
+    border: none;
+    color: #f00;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.submit-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.submit-button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+.submit-button:not(:disabled):hover {
+    background-color: #0056b3;
+}
+
+.error-message {
+    color: #D8000C;
+    background-color: #FFD2D2;
+    border: 1px solid;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.success-message {
+    color: #270;
+    background-color: #DFF2BF;
+    border: 1px solid;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+} 

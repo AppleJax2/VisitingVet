@@ -120,6 +120,24 @@ const petSchema = new mongoose.Schema({
   // Removed simple medicalHistory string, replaced by structured records
   medicalRecords: [medicalRecordEntrySchema], // Array of structured records
 
+  // --- Vaccination Specific Fields ---
+  vaccinationHistory: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'VaccinationRecord'
+  }],
+  latestVerificationStatusSummary: {
+      type: String,
+      enum: ['Up-to-date', 'Needs Attention', 'Pending', 'Unknown'],
+      default: 'Unknown',
+      // This might be better handled by a virtual or service layer logic
+  },
+  hasPendingVerification: {
+      type: Boolean,
+      default: false,
+      // This should be updated via service logic when records change status
+  },
+  // --- End Vaccination Specific Fields ---
+
   lastCheckup: {
       type: Date,
   }
