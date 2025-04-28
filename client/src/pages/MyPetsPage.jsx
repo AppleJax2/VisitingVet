@@ -5,6 +5,7 @@ import { PlusCircle, PencilSquare, Trash, Eye } from 'react-bootstrap-icons';
 import { fetchUserPets, deletePet } from '../services/api'; // Assuming deletePet exists
 import theme from '../utils/theme';
 import PetEditModal from '../components/PetEditModal'; // Import the modal
+import PetCard from '../components/PetCard'; // Import the new PetCard component
 // import PetDetailModal from '../components/PetDetailModal'; // Future component for viewing details
 
 function MyPetsPage() {
@@ -80,6 +81,11 @@ function MyPetsPage() {
     // Optionally show a success message here
   };
 
+  // Handler for viewing pet profile (navigation)
+  const handleViewPet = (pet) => {
+    navigate(`/pet/${pet._id}`);
+  };
+
   // TODO: Handlers for Detail Modal
   // const handleViewDetails = (pet) => {
   //   setSelectedPet(pet);
@@ -90,22 +96,6 @@ function MyPetsPage() {
     pageTitle: {
       color: theme.colors.primary.dark,
       marginBottom: '30px',
-    },
-    petCard: {
-      border: 'none',
-      borderRadius: theme.borderRadius.lg,
-      boxShadow: theme.shadows.sm,
-      overflow: 'hidden',
-      marginBottom: '20px',
-      height: '100%',
-    },
-    petImage: {
-      height: '180px',
-      objectFit: 'cover',
-    },
-    cardTitle: {
-      color: theme.colors.primary.main,
-      fontWeight: '600',
     },
     addButtonCard: {
       border: `2px dashed ${theme.colors.background.medium}`,
@@ -154,47 +144,25 @@ function MyPetsPage() {
         <div className="text-center"><Spinner animation="border" style={{color: theme.colors.primary.main}} /></div>
       ) : (
         <Row>
-          {pets.map((pet) => (
-            <Col md={6} lg={4} key={pet._id} className="mb-4">
-              <Card style={styles.petCard}>
-                <Card.Img 
-                  variant="top" 
-                  src={pet.profileImage || 'https://via.placeholder.com/300x200?text=Pet+Photo'} 
-                  style={styles.petImage}
-                />
-                <Card.Body>
-                  <Card.Title style={styles.cardTitle}>{pet.name}</Card.Title>
-                  <Card.Text className="text-muted">
-                    {pet.breed} ({pet.species}) • {pet.age} years old
-                  </Card.Text>
-                  {/* Add more brief details if needed */}
-                </Card.Body>
-                <Card.Footer className="bg-white text-center">
-                  {/* TODO: Implement View/Edit Modals later */}
-                  {/* <Button variant="outline-secondary" size="sm" style={styles.actionButton} onClick={() => handleViewDetails(pet)} title="View Details"><Eye /></Button> */}
-                  <Button variant="outline-primary" size="sm" style={styles.actionButton} onClick={() => handleShowEditModal(pet)} title="Edit Pet"><PencilSquare /></Button>
-                  <Button variant="outline-danger" size="sm" style={styles.actionButton} onClick={() => handleDelete(pet._id, pet.name)} title="Delete Pet"><Trash /></Button>
-                </Card.Footer>
-              </Card>
+          {pets.length === 0 && !loading ? (
+            <Col xs={12}>
+               <Alert variant="info" className="text-center">
+                 You haven't added any pets yet. 
+                 <Link to="/add-pet" className="alert-link"> Add your first pet now!</Link>
+               </Alert>
             </Col>
-          ))}
-          
-          {/* Add Pet Card (Always visible or if pets array is empty?) - Let's keep it simple for now */}
-          {/* Alternative Add Pet Card if list is empty
-          {pets.length === 0 && (
-             <Col md={6} lg={4} className="mb-4">
-               <Card 
-                 style={styles.addButtonCard}
-                 onClick={() => navigate('/add-pet')}
-               >
-                 <Card.Body>
-                   <PlusCircle style={styles.addButtonIcon} />
-                   <p className="text-muted mb-0">Add your first pet!</p>
-                 </Card.Body>
-               </Card>
-             </Col>
-          )} 
-          */}
+          ) : (
+             pets.map((pet) => (
+              <Col md={6} lg={4} key={pet._id} className="mb-4 d-flex align-items-stretch">
+                <PetCard 
+                  pet={pet} 
+                  onEdit={handleShowEditModal} 
+                  onDelete={handleDelete} 
+                  onView={handleViewPet} // Pass the view handler
+                />
+              </Col>
+             ))
+          )}
         </Row>
       )}
 

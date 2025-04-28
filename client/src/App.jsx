@@ -5,6 +5,9 @@ import './styles/main.scss'; // Import custom SCSS
 import { checkAuthStatus } from './services/api';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyAccountPage from './pages/VerifyAccountPage';
 import DashboardPage from './pages/DashboardPage'; // General dashboard redirect based on role
 import ProviderProfileEditPage from './pages/ProviderProfileEditPage';
 import ProviderProfileViewPage from './pages/ProviderProfileViewPage';
@@ -93,6 +96,9 @@ function AppRoutes() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+          <Route path="/verify-account" element={<VerifyAccountPage />} />
           <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
           <Route path="/search-providers" element={<ProviderSearchPage />} />
           <Route path="/about" element={<AboutUsPage />} />

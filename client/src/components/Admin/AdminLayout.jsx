@@ -1,16 +1,19 @@
-import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import { Container, Nav, Navbar, Offcanvas } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Container, Nav, Navbar, Offcanvas, Button } from 'react-bootstrap';
 import { 
     HouseDoorFill, PeopleFill, PatchCheckFill, 
-    ClipboardDataFill, GearFill, BoxArrowRight 
+    ClipboardDataFill, GearFill, BoxArrowRight, List
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { logout } from '../../services/api'; // Assuming logout API function exists
-import { useNavigate } from 'react-router-dom';
 
 const AdminLayout = () => {
     const navigate = useNavigate();
+    const [showOffcanvas, setShowOffcanvas] = useState(false);
+
+    const handleOffcanvasClose = () => setShowOffcanvas(false);
+    const handleOffcanvasShow = () => setShowOffcanvas(true);
 
     const handleLogout = async () => {
         try {
@@ -23,17 +26,6 @@ const AdminLayout = () => {
     };
 
     const sidebarStyles = {
-        sidebar: {
-          backgroundColor: theme.colors.primary.dark, 
-          minHeight: 'calc(100vh - 56px)', // Adjust based on header height if header is outside layout
-          color: theme.colors.text.white,
-          paddingTop: '20px',
-          position: 'fixed',
-          top: 56, // Assuming header height is 56px
-          left: 0,
-          width: '250px',
-          zIndex: 1020, // Below navbar
-        },
         navLink: {
           color: theme.colors.text.white + 'cc', // Lighter white
           padding: '12px 20px',
@@ -51,9 +43,16 @@ const AdminLayout = () => {
           marginRight: '15px',
           fontSize: '1.2rem',
         },
-        content: {
-            marginLeft: '250px', // Same as sidebar width
+        contentLargeScreen: {
+            marginLeft: '250px', // Same as fixed sidebar width
             padding: '20px',
+            marginTop: '0', // Assuming header is outside or handled separately
+        },
+        contentSmallScreen: {
+            padding: '20px',
+            marginTop: '0',
+        },
+        fixedSidebar: { // Styles for the fixed sidebar on large screens
             marginTop: '56px', // Adjust if header is inside layout
         }
     };

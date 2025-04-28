@@ -5,7 +5,6 @@ import enUS from 'date-fns/locale/en-US';
 import { Container, Row, Col, Card, Spinner, Alert, Button, Modal } from 'react-bootstrap';
 import { getMyAppointmentsProvider, getMyAvailability } from '../services/api';
 import AppointmentDetailModal from './AppointmentDetailModal';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // Setup date-fns localizer
 const locales = {

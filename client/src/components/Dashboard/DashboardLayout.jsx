@@ -1,19 +1,26 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Nav, Button } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
+import { Container, Row, Col, Nav, Button, Offcanvas, Navbar } from 'react-bootstrap';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   House, Calendar, Search, Person, 
   Building, Gear, BoxArrowRight, Download,
-  List as ListIcon, X as XIcon, BellFill, ChatDotsFill, FileEarmarkText,
+  List as ListIcon, X as XIcon, BellFill, ChatDotsFill, FileEarmarkText, List, ChevronDown
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { useAuth } from '../../contexts/AuthContext';
+import NotificationBell from '../NotificationBell';
+import { Dropdown } from 'react-bootstrap';
 
 // DashboardLayout serves as the base layout for all dashboard types
 const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
   const location = useLocation();
+
+  const handleOffcanvasClose = () => setShowOffcanvas(false);
+  const handleOffcanvasShow = () => setShowOffcanvas(true);
 
   // Determine active link
   const isActive = (path) => {
@@ -27,17 +34,28 @@ const DashboardLayout = ({ children }) => {
       top: 0,
       bottom: 0,
       left: 0,
-      width: sidebarCollapsed ? '70px' : '260px',
+      width: sidebarCollapsed ? '80px' : '260px',
       backgroundColor: theme.colors.primary.dark,
       transition: 'all 0.3s ease',
       zIndex: 1030,
       overflowY: 'auto',
       boxShadow: theme.shadows.md,
+      paddingTop: '60px',
     },
     sidebarHeader: {
-      padding: '20px',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      padding: '15px 20px',
       textAlign: sidebarCollapsed ? 'center' : 'left',
       borderBottom: '1px solid rgba(255,255,255,0.1)',
+      backgroundColor: theme.colors.primary.dark,
+      height: '60px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+      zIndex: 1
     },
     sidebarBrand: {
       color: theme.colors.text.white,
@@ -82,48 +100,57 @@ const DashboardLayout = ({ children }) => {
       display: sidebarCollapsed ? 'none' : 'block',
     },
     mainContent: {
-      marginLeft: sidebarCollapsed ? '70px' : '260px',
+      marginLeft: sidebarCollapsed ? '80px' : '260px',
       padding: '20px',
       transition: 'all 0.3s ease',
-      minHeight: 'calc(100vh - 60px)',
+      minHeight: '100vh',
       backgroundColor: theme.colors.background.light,
+      paddingTop: '80px',
+    },
+    contentSmallScreen: {
+      padding: '20px',
+      minHeight: '100vh',
+      backgroundColor: theme.colors.background.light,
+      paddingTop: '80px',
     },
     toggleButton: {
       position: 'absolute',
       bottom: '20px',
-      left: sidebarCollapsed ? '15px' : '105px',
+      left: sidebarCollapsed ? '20px' : '110px',
       backgroundColor: 'rgba(255,255,255,0.1)',
       color: theme.colors.text.white,
       border: 'none',
       transition: 'all 0.3s ease',
-    },
-    installButton: {
-      backgroundColor: theme.colors.secondary.main,
-      border: 'none',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-      padding: '12px 20px',
-      marginTop: '20px',
-      marginRight: '10px',
-      marginLeft: '10px',
-      borderRadius: '5px',
-    },
-    installIcon: {
-      marginRight: sidebarCollapsed ? '0' : '10px',
+      zIndex: 2
     },
     header: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: '20px',
       backgroundColor: theme.colors.background.white,
       padding: '15px 20px',
-      borderRadius: theme.borderRadius.md,
       boxShadow: theme.shadows.sm,
-      position: 'sticky',
+      position: 'fixed',
       top: 0,
+      left: sidebarCollapsed ? '80px' : '260px',
+      right: 0,
       zIndex: 1020,
+      height: '60px',
+      transition: 'left 0.3s ease',
+    },
+    headerSmallScreen: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background.white,
+      padding: '15px 20px',
+      boxShadow: theme.shadows.sm,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 1020,
+      height: '60px',
     },
     headerActions: {
       display: 'flex',
@@ -144,8 +171,8 @@ const DashboardLayout = ({ children }) => {
       padding: 0,
     },
     profileImg: {
-      width: '40px',
-      height: '40px',
+      width: '32px',
+      height: '32px',
       borderRadius: '50%',
       marginRight: '10px',
       objectFit: 'cover',
@@ -257,7 +284,7 @@ const DashboardLayout = ({ children }) => {
         {
           path: '/clinic-settings',
           icon: <Gear style={sidebarStyles.navIcon} />,
-          text: 'Settings',
+          text: 'Clinic Settings',
         },
       ];
     }
@@ -266,99 +293,141 @@ const DashboardLayout = ({ children }) => {
     return commonItems;
   };
 
+  const navItems = getNavItems();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
+  // Reusable Sidebar Content Component
+  const SidebarContent = ({ isOffcanvas = false }) => (
+    <Nav className="flex-column pt-3">
+      {navItems.map((item, index) => (
+        <Nav.Item key={index} style={sidebarStyles.navItem}>
+          <Link
+            to={item.path}
+            style={{
+              ...sidebarStyles.navLink,
+              ...(isActive(item.path) ? sidebarStyles.navLinkActive : {})
+            }}
+            className={isActive(item.path) ? 'active' : ''}
+            onClick={isOffcanvas ? handleOffcanvasClose : undefined}
+          >
+            <span style={sidebarStyles.navIcon}>{item.icon}</span>
+            <span style={sidebarStyles.navText}>{item.text}</span>
+          </Link>
+        </Nav.Item>
+      ))}
+       <Nav.Item style={{ ...sidebarStyles.navItem, marginTop: 'auto' }}>
+          <Nav.Link 
+            onClick={handleLogout}
+            style={{...sidebarStyles.navLink, color: 'rgba(255,255,255,0.7)'}}
+          >
+            <span style={sidebarStyles.navIcon}><BoxArrowRight /></span>
+            <span style={sidebarStyles.navText}>Logout</span>
+          </Nav.Link>
+        </Nav.Item>
+    </Nav>
+  );
+
+  // Reusable Header Content Component
+  const HeaderContent = () => (
+     <div style={sidebarStyles.headerActions}>
+        <NotificationBell />
+        <Dropdown align="end">
+          <Dropdown.Toggle 
+            as={Button} 
+            variant="link" 
+            id="dropdown-user-profile" 
+            style={sidebarStyles.profileButton}
+          >
+            <img 
+              src={user?.profile?.photoUrl || 'https://via.placeholder.com/50?text=' + (user?.email?.[0]?.toUpperCase() || 'U')}
+              alt="User profile" 
+              style={sidebarStyles.profileImg}
+            />
+            <span className="d-none d-md-inline ms-1 me-1">{user?.name || user?.email}</span>
+            <ChevronDown size={14} />
+          </Dropdown.Toggle>
+          <Dropdown.Menu renderOnMount>
+            <Dropdown.Item as={Link} to="/profile">My Profile</Dropdown.Item>
+            <Dropdown.Item as={Link} to="/settings">Settings</Dropdown.Item>
+            <Dropdown.Divider />
+            <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      </div>
+  );
+
   return (
     <div className="dashboard-layout">
-      {/* Sidebar */}
-      <div style={sidebarStyles.sidebar}>
-        <div style={sidebarStyles.sidebarHeader}>
-          <Link to="/dashboard" style={sidebarStyles.sidebarBrand}>
-            <span style={sidebarStyles.sidebarLogo}>🐾</span>
-            {!sidebarCollapsed && <span>VisitingVet</span>}
-          </Link>
-        </div>
-
-        {/* Navigation */}
-        <Nav className="flex-column mt-4">
-          {getNavItems().map((item, index) => (
-            <Nav.Item key={index} style={sidebarStyles.navItem}>
-              <Link
-                to={item.path}
-                style={{
-                  ...sidebarStyles.navLink,
-                  ...(isActive(item.path) ? sidebarStyles.navLinkActive : {}),
-                }}
+      {/* Offcanvas Sidebar for small screens (hidden on md and up) */}
+      <div className="d-md-none">
+          <Navbar style={sidebarStyles.headerSmallScreen} className="px-3">
+             <Button 
+                variant="outline-secondary" 
+                onClick={handleOffcanvasShow} 
+                className="p-1 me-2 lh-1"
+                aria-label="Open navigation menu"
               >
-                {item.icon}
-                <span style={sidebarStyles.navText}>{item.text}</span>
-              </Link>
-            </Nav.Item>
-          ))}
+                <ListIcon size={24}/>
+              </Button>
+             <Navbar.Brand as={Link} to="/dashboard" style={{ color: theme.colors.primary.main }}>Dashboard</Navbar.Brand>
+             <HeaderContent />
+          </Navbar>
+          <Offcanvas 
+            show={showOffcanvas} 
+            onHide={handleOffcanvasClose} 
+            placement="start" 
+            style={{ backgroundColor: theme.colors.primary.dark, color: theme.colors.text.white, width: '260px' }}
+          >
+            <Offcanvas.Header closeButton closeVariant="white" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+               <div style={sidebarStyles.sidebarHeader} className="position-relative w-100 p-0">
+                 <Link to="/dashboard" style={sidebarStyles.sidebarBrand}>
+                   <img src="/assets/logo-white.png" alt="Logo" style={sidebarStyles.sidebarLogo} />
+                   VisitingVet
+                 </Link>
+               </div>
+            </Offcanvas.Header>
+            <Offcanvas.Body className="p-0">
+              <SidebarContent isOffcanvas={true} />
+            </Offcanvas.Body>
+          </Offcanvas>
+      </div>
 
-          {/* Logout */}
-          <Nav.Item style={sidebarStyles.navItem}>
-            <Button
-              variant="link"
-              onClick={(e) => {
-                e.preventDefault();
-                logout();
-              }}
-              style={{
-                ...sidebarStyles.navLink,
-                border: 'none',
-                background: 'none',
-                width: '100%',
-                textAlign: 'left'
-              }}
+      {/* Fixed Collapsible Sidebar for medium screens and up (visible on md and up) */}
+      <div className="d-none d-md-block" style={{ ...sidebarStyles.sidebar, left: 0 }}>
+          <div style={sidebarStyles.sidebarHeader}>
+             <Link to="/dashboard" style={sidebarStyles.sidebarBrand}>
+               <img src="/assets/logo-white.png" alt="Logo" style={sidebarStyles.sidebarLogo} />
+               {!sidebarCollapsed && <span>VisitingVet</span>}
+             </Link>
+           </div>
+           <SidebarContent />
+            <Button 
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)} 
+              style={sidebarStyles.toggleButton} 
+              variant="outline-light"
+              size="sm"
             >
-              <BoxArrowRight style={sidebarStyles.navIcon} />
-              <span style={sidebarStyles.navText}>Logout</span>
+              {sidebarCollapsed ? <ListIcon /> : <XIcon />}
             </Button>
-          </Nav.Item>
-        </Nav>
-
-        {/* Install Now Button - Example, functionality not implemented */}
-        <Button style={sidebarStyles.installButton}>
-          <Download style={sidebarStyles.installIcon} />
-          {!sidebarCollapsed && <span>Install App</span>}
-        </Button>
-
-        {/* Toggle Sidebar Button */}
-        <Button
-          style={sidebarStyles.toggleButton}
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-        >
-          {sidebarCollapsed ? <ListIcon /> : <XIcon />}
-        </Button>
       </div>
-
-      {/* Main Content Area */}
-      <div style={sidebarStyles.mainContent}>
-        {/* Top Header inside Main Content */}
-        <div style={sidebarStyles.header}>
-          <h4>Welcome, {user?.name || user?.email?.split('@')[0] || 'User'}</h4>
-          <div style={sidebarStyles.headerActions}>
-            <BellFill style={sidebarStyles.actionIcon} />
-            <ChatDotsFill style={sidebarStyles.actionIcon} />
-            <button style={sidebarStyles.profileButton}>
-              <img
-                src={user?.profileImage || '/assets/images/default-profile.png'}
-                alt="Profile"
-                style={sidebarStyles.profileImg}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/assets/images/default-profile.png';
-                }}
-              />
-              <span>{user?.name || user?.email?.split('@')[0] || 'User'}</span>
-            </button>
-          </div>
+      
+       {/* Header for medium screens and up */}
+       <div className="d-none d-md-block" style={sidebarStyles.header}>
+            <div>{/* Placeholder for potential breadcrumbs or title */}</div>
+            <HeaderContent />
         </div>
 
-        {/* Dashboard Content Rendered Here */}
-        <div className="mt-3">
-          {children}
-        </div>
-      </div>
+      {/* Main Content Area - Adjust margin based on screen size */}
+      <main className="d-md-none" style={sidebarStyles.contentSmallScreen}>
+        {children}
+      </main>
+      <main className="d-none d-md-block" style={sidebarStyles.mainContent}>
+        {children}
+      </main>
     </div>
   );
 };
