@@ -23,6 +23,12 @@
   &:hover {
     box-shadow: $shadow-md;
   }
+  
+  &:focus, &:focus-visible {
+    outline: 2px solid $color-accent-gold;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba($color-accent-gold, 0.5), $shadow-md;
+  }
 }
 
 // Card header

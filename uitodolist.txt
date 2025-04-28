@@ -37,10 +37,10 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
 
 ## Cards (client/src/styles/components/cards.scss)
 
-- [ ] Standardize padding between card header, body, and footer based on the 8px grid.
-- [ ] Implement standardized hover states (e.g., subtle shadow increase).
-- [ ] Implement standardized focus states for interactive cards or elements within cards.
-- [ ] Review and ensure consistent styling definitions for themed card variants (`.card-primary`, `.card-secondary`, etc.).
+- [x] Standardize padding between card header, body, and footer based on the 8px grid.
+- [x] Implement standardized hover states (e.g., subtle shadow increase).
+- [x] Implement standardized focus states for interactive cards or elements within cards.
+- [x] Review and ensure consistent styling definitions for themed card variants (`.card-primary`, `.card-secondary`, etc.).
 
 ## Forms (client/src/styles/components/forms.scss & component JSX files)
 
