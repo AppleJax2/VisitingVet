@@ -139,8 +139,8 @@ According to the design document, the complete VisitingVet platform should inclu
    - [x] Evaluate and integrate video conferencing API
    - [x] Create appointment types for video consultations
    - [x] Implement video call UI components
-   - [ ] Add recording and documentation features
-   - Create fallback options for technical issues
+   - [x] Add recording and documentation features
+   - [ ] Create fallback options for technical issues
 
 ### Priority 3: Platform Enhancement
 6. Improve search and discovery

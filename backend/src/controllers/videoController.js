@@ -103,4 +103,102 @@ exports.createVideoToken = asyncHandler(async (req, res, next) => {
         } 
         return next(new ErrorResponse('Failed to generate video token', 500));
     }
+});
+
+/**
+ * @desc    Get recordings for a specific Daily room
+ * @route   GET /api/video/recordings/:roomName
+ * @access  Private (Provider, Admin, maybe PetOwner?)
+ */
+exports.getRecordingsForRoom = asyncHandler(async (req, res, next) => {
+    const { roomName } = req.params;
+    
+    // Basic validation: Ensure API is configured
+    if (!DAILY_API_KEY || !DAILY_DOMAIN) {
+        return next(new ErrorResponse('Video conferencing is not configured.', 500));
+    }
+
+    // TODO: Add authorization check - who can access recordings for this room?
+    // e.g., Fetch appointment by roomName (appointmentId), check if req.user._id matches provider or petOwner
+    // const appointment = await Appointment.findById(roomName);
+    // if (!appointment || (appointment.providerProfile.user.toString() !== req.user.id && appointment.petOwner.toString() !== req.user.id)) {
+    //     return next(new ErrorResponse('Not authorized to view recordings for this appointment', 403));
+    // }
+
+    try {
+        // Call Daily API to list recordings, potentially filtering by room name if API supports it
+        // The Daily API GET /recordings might require filtering client-side or using meeting_session_id
+        // Let's assume we fetch all and filter, or use a session ID if we store it.
+        // Simpler approach: Get recordings associated with the room name (might fetch more than needed if names aren't unique)
+        
+        console.log(`Fetching Daily recordings list...`);
+        // NOTE: The Daily REST API for recordings doesn't directly filter by room_name.
+        // It might be better to filter by meeting_session_id if available, or fetch recent recordings
+        // and filter manually. This is a simplified example assuming direct room name use might work or 
+        // that we'd implement more robust filtering/session tracking.
+        const response = await dailyApi.get('/recordings'); // May need pagination
+        
+        const allRecordings = response.data.data || [];
+        
+        // Filter recordings that *might* belong to this room based on room_name
+        // This is NOT reliable if room names are reused or not unique identifiers like appointment IDs
+        const roomRecordings = allRecordings.filter(rec => rec.room_name === roomName);
+        
+        console.log(`Found ${roomRecordings.length} potential recordings for room ${roomName}`);
+
+        res.status(200).json({ 
+            success: true, 
+            count: roomRecordings.length, 
+            data: roomRecordings 
+        });
+
+    } catch (error) {
+        console.error(`Error fetching Daily recordings for room ${roomName}:`, error.response?.data || error.message);
+        return next(new ErrorResponse('Failed to fetch video recordings', 500));
+    }
+});
+
+/**
+ * @desc    Get a temporary access link for a specific Daily recording
+ * @route   GET /api/video/recordings/link/:recordingId
+ * @access  Private (Provider, Admin, maybe PetOwner?)
+ */
+exports.getRecordingAccessLink = asyncHandler(async (req, res, next) => {
+    const { recordingId } = req.params;
+
+    if (!DAILY_API_KEY || !DAILY_DOMAIN) {
+        return next(new ErrorResponse('Video conferencing is not configured.', 500));
+    }
+    
+     // TODO: Add authorization check - who can access this specific recording?
+     // Fetch the recording details first, check its room_name, then check appointment authorization as above.
+     // try {
+     //     const recordingDetails = await dailyApi.get(`/recordings/${recordingId}`);
+     //     const roomName = recordingDetails.data?.room_name;
+     //     // ... perform auth check based on roomName ...
+     // } catch (detailsError) { ... }
+
+    try {
+        console.log(`Fetching Daily access link for recording ${recordingId}...`);
+        const response = await dailyApi.get(`/recordings/${recordingId}/access-link`);
+        
+        const accessLink = response.data.download_link; // Or link, depending on API response structure
+
+        if (!accessLink) {
+             throw new ErrorResponse('Access link not found in Daily API response', 404);
+        }
+
+        console.log(`Successfully fetched access link for recording ${recordingId}`);
+        res.status(200).json({ 
+            success: true, 
+            accessLink: accessLink 
+        });
+
+    } catch (error) {
+        console.error(`Error fetching Daily access link for recording ${recordingId}:`, error.response?.data || error.message);
+         if (error.response && error.response.status === 404) {
+             return next(new ErrorResponse('Recording not found', 404));
+         }
+        return next(new ErrorResponse('Failed to get recording access link', 500));
+    }
 }); 

@@ -634,4 +634,32 @@ export const getVideoToken = async (roomName) => {
   }
 };
 
+/**
+ * Get list of recordings for a specific room/appointment
+ * @param {string} roomName - The room name (likely appointment ID)
+ */
+export const getRecordingsForRoom = async (roomName) => {
+  try {
+    const response = await api.get(`/video/recordings/${roomName}`);
+    return response.data; // Should return { success: true, count: number, data: [...] }
+  } catch (error) {
+    console.error('Get recordings error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get recordings');
+  }
+};
+
+/**
+ * Get a temporary access link for a specific recording
+ * @param {string} recordingId - The ID of the Daily recording
+ */
+export const getRecordingAccessLink = async (recordingId) => {
+  try {
+    const response = await api.get(`/video/recordings/link/${recordingId}`);
+    return response.data; // Should return { success: true, accessLink: string }
+  } catch (error) {
+    console.error('Get recording link error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get recording link');
+  }
+};
+
 export default api; 

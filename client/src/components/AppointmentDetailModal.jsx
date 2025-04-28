@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Spinner, Alert, Row, Col, Badge, ListGroup, Form } from 'react-bootstrap';
-import { CalendarEvent, Clock, GeoAlt, Person, Tag, CardText, CheckCircle, XCircle, ExclamationTriangle, CameraVideo } from 'react-bootstrap-icons';
-import { getAppointmentDetails, cancelAppointmentByPetOwner } from '../services/api';
+import { CalendarEvent, Clock, GeoAlt, Person, Tag, CardText, CheckCircle, XCircle, ExclamationTriangle, CameraVideo, Film } from 'react-bootstrap-icons';
+import { getAppointmentDetails, cancelAppointmentByPetOwner, getRecordingsForRoom, getRecordingAccessLink } from '../services/api';
 import { format } from 'date-fns';
 import VideoCallFrame from './Video/VideoCallFrame';
 
@@ -14,34 +14,59 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, current
   const [cancellationReason, setCancellationReason] = useState('');
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showVideoCall, setShowVideoCall] = useState(false);
+  const [recordings, setRecordings] = useState([]);
+  const [loadingRecordings, setLoadingRecordings] = useState(false);
+  const [recordingError, setRecordingError] = useState('');
 
   useEffect(() => {
-    const loadDetails = async () => {
+    const loadDetailsAndRecordings = async () => {
       if (!appointmentId) return;
       setLoading(true);
+      setLoadingRecordings(true);
       setError('');
+      setRecordingError('');
       setCancelError('');
       setShowCancelConfirm(false);
-      setCancellationReason('');
       setShowVideoCall(false);
       setAppointment(null);
+      setRecordings([]);
+      
       try {
-        const response = await getAppointmentDetails(appointmentId);
-        if (response.success) {
-          setAppointment(response.data);
+        const apptResponse = await getAppointmentDetails(appointmentId);
+        if (apptResponse.success) {
+          const appt = apptResponse.data;
+          setAppointment(appt);
+          
+          if (appt.status === 'Completed' && appt.deliveryMethod === 'video') {
+              try {
+                  console.log(`Fetching recordings for room: ${appt._id}`);
+                  const recordingResponse = await getRecordingsForRoom(appt._id);
+                  if (recordingResponse.success) {
+                      setRecordings(recordingResponse.data || []);
+                      console.log(`Found ${recordingResponse.count} recordings.`);
+                  } else {
+                      console.warn('Failed to fetch recordings:', recordingResponse.error);
+                      setRecordingError('Could not retrieve recordings for this appointment.');
+                  }
+              } catch (recErr) {
+                  console.error('Error fetching recordings:', recErr);
+                  setRecordingError('An error occurred while fetching recordings.');
+              }
+          }
         } else {
-          setError(response.error || 'Failed to load appointment details.');
+          setError(apptResponse.error || 'Failed to load appointment details.');
         }
       } catch (err) {
         console.error('Error loading appointment details:', err);
         setError(err.message || 'An error occurred while fetching details.');
       } finally {
         setLoading(false);
+        setLoadingRecordings(false);
       }
     };
 
     if (show) {
-      loadDetails();
+      loadDetailsAndRecordings();
     }
     if (!show) {
       setShowVideoCall(false);
@@ -109,6 +134,22 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, current
     setShowVideoCall(false);
   };
 
+  const handleViewRecording = async (recordingId) => {
+      setRecordingError('');
+      try {
+          console.log(`Getting access link for recording: ${recordingId}`);
+          const response = await getRecordingAccessLink(recordingId);
+          if (response.success && response.accessLink) {
+              window.open(response.accessLink, '_blank', 'noopener,noreferrer');
+          } else {
+              throw new Error(response.error || 'Failed to get recording link.');
+          }
+      } catch (err) {
+           console.error('Error getting recording link:', err);
+           setRecordingError(`Failed to get recording link: ${err.message}`);
+      }
+  };
+
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton>
@@ -165,6 +206,25 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, current
                     <CheckCircle className="me-2 text-info"/> 
                     <strong>Completion Notes:</strong> {appointment.completionNotes || 'N/A'}
                     {appointment.followUpRecommended && <div className="mt-1 ps-4"><strong>Follow-up Recommended:</strong> {appointment.followUpNotes || 'Yes'}</div>}
+                  </ListGroup.Item>
+                )}
+                {appointment.status === 'Completed' && appointment.deliveryMethod === 'video' && (
+                  <ListGroup.Item>
+                    <Film className="me-2"/> <strong>Recordings:</strong>
+                    {loadingRecordings && <Spinner size="sm" className="ms-2"/>}
+                    {recordingError && <span className="ms-2 text-danger">{recordingError}</span>}
+                    {!loadingRecordings && recordings.length === 0 && <span className="ms-2 text-muted">No recordings found.</span>}
+                    {!loadingRecordings && recordings.length > 0 && (
+                        <ul className="list-unstyled ps-4 mt-1">
+                            {recordings.map(rec => (
+                                <li key={rec.id}>
+                                    <Button variant="link" size="sm" onClick={() => handleViewRecording(rec.id)} title={`View recording from ${format(new Date(rec.start_ts), 'Pp')}`}>
+                                        View Recording ({format(new Date(rec.start_ts), 'P p')}) - Duration: {Math.round(rec.duration)}s
+                                    </Button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                   </ListGroup.Item>
                 )}
               </ListGroup>
