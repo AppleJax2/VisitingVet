@@ -1,8 +1,8 @@
 const ApiError = require('../errors/ApiError');
-// const User = require('../models/User'); // To get user contact info
-// const { VaccinationRecord } = require('../models/VaccinationRecord'); // To get record details for message
-// const emailService = require('./emailService'); // Placeholder for actual email sending
-// const smsService = require('./smsService'); // Placeholder for actual SMS sending
+const Notification = require('../models/Notification');
+const User = require('../models/User');
+const emailService = require('./emailService'); // Assumed Email service
+const smsService = require('./smsService'); // Assumed SMS service
 
 /**
  * Sends a notification based on a specific event type.
@@ -19,12 +19,10 @@ const sendNotification = async (userId, eventType, data, channels = ['email']) =
     
     try {
         // 1. Fetch User details (needed for email/phone and preferences)
-        // const user = await User.findById(userId);
-        // if (!user) {
-        //     throw ApiError.notFound(`User not found with ID: ${userId}`);
-        // }
-        const simulatedUser = { _id: userId, email: `${userId}@example.com`, preferences: { notificationChannels: channels } }; // Simulation
-        const user = simulatedUser;
+        const user = await User.findById(userId);
+        if (!user) {
+            throw ApiError.notFound(`User not found with ID: ${userId}`);
+        }
 
         // 2. Construct Message based on eventType and data
         const { subject, body, htmlBody } = constructMessage(eventType, data, user);
@@ -40,18 +38,20 @@ const sendNotification = async (userId, eventType, data, channels = ['email']) =
         const promises = [];
         if (effectiveChannels.includes('email') && user.email) {
             console.log(`[Notification Service] Sending EMAIL to ${user.email} for event ${eventType}`);
-            // promises.push(emailService.send(user.email, subject, body, htmlBody));
-            promises.push(new Promise(resolve => setTimeout(resolve, 60))); // Simulate email send
+            promises.push(emailService.sendEmail(user.email, subject, body, htmlBody));
         }
         if (effectiveChannels.includes('sms') && user.phoneNumber) {
             console.log(`[Notification Service] Sending SMS to ${user.phoneNumber} for event ${eventType}`);
-             // promises.push(smsService.send(user.phoneNumber, body)); // SMS usually uses plain text body
-             promises.push(new Promise(resolve => setTimeout(resolve, 70))); // Simulate SMS send
+            promises.push(smsService.sendSMS(user.phoneNumber, body));
         }
         if (effectiveChannels.includes('inApp')) {
             console.log(`[Notification Service] Creating IN-APP notification for user ${userId}, event ${eventType}`);
-            // promises.push(createInAppNotification(userId, subject, body)); // Store in DB for user to see
-            promises.push(new Promise(resolve => setTimeout(resolve, 20))); // Simulate in-app creation
+            promises.push(Notification.create({
+                user: userId,
+                type: eventType,
+                message: body,
+                data: data,
+            }));
         }
 
         await Promise.allSettled(promises);
