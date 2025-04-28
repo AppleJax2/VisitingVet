@@ -51,6 +51,22 @@
     border: 1px solid #ff8888;
     padding: 1rem;
     border-radius: 8px;
+    max-width: 80%;
+    margin-bottom: 1.5rem; /* Space before fallback options */
+}
+
+.fallback-options {
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem; /* Spacing between buttons */
+    margin-top: 1rem;
+}
+
+.fallback-options .btn {
+    /* Ensure consistent button sizing */
+    min-width: 120px;
 }
 
 .close-error-button {
