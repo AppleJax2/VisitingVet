@@ -1,5 +1,11 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import { login as apiLogin, logout as apiLogout, register as apiRegister, checkAuthStatus } from '../services/api';
+import { 
+  login as apiLogin, 
+  logout as apiLogout, 
+  register as apiRegister, 
+  checkAuthStatus, 
+  verifyMFALogin 
+} from '../services/api';
 
 // Create the context
 const AuthContext = createContext(null);
@@ -8,6 +14,8 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true); // Start as true to check initial status
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaUserId, setMfaUserId] = useState(null);
 
   // Function to check authentication status on initial load
   const verifyAuth = useCallback(async () => {
@@ -32,13 +40,45 @@ export const AuthProvider = ({ children }) => {
     verifyAuth();
   }, [verifyAuth]);
 
+  // Handle MFA verification during login
+  const handleMfaVerification = async (userId, mfaToken) => {
+    setLoading(true);
+    try {
+      const response = await verifyMFALogin(userId, mfaToken);
+      if (response && response.success) {
+        setUser(response.user);
+        setMfaRequired(false);
+        setMfaUserId(null);
+        setLoading(false);
+        return response;
+      } else {
+        throw new Error(response?.message || 'MFA verification failed');
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('MFA verification error in context:', error);
+      throw error;
+    }
+  };
+
   // Login function
   const login = async (credentials) => {
     setLoading(true);
     try {
       const response = await apiLogin(credentials);
+      
+      // Check if MFA is required
+      if (response && !response.success && response.mfaRequired) {
+        setMfaRequired(true);
+        setMfaUserId(response.userId);
+        setLoading(false);
+        return response;
+      }
+      
       if (response && response.success) {
         setUser(response.user);
+        setMfaRequired(false);
+        setMfaUserId(null);
         setLoading(false);
         return response; // Return the full response on success
       } else {
@@ -82,6 +122,8 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // Clear user state
       setUser(null);
+      setMfaRequired(false);
+      setMfaUserId(null);
       
       // Clear any stored tokens or user data in local/session storage
       localStorage.removeItem('user');
@@ -105,7 +147,9 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
-    verifyAuth // Expose verifyAuth if manual re-check is needed
+    verifyAuth, // Expose verifyAuth if manual re-check is needed
+    mfaRequired,
+    handleMfaVerification
   };
 
   return (

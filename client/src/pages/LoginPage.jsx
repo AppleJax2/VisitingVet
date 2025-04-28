@@ -10,7 +10,9 @@ import {
   Alert, 
   Spinner, 
   Toast, 
-  ToastContainer 
+  ToastContainer,
+  Modal,
+  FormControl 
 } from 'react-bootstrap';
 import { 
   Envelope, 
@@ -19,7 +21,8 @@ import {
   Check2Circle, 
   ShieldCheck, 
   Calendar,
-  GeoAlt
+  GeoAlt,
+  ShieldLock
 } from 'react-bootstrap-icons';
 import './AuthPages.css';
 import { useAuth } from '../contexts/AuthContext';
@@ -30,16 +33,30 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  const { login, user, loading: authLoading } = useAuth();
+  const { login, user, loading: authLoading, mfaRequired, handleMfaVerification } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  
+  // MFA verification states
+  const [showMfaModal, setShowMfaModal] = useState(false);
+  const [mfaToken, setMfaToken] = useState('');
+  const [mfaError, setMfaError] = useState('');
+  const [verifyingMfa, setVerifyingMfa] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     if (!authLoading && user) {
       navigate('/dashboard');
     }
   }, [user, authLoading, navigate]);
+
+  // Show MFA modal when MFA is required
+  useEffect(() => {
+    if (mfaRequired) {
+      setShowMfaModal(true);
+    }
+  }, [mfaRequired]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,7 +66,11 @@ function LoginPage() {
     try {
       const response = await login({ email, password, rememberMe });
       
-      if (response && response.success) {
+      if (response.mfaRequired) {
+        // Store userId for MFA verification
+        setUserId(response.userId);
+        // MFA modal will be shown by the useEffect hook
+      } else if (response && response.success) {
         console.log('Login successful via context:', response.user);
         setToastMessage('Login successful! Redirecting to dashboard...');
         setShowToast(true);
@@ -66,6 +87,33 @@ function LoginPage() {
       setShowToast(false);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleMfaSubmit = async (e) => {
+    e.preventDefault();
+    setMfaError('');
+    setVerifyingMfa(true);
+
+    try {
+      const response = await handleMfaVerification(userId, mfaToken);
+      
+      if (response && response.success) {
+        setShowMfaModal(false);
+        setToastMessage('Login successful! Redirecting to dashboard...');
+        setShowToast(true);
+      } else {
+        setMfaError(response?.message || 'MFA verification failed.');
+      }
+    } catch (err) {
+      console.error('MFA verification error:', err);
+      setMfaError(
+        err.response?.data?.message || 
+        err.message || 
+        'An error occurred during MFA verification. Please try again.'
+      );
+    } finally {
+      setVerifyingMfa(false);
     }
   };
 
@@ -100,6 +148,73 @@ function LoginPage() {
           <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
+      
+      {/* MFA Verification Modal */}
+      <Modal 
+        show={showMfaModal} 
+        onHide={() => setShowMfaModal(false)}
+        backdrop="static"
+        keyboard={false}
+        centered
+      >
+        <Modal.Header>
+          <Modal.Title>
+            <ShieldLock className="me-2" />
+            Two-Factor Authentication
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Please enter the verification code from your authentication app.</p>
+          
+          {mfaError && (
+            <Alert variant="danger" className="mb-3">
+              {mfaError}
+            </Alert>
+          )}
+          
+          <Form onSubmit={handleMfaSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Authentication Code</Form.Label>
+              <FormControl
+                type="text"
+                placeholder="Enter 6-digit code"
+                value={mfaToken}
+                onChange={(e) => setMfaToken(e.target.value.trim())}
+                maxLength={6}
+                pattern="[0-9]*"
+                inputMode="numeric"
+                autoFocus
+                required
+                disabled={verifyingMfa}
+              />
+            </Form.Group>
+            
+            <div className="d-grid gap-2">
+              <Button 
+                variant="primary" 
+                type="submit"
+                disabled={verifyingMfa || !mfaToken || mfaToken.length < 6}
+              >
+                {verifyingMfa ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      className="me-2"
+                    />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify"
+                )}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
       
       <Container>
         <Row className="justify-content-center">

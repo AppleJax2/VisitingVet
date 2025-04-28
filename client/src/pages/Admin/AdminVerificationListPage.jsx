@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Badge, Spinner, Alert, Pagination, Modal, Form, Card, ListGroup } from 'react-bootstrap';
-import { adminGetPendingVerifications, adminApproveVerification, adminRejectVerification } from '../../services/api';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Table, Button, Badge, Spinner, Alert, Pagination, Modal, Form, Card, ListGroup, Row, Col, FormSelect, Toast, ToastContainer } from 'react-bootstrap';
+import { adminGetPendingVerifications, adminApproveVerification, adminRejectVerification, adminSaveDocumentAnnotations } from '../../services/apiClient';
 import { CheckCircleFill, XCircleFill, FileEarmarkTextFill } from 'react-bootstrap-icons';
 import { format } from 'date-fns';
+import logger from '../../utils/logger';
+import ConfirmActionModal from '../../components/Admin/ConfirmActionModal';
+import DocumentViewer from '../../components/Admin/DocumentViewer';
 
 const AdminVerificationListPage = () => {
   const [requests, setRequests] = useState([]);
@@ -10,17 +13,26 @@ const AdminVerificationListPage = () => {
   const [error, setError] = useState('');
   const [pagination, setPagination] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('createdAt_asc');
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [requestToReject, setRequestToReject] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmModalProps, setConfirmModalProps] = useState({});
+  const [isConfirmingAction, setIsConfirmingAction] = useState(false);
+  const [actionToConfirm, setActionToConfirm] = useState(null);
+  const [viewingDocument, setViewingDocument] = useState({ url: null, type: null, id: null, annotations: [] });
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ variant: 'success', message: '' });
 
-  const fetchRequests = async (page = 1) => {
+  const fetchRequests = useCallback(async (page = 1, sort = 'createdAt_asc') => {
     setLoading(true);
     setError('');
     try {
-      const response = await adminGetPendingVerifications(page, 10); // Fetch 10 per page
+      logger.info(`Fetching pending verifications. Page: ${page}, SortBy: ${sort}`);
+      const response = await adminGetPendingVerifications(page, 10, { sortBy: sort });
       if (response.success) {
         setRequests(response.data || []);
         setPagination(response.pagination || {});
@@ -31,18 +43,23 @@ const AdminVerificationListPage = () => {
         setPagination({});
       }
     } catch (err) {
-      console.error('Error fetching verification requests:', err);
-      setError(err.message || 'An error occurred fetching requests.');
+      logger.error('Error fetching verification requests:', err);
+      setError(err.response?.data?.error || err.message || 'An error occurred fetching requests.');
       setRequests([]);
       setPagination({});
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchRequests(currentPage);
-  }, [currentPage]);
+    fetchRequests(currentPage, sortBy);
+  }, [currentPage, sortBy, fetchRequests]);
+
+  const handleSortChange = (e) => {
+    setSortBy(e.target.value);
+    setCurrentPage(1);
+  };
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber !== currentPage) {
@@ -63,12 +80,81 @@ const AdminVerificationListPage = () => {
 
   const handleShowDetailsModal = (request) => {
     setSelectedRequest(request);
+    setViewingDocument({ url: null, type: null, id: null, annotations: [] });
     setShowDetailsModal(true);
   };
 
   const handleCloseDetailsModal = () => {
     setShowDetailsModal(false);
     setSelectedRequest(null);
+    setViewingDocument({ url: null, type: null, id: null, annotations: [] });
+  };
+
+  const handleViewDocumentClick = (doc) => {
+    if (doc.signedUrl) {
+        setViewingDocument({ 
+            url: doc.signedUrl, 
+            type: doc.contentType,
+            id: doc._id || doc.fileKey,
+            annotations: doc.annotations || []
+        });
+    } else {
+        logger.warn('Attempted to view document with no URL.');
+    }
+  };
+
+  const handleSaveAnnotations = async (annotations) => {
+    if (!selectedRequest || !viewingDocument.id) {
+        setToastMessage({ 
+            variant: 'danger', 
+            message: 'Cannot save annotations: missing document reference' 
+        });
+        setShowToast(true);
+        return;
+    }
+    
+    try {
+        const response = await adminSaveDocumentAnnotations(
+            selectedRequest._id,
+            viewingDocument.id,
+            annotations
+        );
+        
+        if (response.success) {
+            // Update the document annotations in the local state
+            if (selectedRequest && selectedRequest.documents) {
+                const updatedDocuments = selectedRequest.documents.map(doc => {
+                    if ((doc._id || doc.fileKey) === viewingDocument.id) {
+                        return { ...doc, annotations };
+                    }
+                    return doc;
+                });
+                
+                setSelectedRequest({
+                    ...selectedRequest,
+                    documents: updatedDocuments
+                });
+            }
+            
+            setToastMessage({ 
+                variant: 'success', 
+                message: 'Annotations saved successfully' 
+            });
+        } else {
+            setToastMessage({ 
+                variant: 'danger', 
+                message: response.error || 'Failed to save annotations' 
+            });
+        }
+    } catch (err) {
+        logger.error('Error saving document annotations:', err);
+        setToastMessage({ 
+            variant: 'danger', 
+            message: err.message || 'An error occurred saving annotations' 
+        });
+    }
+    
+    setShowToast(true);
   };
 
   const handleRejectConfirm = async () => {
@@ -76,28 +162,62 @@ const AdminVerificationListPage = () => {
     try {
       await adminRejectVerification(requestToReject._id, rejectReason);
       handleCloseRejectModal();
-      fetchRequests(1); // Refresh list from page 1
-      // Show success toast/message
+      fetchRequests(1, sortBy);
     } catch (err) {
       setError(err.message || 'Failed to reject request.');
-      // Show error toast/message
     }
   };
 
-  const handleApprove = async (requestId) => {
-    if (!window.confirm('Are you sure you want to approve this verification request?')) return;
+  const handleShowConfirmModal = (type, target, props) => {
+    setActionToConfirm({ type, target });
+    setConfirmModalProps(props);
+    setShowConfirmModal(true);
+  };
+  
+  const handleHideConfirmModal = () => {
+    setShowConfirmModal(false);
+    setIsConfirmingAction(false);
+    setActionToConfirm(null);
+    setConfirmModalProps({});
+  };
+  
+  const handleConfirmAction = async () => {
+    if (!actionToConfirm) return;
+    const { type, target } = actionToConfirm;
+    setIsConfirmingAction(true);
+    setError('');
     try {
-      await adminApproveVerification(requestId);
-      fetchRequests(1); // Refresh list from page 1
-      // Show success toast/message
+      let responseMessage = '';
+      switch (type) {
+        case 'approve':
+          await adminApproveVerification(target);
+          responseMessage = 'Verification request approved successfully.';
+          break;
+        default:
+          logger.warn('Unknown action type in handleConfirmAction:', type);
+          throw new Error('Invalid action type.');
+      }
+      logger.info(responseMessage);
+      handleHideConfirmModal();
+      fetchRequests(1, sortBy);
     } catch (err) {
-      setError(err.message || 'Failed to approve request.');
-      // Show error toast/message
+      logger.error(`Failed to perform action ${type} on ${target}:`, err);
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to approve request.';
+      setError(errorMsg);
+      handleHideConfirmModal();
     }
+  };
+
+  const handleApprove = (requestId, userEmail) => {
+    handleShowConfirmModal('approve', requestId, {
+      title: 'Confirm Approval',
+      body: `Are you sure you want to approve the verification request for ${userEmail}?`,
+      confirmButtonText: 'Approve',
+      confirmButtonVariant: 'success',
+    });
   };
 
   const renderPaginationItems = () => {
-    // (Same pagination logic as AdminUserListPage)
     if (!pagination.pages || pagination.pages <= 1) return null;
     let items = [];
     const maxPagesToShow = 5;
@@ -122,6 +242,18 @@ const AdminVerificationListPage = () => {
     <Container fluid>
       <h2 className="mb-4">Pending Verification Requests</h2>
       {error && <Alert variant="danger">{error}</Alert>}
+
+      <Row className="mb-3">
+          <Col md={3}>
+              <Form.Group controlId="sortVerifications">
+                  <Form.Label>Sort By</Form.Label>
+                  <FormSelect value={sortBy} onChange={handleSortChange} disabled={loading}>
+                      <option value="createdAt_asc">Oldest First</option>
+                      <option value="createdAt_desc">Newest First</option>
+                  </FormSelect>
+              </Form.Group>
+          </Col>
+      </Row>
 
       {loading ? (
         <div className="text-center"><Spinner animation="border" /></div>
@@ -153,12 +285,12 @@ const AdminVerificationListPage = () => {
                       <Button variant="link" size="sm" onClick={() => handleShowDetailsModal(request)}>View</Button>
                     </td>
                     <td>
-                       <Button variant="outline-success" size="sm" className="me-1" title="Approve Request" onClick={() => handleApprove(request._id)}>
-                          <CheckCircleFill /> Approve
-                        </Button>
-                         <Button variant="outline-danger" size="sm" className="me-1" title="Reject Request" onClick={() => handleShowRejectModal(request)}>
-                          <XCircleFill /> Reject
-                        </Button>
+                      <Button variant="outline-success" size="sm" className="me-1" title="Approve Request" onClick={() => handleApprove(request._id, request.user?.email)}>
+                        <CheckCircleFill /> Approve
+                      </Button>
+                      <Button variant="outline-danger" size="sm" className="me-1" title="Reject Request" onClick={() => handleShowRejectModal(request)}>
+                        <XCircleFill /> Reject
+                      </Button>
                     </td>
                   </tr>
                 ))
@@ -174,7 +306,6 @@ const AdminVerificationListPage = () => {
         </>
       )}
 
-      {/* Reject Request Modal */}
       <Modal show={showRejectModal} onHide={handleCloseRejectModal}>
         <Modal.Header closeButton>
           <Modal.Title>Reject Verification - {requestToReject?.user?.email}</Modal.Title>
@@ -202,45 +333,92 @@ const AdminVerificationListPage = () => {
         </Modal.Footer>
       </Modal>
 
-       {/* View Details Modal */}
-      <Modal show={showDetailsModal} onHide={handleCloseDetailsModal} size="lg">
+      <Modal show={showDetailsModal} onHide={handleCloseDetailsModal} size="xl" fullscreen="lg-down">
         <Modal.Header closeButton>
           <Modal.Title>Verification Details - {selectedRequest?.user?.email}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {selectedRequest ? (
-            <>
-              <p><strong>User:</strong> {selectedRequest.user?.name} ({selectedRequest.user?.email})</p>
-              <p><strong>Role:</strong> {selectedRequest.user?.role}</p>
-              <p><strong>Submitted At:</strong> {format(new Date(selectedRequest.createdAt), 'PPpp')}</p>
-              <Card>
-                <Card.Header>Submitted Documents</Card.Header>
-                <ListGroup variant="flush">
-                  {selectedRequest.submittedDocuments.map((doc, index) => (
-                    <ListGroup.Item key={index}>
-                      <FileEarmarkTextFill className="me-2" />
-                      <strong>{doc.documentType}</strong>: 
-                      <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="ms-2">View Document</a> 
-                      <span className="text-muted ms-3">({format(new Date(doc.submittedAt), 'Pp')})</span>
-                    </ListGroup.Item>
-                  ))}
-                  {selectedRequest.submittedDocuments.length === 0 && (
-                    <ListGroup.Item>No documents submitted.</ListGroup.Item>
+            <Row style={{ height: '100%' }}>
+              <Col xs={12} md={4} style={{ height: '100%', overflowY: 'auto', borderRight: '1px solid #dee2e6' }}>
+                  <h5>Request Info</h5>
+                  <p><strong>User:</strong> {selectedRequest.user?.name} ({selectedRequest.user?.email})</p>
+                  <p><strong>Role:</strong> {selectedRequest.user?.role?.name || selectedRequest.user?.role || 'N/A'}</p>
+                  <p><strong>Submitted At:</strong> {format(new Date(selectedRequest.createdAt), 'PPpp')}</p>
+                  {selectedRequest.notes && <p><strong>Admin Notes:</strong> {selectedRequest.notes}</p>}
+                  <hr />
+                  <h5>Submitted Documents</h5>
+                  {selectedRequest.documents && selectedRequest.documents.length > 0 ? (
+                      <ListGroup variant="flush">
+                          {selectedRequest.documents.map((doc, index) => (
+                              <ListGroup.Item key={doc.fileKey || index} 
+                                action 
+                                onClick={() => handleViewDocumentClick(doc)} 
+                                style={{ cursor: doc.signedUrl ? 'pointer' : 'default' }}
+                                active={(doc._id || doc.fileKey) === viewingDocument.id}
+                              >
+                                  <FileEarmarkTextFill className="me-2" />
+                                  {doc.documentType || 'Document'}
+                                  {doc.annotations && doc.annotations.length > 0 && (
+                                    <Badge bg="info" className="ms-2">{doc.annotations.length} notes</Badge>
+                                  )}
+                                  {!doc.signedUrl && doc.error && <Badge bg="danger" className="ms-2">Error</Badge>}
+                                  {!doc.signedUrl && !doc.error && <Badge bg="secondary" className="ms-2">No URL</Badge>}
+                              </ListGroup.Item>
+                          ))}
+                      </ListGroup>
+                  ) : (
+                      <p>No documents submitted or available.</p>
                   )}
-                </ListGroup>
-              </Card>
-              {selectedRequest.notes && <p className="mt-3"><strong>Notes:</strong> {selectedRequest.notes}</p>}
-            </>
+              </Col>
+              <Col xs={12} md={8} style={{ height: '100%', overflow: 'hidden', display:'flex', flexDirection:'column'}}>
+                {viewingDocument.url ? (
+                    <DocumentViewer 
+                        documentUrl={viewingDocument.url} 
+                        contentType={viewingDocument.type}
+                        initialAnnotations={viewingDocument.annotations}
+                        onSaveAnnotations={handleSaveAnnotations}
+                    />
+                ) : (
+                    <div className="d-flex align-items-center justify-content-center h-100 text-muted">
+                        <p>Select a document from the list to view it here.</p>
+                    </div>
+                )}
+              </Col>
+            </Row>
           ) : (
             <p>Loading details...</p>
           )}
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseDetailsModal}>
-            Close
-          </Button>
-        </Modal.Footer>
       </Modal>
+
+      <ConfirmActionModal 
+          show={showConfirmModal}
+          onHide={handleHideConfirmModal}
+          onConfirm={handleConfirmAction}
+          title={confirmModalProps.title || 'Confirm Action'}
+          body={confirmModalProps.body || 'Are you sure?'}
+          confirmButtonText={confirmModalProps.confirmButtonText}
+          confirmButtonVariant={confirmModalProps.confirmButtonVariant}
+          isConfirming={isConfirmingAction}
+      />
+
+      <ToastContainer position="bottom-end" className="p-3">
+        <Toast 
+            show={showToast} 
+            onClose={() => setShowToast(false)} 
+            delay={3000} 
+            autohide 
+            bg={toastMessage.variant}
+        >
+            <Toast.Header closeButton>
+                <strong className="me-auto">Notification</strong>
+            </Toast.Header>
+            <Toast.Body className={toastMessage.variant === 'danger' ? 'text-white' : ''}>
+                {toastMessage.message}
+            </Toast.Body>
+        </Toast>
+      </ToastContainer>
 
     </Container>
   );

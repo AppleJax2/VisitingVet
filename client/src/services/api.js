@@ -628,6 +628,23 @@ export const adminRejectVerification = async (requestId, reason) => {
   }
 };
 
+/**
+ * Save annotations for a document in a verification request
+ * @param {string} requestId - The ID of the verification request
+ * @param {string} documentId - The ID of the document
+ * @param {Array} annotations - The annotations to save
+ * @returns {Promise<Object>} Response with success status
+ */
+export const adminSaveDocumentAnnotations = async (requestId, documentId, annotations) => {
+  try {
+    const response = await api.put(`/admin/verifications/${requestId}/documents/${documentId}/annotations`, { annotations });
+    return response.data;
+  } catch (error) {
+    console.error('Admin save document annotations error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to save document annotations');
+  }
+};
+
 export const adminCreateUser = async (userData) => {
   try {
     const response = await api.post('/admin/users/create', userData);
@@ -645,6 +662,98 @@ export const adminGetActionLogs = async (page = 1, limit = 50, filters = {}) => 
   } catch (error) {
     console.error('Admin get action logs error:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to fetch action logs');
+  }
+};
+
+/**
+ * Get active user sessions with filtering and pagination
+ * @param {number} page - Page number
+ * @param {number} limit - Limit per page
+ * @param {object} filters - Filters like search, role
+ * @returns {Promise<Object>} Response with sessions data
+ */
+export const adminGetActiveSessions = async (page = 1, limit = 20, filters = {}) => {
+  try {
+    const response = await api.get('/admin/sessions', { params: { page, limit, ...filters } });
+    return response.data; // Should include data and pagination
+  } catch (error) {
+    console.error('Admin get sessions error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch active sessions');
+  }
+};
+
+/**
+ * Terminate a user session by ID
+ * @param {string} sessionId - ID of the session to terminate
+ * @returns {Promise<Object>} Response with success status
+ */
+export const adminTerminateSession = async (sessionId) => {
+  try {
+    const response = await api.delete(`/admin/sessions/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Admin terminate session error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to terminate session');
+  }
+};
+
+/**
+ * Get all roles in the system
+ * @returns {Promise<Object>} Response with roles data
+ */
+export const adminGetRoles = async () => {
+  try {
+    const response = await api.get('/admin/roles');
+    return response.data;
+  } catch (error) {
+    console.error('Admin get roles error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch roles');
+  }
+};
+
+/**
+ * Create a new role
+ * @param {Object} roleData - Role data including name, description, and permissions
+ * @returns {Promise<Object>} Response with created role
+ */
+export const adminCreateRole = async (roleData) => {
+  try {
+    const response = await api.post('/admin/roles', roleData);
+    return response.data;
+  } catch (error) {
+    console.error('Admin create role error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to create role');
+  }
+};
+
+/**
+ * Update an existing role
+ * @param {string} roleId - ID of the role to update
+ * @param {Object} roleData - Updated role data
+ * @returns {Promise<Object>} Response with updated role
+ */
+export const adminUpdateRole = async (roleId, roleData) => {
+  try {
+    const response = await api.put(`/admin/roles/${roleId}`, roleData);
+    return response.data;
+  } catch (error) {
+    console.error('Admin update role error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update role');
+  }
+};
+
+/**
+ * Delete a role
+ * @param {string} roleId - ID of the role to delete
+ * @returns {Promise<Object>} Response with success status
+ */
+export const adminDeleteRole = async (roleId) => {
+  try {
+    const response = await api.delete(`/admin/roles/${roleId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Admin delete role error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to delete role');
   }
 };
 
@@ -702,6 +811,47 @@ export const changePassword = async (passwordData) => {
   } catch (error) {
     console.error('Change password error:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to change password');
+  }
+};
+
+// MFA related functions
+export const setupMFA = async () => {
+  try {
+    const response = await api.post('/auth/mfa/setup');
+    return response.data;
+  } catch (error) {
+    console.error('MFA setup error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to setup MFA');
+  }
+};
+
+export const verifyAndEnableMFA = async (token) => {
+  try {
+    const response = await api.post('/auth/mfa/verify', { token });
+    return response.data;
+  } catch (error) {
+    console.error('MFA verification error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to verify MFA');
+  }
+};
+
+export const disableMFA = async (token) => {
+  try {
+    const response = await api.post('/auth/mfa/disable', { token });
+    return response.data;
+  } catch (error) {
+    console.error('MFA disable error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to disable MFA');
+  }
+};
+
+export const verifyMFALogin = async (userId, mfaToken) => {
+  try {
+    const response = await api.post('/auth/mfa/verify-login', { userId, mfaToken });
+    return response.data;
+  } catch (error) {
+    console.error('MFA login verification error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to verify MFA during login');
   }
 };
 

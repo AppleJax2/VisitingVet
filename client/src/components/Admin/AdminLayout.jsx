@@ -3,7 +3,8 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { Container, Nav, Navbar, Offcanvas, Button } from 'react-bootstrap';
 import { 
     HouseDoorFill, PeopleFill, PatchCheckFill, 
-    ClipboardDataFill, GearFill, BoxArrowRight, List
+    ClipboardDataFill, GearFill, BoxArrowRight, List,
+    ShieldLock, ClockHistory, Shield
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { useAuth } from '../../contexts/AuthContext';
@@ -67,6 +68,9 @@ const AdminLayout = () => {
         { path: '/admin/users', icon: <PeopleFill style={sidebarStyles.navIcon} />, text: 'Users' },
         { path: '/admin/verifications', icon: <PatchCheckFill style={sidebarStyles.navIcon} />, text: 'Verifications' },
         { path: '/admin/logs', icon: <ClipboardDataFill style={sidebarStyles.navIcon} />, text: 'Action Logs' },
+        { path: '/admin/sessions', icon: <ClockHistory style={sidebarStyles.navIcon} />, text: 'User Sessions' },
+        { path: '/admin/permissions', icon: <Shield style={sidebarStyles.navIcon} />, text: 'Permissions' },
+        { path: '/admin/mfa-setup', icon: <ShieldLock style={sidebarStyles.navIcon} />, text: 'Two-Factor Auth' },
         { path: '/admin/settings', icon: <GearFill style={sidebarStyles.navIcon} />, text: 'Settings' },
     ];
 

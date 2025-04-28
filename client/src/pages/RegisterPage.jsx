@@ -4,6 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Form, Button, Container, Row, Col, Card, Alert, Spinner, Tab, Nav } from 'react-bootstrap';
 import { Envelope, Lock, PersonFill, TelephoneFill, Building, HospitalFill, PeopleFill, Check2Circle } from 'react-bootstrap-icons';
 import theme from '../utils/theme';
+import PasswordStrengthMeter from '../components/Shared/PasswordStrengthMeter';
+import { validatePasswordStrength } from '../utils/passwordUtils';
 import './AuthPages.css';
 
 function RegisterPage() {
@@ -38,6 +40,14 @@ function RegisterPage() {
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
+
+    // Check password strength
+    const passwordValidation = validatePasswordStrength(formData.password);
+    if (!passwordValidation.isValid) {
+      setError('Please correct the password issues before continuing');
       setIsLoading(false);
       return;
     }
@@ -237,13 +247,11 @@ function RegisterPage() {
                               value={formData.password}
                               onChange={handleChange}
                               required
-                              minLength={6}
+                              minLength={8}
                               className="auth-input"
                             />
                           </div>
-                          <Form.Text className="text-muted">
-                            Minimum 6 characters
-                          </Form.Text>
+                          <PasswordStrengthMeter password={formData.password} />
                         </Form.Group>
                       </Col>
                       <Col md={6}>

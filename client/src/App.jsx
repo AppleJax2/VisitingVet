@@ -35,6 +35,11 @@ import AdminVerificationListPage from './pages/Admin/AdminVerificationListPage';
 import AdminLogPage from './pages/Admin/AdminLogPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
 import AdminEditProfilePage from './pages/Admin/AdminEditProfilePage';
+import AdminResetPasswordPage from './pages/Admin/AdminResetPasswordPage';
+import AdminUserDetailPage from './pages/Admin/AdminUserDetailPage';
+import AdminMFASetupPage from './pages/Admin/AdminMFASetupPage';
+import AdminSessionsPage from './pages/Admin/AdminSessionsPage';
+import AdminPermissionsPage from './pages/Admin/AdminPermissionsPage';
 
 // Import specific Dashboard components if needed for routing/layout
 import PetOwnerDashboard from './components/Dashboard/PetOwnerDashboard';
@@ -120,6 +125,10 @@ function AppRoutes() {
           <Route path="/stripe/connect/return" element={<StripeConnectReturnPage />} />
           <Route path="/stripe/connect/refresh" element={<StripeConnectRefreshPage />} />
 
+          {/* Admin specific password reset routes */}
+          <Route path="/admin/forgot-password" element={<AdminResetPasswordPage />} />
+          <Route path="/admin/reset-password/:resetToken" element={<AdminResetPasswordPage />} />
+
           {/* Logged-in User Routes (Dashboard is role-specific) */}
           <Route element={<PrivateRoute allowedRoles={['PetOwner', 'MVSProvider', 'Clinic', 'Admin']} />}>
             <Route path="/dashboard" element={<DashboardPage />} /> 
@@ -162,10 +171,14 @@ function AppRoutes() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />
               <Route path="users" element={<AdminUserListPage />} />
+              <Route path="users/:userId" element={<AdminUserDetailPage />} />
               <Route path="edit-profile/:userId" element={<AdminEditProfilePage />} />
               <Route path="verifications" element={<AdminVerificationListPage />} />
               <Route path="logs" element={<AdminLogPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
+              <Route path="mfa-setup" element={<AdminMFASetupPage />} />
+              <Route path="sessions" element={<AdminSessionsPage />} />
+              <Route path="permissions" element={<AdminPermissionsPage />} />
               {/* Admin Service Request Routes */}
               <Route path="service-requests" element={<ServiceRequestsPage />} />
               <Route path="service-requests/:id" element={<ServiceRequestDetailPage />} />

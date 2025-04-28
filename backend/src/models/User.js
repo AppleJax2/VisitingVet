@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { validatePasswordStrength } = require('../validations/userValidation');
+// const Role = require('./Role'); // Import Role model
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -15,13 +17,26 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please provide a password'],
-    minlength: 6,
+    minlength: 8,
     select: false, // Do not return password by default
+    validate: {
+      validator: function(password) {
+        // Only validate password when it's being modified
+        if (!this.isModified('password')) return true;
+        
+        const validationResult = validatePasswordStrength(password);
+        return validationResult.isValid;
+      },
+      message: props => {
+        const validationResult = validatePasswordStrength(props.value);
+        return validationResult.errors.join(', ');
+      }
+    }
   },
   role: {
-    type: String,
-    enum: ['PetOwner', 'MVSProvider', 'Clinic'], // Enforce specific roles
-    required: [true, 'Please specify a user role'],
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Role',
+    required: [true, 'User role must be assigned'],
   },
   name: {
     type: String,
@@ -100,9 +115,39 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 30, // Default timeout of 30 minutes for regular users
   },
-  isAdmin: {
+
+  // MFA fields
+  mfaEnabled: {
     type: Boolean,
-    default: false, // Flag to identify admin users for special session handling
+    default: false,
+  },
+  mfaSecret: {
+    type: String,
+    select: false, // Never return by default
+  },
+  mfaBackupCodes: [{
+    code: {
+      type: String,
+      select: false,
+    },
+    used: {
+      type: Boolean,
+      default: false,
+    }
+  }],
+  mfaVerified: {
+    type: Boolean,
+    default: false, // Initially false until user completes setup
+  },
+
+  // Password Reset Fields
+  passwordResetToken: {
+    type: String,
+    select: false, // Do not return in queries by default
+  },
+  passwordResetExpires: {
+    type: Date,
+    select: false, // Do not return in queries by default
   },
 
   // Add other fields common to all users later if needed

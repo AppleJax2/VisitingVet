@@ -22,6 +22,8 @@ const reviewRoutes = require('./src/routes/reviewRoutes');
 const conversationRoutes = require('./src/routes/conversationRoutes'); // Import conversation routes
 const videoRoutes = require('./src/routes/videoRoutes'); // Import video routes
 const configureSocket = require('./src/config/socket'); // Import socket configuration logic
+const sanitizeInputs = require('./src/middleware/inputSanitizer'); // Import the sanitizer middleware
+const { adminApiLimiter } = require('./src/middleware/rateLimiter'); // Import the rate limiter
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -86,7 +88,11 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/pets', petRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/clinics', clinicRoutes);
-app.use('/api/admin', adminRoutes);
+
+// Apply rate limiting and input sanitization middleware specifically to admin routes
+// Rate limiter should come first
+app.use('/api/admin', adminApiLimiter, sanitizeInputs, adminRoutes);
+
 app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reviews', reviewRoutes);

@@ -1,46 +1,39 @@
 import React from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
+import VerificationMetricsCard from '../../components/Admin/VerificationMetricsCard';
 
 const AdminDashboardPage = () => {
   return (
     <Container fluid>
       <h2 className="mb-4">Admin Overview</h2>
       <Row>
-        <Col md={4}>
-          <Card className="mb-3">
+        <Col lg={4} md={6} className="mb-3">
+          <VerificationMetricsCard />
+        </Col>
+        <Col lg={4} md={6} className="mb-3">
+          <Card className="h-100">
             <Card.Body>
               <Card.Title>Users</Card.Title>
               <Card.Text>
                 Manage users, view details, and handle bans.
               </Card.Text>
-              {/* Add stats later */}
+              {/* TODO: Add User Metrics Card */}
             </Card.Body>
           </Card>
         </Col>
-        <Col md={4}>
-          <Card className="mb-3">
-            <Card.Body>
-              <Card.Title>Verifications</Card.Title>
-              <Card.Text>
-                Review pending verification requests.
-              </Card.Text>
-              {/* Add stats later */}
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card className="mb-3">
+        <Col lg={4} md={6} className="mb-3">
+          <Card className="h-100">
             <Card.Body>
               <Card.Title>Action Logs</Card.Title>
               <Card.Text>
                 View recent administrator actions.
               </Card.Text>
-              {/* Add quick links or recent logs later */}
+              {/* TODO: Add link or recent logs */}
             </Card.Body>
           </Card>
         </Col>
       </Row>
-      {/* Add more widgets or charts later */}
+      {/* Add more sections like Analytics Overview etc. */}
     </Container>
   );
 };
