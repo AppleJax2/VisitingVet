@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Table, Button, Badge, Spinner, Alert, Pagination, Modal, Form, Card, ListGroup, Row, Col, FormSelect, Toast, ToastContainer } from 'react-bootstrap';
-import { adminGetPendingVerifications, adminApproveVerification, adminRejectVerification, adminSaveDocumentAnnotations } from '../../services/apiClient';
-import { CheckCircleFill, XCircleFill, FileEarmarkTextFill } from 'react-bootstrap-icons';
+import { Container, Table, Button, Badge, Spinner, Alert, Pagination, Modal, Form, Card, ListGroup, Row, Col, FormSelect, Toast, ToastContainer, InputGroup } from 'react-bootstrap';
+import { adminGetPendingVerifications, adminApproveVerification, adminRejectVerification, adminSaveDocumentAnnotations, adminUpdateManualVerification } from '../../services/apiClient';
+import { CheckCircleFill, XCircleFill, FileEarmarkTextFill, BoxArrowUpRight, QuestionCircleFill } from 'react-bootstrap-icons';
 import { format } from 'date-fns';
 import logger from '../../utils/logger';
 import ConfirmActionModal from '../../components/Admin/ConfirmActionModal';
 import DocumentViewer from '../../components/Admin/DocumentViewer';
+
+const DORA_LOOKUP_URL = 'https://apps2.colorado.gov/dora/licensing/lookup/licenselookup.aspx';
 
 const AdminVerificationListPage = () => {
   const [requests, setRequests] = useState([]);
@@ -26,6 +28,9 @@ const AdminVerificationListPage = () => {
   const [viewingDocument, setViewingDocument] = useState({ url: null, type: null, id: null, annotations: [] });
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ variant: 'success', message: '' });
+  const [manualVerificationStatus, setManualVerificationStatus] = useState('');
+  const [manualVerificationDate, setManualVerificationDate] = useState('');
+  const [isUpdatingManualStatus, setIsUpdatingManualStatus] = useState(false);
 
   const fetchRequests = useCallback(async (page = 1, sort = 'createdAt_asc') => {
     setLoading(true);
@@ -80,6 +85,9 @@ const AdminVerificationListPage = () => {
 
   const handleShowDetailsModal = (request) => {
     setSelectedRequest(request);
+    const providerProfile = request.user?.visitingVetProfile;
+    setManualVerificationStatus(providerProfile?.doraVerification?.status || 'Not Verified');
+    setManualVerificationDate(providerProfile?.doraVerification?.lastChecked ? format(new Date(providerProfile.doraVerification.lastChecked), 'yyyy-MM-dd') : '');
     setViewingDocument({ url: null, type: null, id: null, annotations: [] });
     setShowDetailsModal(true);
   };
@@ -88,6 +96,9 @@ const AdminVerificationListPage = () => {
     setShowDetailsModal(false);
     setSelectedRequest(null);
     setViewingDocument({ url: null, type: null, id: null, annotations: [] });
+    setManualVerificationStatus('');
+    setManualVerificationDate('');
+    setIsUpdatingManualStatus(false);
   };
 
   const handleViewDocumentClick = (doc) => {
@@ -215,6 +226,32 @@ const AdminVerificationListPage = () => {
       confirmButtonText: 'Approve',
       confirmButtonVariant: 'success',
     });
+  };
+
+  const handleUpdateManualVerificationStatus = async () => {
+    if (!selectedRequest || !selectedRequest.user?._id) return;
+    setIsUpdatingManualStatus(true);
+    try {
+        const payload = {
+             doraVerificationStatus: manualVerificationStatus,
+             doraVerificationDate: manualVerificationDate || null
+         };
+        logger.info('Attempting to update manual verification status', { userId: selectedRequest.user._id, payload });
+        const response = await adminUpdateManualVerification(selectedRequest.user._id, payload);
+        if (response.success) {
+             setToastMessage({ variant: 'success', message: 'Manual verification status updated.' });
+             setShowToast(true);
+        } else {
+             setToastMessage({ variant: 'danger', message: response.error || 'Failed to update status.' });
+             setShowToast(true);
+        }
+    } catch (err) {
+        logger.error('Error updating manual verification status:', err);
+        setToastMessage({ variant: 'danger', message: err.response?.data?.error || err.message || 'Failed to update status.' });
+        setShowToast(true);
+    } finally {
+        setIsUpdatingManualStatus(false);
+    }
   };
 
   const renderPaginationItems = () => {
@@ -370,6 +407,72 @@ const AdminVerificationListPage = () => {
                   ) : (
                       <p>No documents submitted or available.</p>
                   )}
+                  <hr />
+                  {selectedRequest.user?.role === 'MVSProvider' && (
+                    <>
+                        <h5>DORA License Verification (Manual)</h5>
+                        <p>
+                            <strong>License #:</strong> {selectedRequest.user?.visitingVetProfile?.licenseNumber || 'N/A'} 
+                            (State: {selectedRequest.user?.visitingVetProfile?.licenseState || 'N/A'})
+                        </p>
+                         <Button 
+                            variant="outline-primary" 
+                            size="sm" 
+                            href={DORA_LOOKUP_URL} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="mb-2"
+                        >
+                            Look up on DORA <BoxArrowUpRight className="ms-1" />
+                         </Button>
+                         <Form.Group className="mb-2" controlId="manualVerificationStatus">
+                             <Form.Label>Verification Status</Form.Label>
+                             <Form.Select 
+                                value={manualVerificationStatus}
+                                onChange={(e) => setManualVerificationStatus(e.target.value)}
+                                disabled={isUpdatingManualStatus}
+                            >
+                                 <option value="Not Verified">Not Verified</option>
+                                 <option value="Verification Pending">Verification Pending</option>
+                                 <option value="Verified - Valid">Verified - Valid</option>
+                                 <option value="Verified - Expired">Verified - Expired</option>
+                                 <option value="Verified - Other Issue">Verified - Other Issue</option>
+                             </Form.Select>
+                         </Form.Group>
+                         <Form.Group className="mb-3" controlId="manualVerificationDate">
+                             <Form.Label>Date Checked</Form.Label>
+                             <InputGroup>
+                                 <Form.Control 
+                                    type="date" 
+                                    value={manualVerificationDate}
+                                    onChange={(e) => setManualVerificationDate(e.target.value)}
+                                    disabled={isUpdatingManualStatus || manualVerificationStatus === 'Not Verified' || manualVerificationStatus === 'Verification Pending'}
+                                />
+                                 <Button 
+                                    variant="outline-secondary" 
+                                    onClick={() => setManualVerificationDate(format(new Date(), 'yyyy-MM-dd'))}
+                                    disabled={isUpdatingManualStatus || manualVerificationStatus === 'Not Verified' || manualVerificationStatus === 'Verification Pending'}
+                                    title="Set to Today"
+                                >
+                                    Today
+                                 </Button>
+                             </InputGroup>
+                         </Form.Group>
+                         <Button 
+                            variant="primary" 
+                            size="sm" 
+                            onClick={handleUpdateManualVerificationStatus}
+                            disabled={isUpdatingManualStatus}
+                        >
+                            {isUpdatingManualStatus ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : 'Save Status'}
+                         </Button>
+                         <p className="text-muted mt-2">
+                             <small>
+                                 <QuestionCircleFill className="me-1"/> Manually look up the license on the official DORA website and record the status here.
+                             </small>
+                         </p>
+                    </>
+                   )}
               </Col>
               <Col xs={12} md={8} style={{ height: '100%', overflow: 'hidden', display:'flex', flexDirection:'column'}}>
                 {viewingDocument.url ? (
