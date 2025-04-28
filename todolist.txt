@@ -105,12 +105,12 @@ According to the design document, the complete VisitingVet platform should inclu
    ~~- Create result sharing mechanism for completed services~~
    ~~- Implement notification system for the entire coordination process~~
 
-1. Implement payment processing system
-   - Integrate Stripe API (configuration already exists)
-   - Create payment models and controllers
-   - Implement checkout flow for appointments
-   - Add billing management for providers
-   - Create payment history views
+~~1. Implement payment processing system~~
+   ~~- Integrate Stripe API (configuration already exists)~~
+   ~~- Create payment models and controllers~~
+   ~~- Implement checkout flow for appointments~~
+   ~~- Add billing management for providers~~
+   ~~- Create payment history views~~
 
 2. Develop review and rating system
    - Create review data model

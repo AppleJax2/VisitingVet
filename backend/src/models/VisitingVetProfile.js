@@ -110,6 +110,18 @@ const visitingVetProfileSchema = new mongoose.Schema({
     default: [],
   },
 
+  // Rating Information (calculated from Reviews)
+  averageRating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  numberOfReviews: {
+    type: Number,
+    default: 0
+  },
+
   // Stripe Connect Information
   stripeAccountId: {
     type: String,

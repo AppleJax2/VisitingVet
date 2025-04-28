@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, ListGroup, Alert, Spinner, Button } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
 import { getProfileById, getProviderAvailability, checkAuthStatus } from '../services/api';
+import api from '../services/api';
 import AppointmentRequestModal from '../components/AppointmentRequestModal';
+import ReviewList from '../components/Reviews/ReviewList';
+import StarRatingDisplay from '../components/Reviews/StarRatingDisplay';
 
 function ProviderProfileViewPage() {
   const { id } = useParams();
@@ -11,6 +14,9 @@ function ProviderProfileViewPage() {
   const [profile, setProfile] = useState(null);
   const [user, setUser] = useState(null);
   const [services, setServices] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewsError, setReviewsError] = useState(null);
   const [currentUserRole, setCurrentUserRole] = useState(null);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -19,6 +25,8 @@ function ProviderProfileViewPage() {
     const fetchUserAndProfile = async () => {
       setIsLoading(true);
       setError('');
+      setReviewsLoading(true);
+      setReviewsError(null);
       try {
         // Check current user role (if logged in)
         const authData = await checkAuthStatus();
@@ -27,16 +35,34 @@ function ProviderProfileViewPage() {
         }
         
         // Fetch provider profile
-        const data = await getProfileById(id);
-        if (data && data.success) {
-          setProfile(data.profile);
-          setUser(data.profile.user);
-          setServices(data.profile.services || []);
+        const profileData = await getProfileById(id);
+        if (profileData && profileData.success) {
+          setProfile(profileData.profile);
+          setUser(profileData.profile.user);
+          setServices(profileData.profile.services || []);
+        } else {
+            throw new Error(profileData.message || 'Profile not found');
         }
+
+        // Fetch reviews for this profile
+        try {
+            const reviewsData = await api.get(`/reviews/provider/${id}`);
+            if (reviewsData.data.success) {
+                setReviews(reviewsData.data.data || []);
+            } else {
+                throw new Error(reviewsData.data.message || 'Failed to load reviews');
+            }
+        } catch (reviewErr) {
+             console.error("Review Fetch Error:", reviewErr);
+             setReviewsError(reviewErr.message || 'Could not load reviews for this provider.');
+        }
+
       } catch (err) {
         setError('Failed to load provider profile. The provider may not exist or has not created a profile yet.');
+        console.error("Profile Fetch Error:", err);
       } finally {
         setIsLoading(false);
+        setReviewsLoading(false);
       }
     };
 
@@ -106,6 +132,17 @@ function ProviderProfileViewPage() {
               <h3>{user.email}</h3>
               <p className="text-muted">Visiting Veterinarian</p>
               
+              <div className="mb-2">
+                    {profile.numberOfReviews > 0 ? (
+                        <>
+                            <StarRatingDisplay rating={profile.averageRating} /> 
+                            <span className="ms-2 text-muted">({profile.numberOfReviews} review{profile.numberOfReviews !== 1 ? 's' : ''})</span>
+                        </>
+                    ) : (
+                        <span className="text-muted">No reviews yet</span>
+                    )}
+                </div>
+              
               {profile.credentials && profile.credentials.length > 0 && (
                 <div className="mb-2">
                   {profile.credentials.map((credential, index) => (
@@ -170,7 +207,7 @@ function ProviderProfileViewPage() {
             </Card.Body>
           </Card>
           
-          <Card>
+          <Card className="mb-4">
             <Card.Header>
               <h4>Services Offered</h4>
             </Card.Header>
@@ -235,6 +272,19 @@ function ProviderProfileViewPage() {
                   )}
                 </Alert>
               )}
+            </Card.Body>
+          </Card>
+
+          <Card>
+            <Card.Header>
+              <h4>Reviews ({profile.numberOfReviews || 0})</h4>
+            </Card.Header>
+            <Card.Body>
+               <ReviewList 
+                    reviews={reviews}
+                    isLoading={reviewsLoading}
+                    error={reviewsError}
+                />
             </Card.Body>
           </Card>
         </Col>

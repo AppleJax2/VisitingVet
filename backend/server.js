@@ -16,6 +16,7 @@ const clinicRoutes = require('./src/routes/clinicRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const paymentRoutes = require('./src/routes/paymentRoutes');
+const reviewRoutes = require('./src/routes/reviewRoutes');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -68,6 +69,7 @@ app.use('/api/clinics', clinicRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {
