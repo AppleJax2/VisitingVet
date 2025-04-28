@@ -94,16 +94,16 @@ According to the design document, the complete VisitingVet platform should inclu
 
 ### Priority 1: Core Business Functionality
 
-0. Implement Clinic-MVS-Pet Owner Coordination System
-   - Create ServiceRequest data model for clinic-initiated referrals
-   - Develop clinic interface for initiating specialized service requests
-   - Build MVS provider notification and response system
-   - Create pet owner interface for selecting from available time slots
-   - Implement three-way appointment confirmation workflow
-   - Add status tracking throughout the referral process
-   - Develop dashboard views for all three parties
-   - Create result sharing mechanism for completed services
-   - Implement notification system for the entire coordination process
+~~0. Implement Clinic-MVS-Pet Owner Coordination System~~
+   ~~- Create ServiceRequest data model for clinic-initiated referrals~~
+   ~~- Develop clinic interface for initiating specialized service requests~~
+   ~~- Build MVS provider notification and response system~~
+   ~~- Create pet owner interface for selecting from available time slots~~
+   ~~- Implement three-way appointment confirmation workflow~~
+   ~~- Add status tracking throughout the referral process~~
+   ~~- Develop dashboard views for all three parties~~
+   ~~- Create result sharing mechanism for completed services~~
+   ~~- Implement notification system for the entire coordination process~~
 
 1. Implement payment processing system
    - Integrate Stripe API (configuration already exists)

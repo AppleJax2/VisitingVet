@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, Badge, Spinner } from 'react-bootstrap';
+import { Row, Col, Card, Button, Badge, Spinner, ListGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   Search, Calendar2Check, PlusCircle, 
-  GeoAlt, Clock, Stars, Bell
+  GeoAlt, Clock, Stars, Bell, FileEarmarkText
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { fetchPetOwnerDashboardData, fetchUserReminders, fetchUserPets, fetchUpcomingAppointments } from '../../services/api';
@@ -221,6 +221,19 @@ const PetOwnerDashboard = ({ user }) => {
               <h5 style={styles.cardTitle}>Add a Pet</h5>
               <p className="text-muted">
                 Register a new pet to your profile
+              </p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card style={styles.actionCard} as={Link} to="/dashboard/pet-owner/service-requests">
+            <Card.Body className="text-center p-4">
+              <div style={styles.actionIcon} className="mx-auto">
+                <FileEarmarkText />
+              </div>
+              <h5 style={styles.cardTitle}>Specialist Referrals</h5>
+              <p className="text-muted">
+                View referrals from your vet clinic.
               </p>
             </Card.Body>
           </Card>

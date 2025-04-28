@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Table, Button, Badge, Form, Tabs, Tab, Spinner, Alert } from 'react-bootstrap';
+import { Row, Col, Card, Table, Button, Badge, Form, Tabs, Tab, Spinner, Alert, ListGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   Calendar3, Clock, GeoAlt, Cash, Star, 
   PeopleFill, Check2Circle, XCircle, Eye, 
   Building, Download, Wallet2, BellFill,
-  PencilSquare, PlusCircle, BarChartFill
+  PencilSquare, PlusCircle, BarChartFill, FileEarmarkText
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
@@ -605,6 +605,26 @@ const ClinicDashboard = ({ user }) => {
           </Card>
         </Col>
       </Row>
+
+      {/* Service Requests Card */}
+      <Col md={4}>
+        <Card className="dashboard-card shadow-sm h-100">
+          <Card.Body className="text-center">
+            <FileEarmarkText size={40} className="mb-3 text-primary" />
+            <Card.Title>Specialist Referrals</Card.Title>
+            <Card.Text>
+              Manage referrals to mobile veterinary specialists.
+            </Card.Text>
+            <Button 
+              variant="primary" 
+              as={Link} 
+              to="/dashboard/clinic/service-requests"
+            >
+              Manage Referrals
+            </Button>
+          </Card.Body>
+        </Card>
+      </Col>
     </div>
   );
 };

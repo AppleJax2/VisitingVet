@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Table, Button, Badge, Form, Spinner, Alert } from 'react-bootstrap';
+import { Row, Col, Card, Table, Button, Badge, Form, Spinner, Alert, ListGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   Calendar3, Clock, GeoAlt, Cash, Star, 
   PeopleFill, Check2Circle, XCircle, Eye, 
-  BarChart, Download, Wallet2, BellFill 
+  BarChart, Download, Wallet2, BellFill, FileEarmarkText 
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
@@ -616,6 +616,26 @@ const ProviderDashboard = ({ user }) => {
           </Card>
         </Col>
       </Row>
+
+      {/* Service Requests Card */}
+      <Col md={4}>
+        <Card className="dashboard-card shadow-sm h-100">
+          <Card.Body className="text-center">
+            <FileEarmarkText size={40} className="mb-3 text-primary" />
+            <Card.Title>Service Requests</Card.Title>
+            <Card.Text>
+              View and respond to service requests from clinics.
+            </Card.Text>
+            <Button 
+              variant="primary" 
+              as={Link} 
+              to="/dashboard/provider/service-requests"
+            >
+              View Requests
+            </Button>
+          </Card.Body>
+        </Card>
+      </Col>
     </div>
   );
 };

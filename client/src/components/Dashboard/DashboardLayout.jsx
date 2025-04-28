@@ -4,18 +4,20 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   House, Calendar, Search, Person, 
   Building, Gear, BoxArrowRight, Download,
-  List, X, Bell, ChatDots
+  List as ListIcon, X as XIcon, BellFill, ChatDotsFill, FileEarmarkText,
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
+import { useAuth } from '../../contexts/AuthContext';
 
 // DashboardLayout serves as the base layout for all dashboard types
-const DashboardLayout = ({ children, user, onLogout }) => {
+const DashboardLayout = ({ children }) => {
+  const { user, logout } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
 
   // Determine active link
   const isActive = (path) => {
-    return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
   // Sidebar styles
@@ -45,6 +47,7 @@ const DashboardLayout = ({ children, user, onLogout }) => {
       textDecoration: 'none',
       display: 'flex',
       alignItems: 'center',
+      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
     },
     sidebarLogo: {
       marginRight: sidebarCollapsed ? '0' : '10px',
@@ -70,8 +73,10 @@ const DashboardLayout = ({ children, user, onLogout }) => {
       color: theme.colors.text.white,
     },
     navIcon: {
-      marginRight: sidebarCollapsed ? '0' : '10px',
+      marginRight: sidebarCollapsed ? '0' : '15px',
       fontSize: '1.2rem',
+      minWidth: '20px',
+      textAlign: 'center',
     },
     navText: {
       display: sidebarCollapsed ? 'none' : 'block',
@@ -80,7 +85,8 @@ const DashboardLayout = ({ children, user, onLogout }) => {
       marginLeft: sidebarCollapsed ? '70px' : '260px',
       padding: '20px',
       transition: 'all 0.3s ease',
-      minHeight: '100vh',
+      minHeight: 'calc(100vh - 60px)',
+      backgroundColor: theme.colors.background.light,
     },
     toggleButton: {
       position: 'absolute',
@@ -115,6 +121,9 @@ const DashboardLayout = ({ children, user, onLogout }) => {
       padding: '15px 20px',
       borderRadius: theme.borderRadius.md,
       boxShadow: theme.shadows.sm,
+      position: 'sticky',
+      top: 0,
+      zIndex: 1020,
     },
     headerActions: {
       display: 'flex',
@@ -132,17 +141,21 @@ const DashboardLayout = ({ children, user, onLogout }) => {
       backgroundColor: 'transparent',
       border: 'none',
       color: theme.colors.text.primary,
+      padding: 0,
     },
     profileImg: {
       width: '40px',
       height: '40px',
       borderRadius: '50%',
       marginRight: '10px',
+      objectFit: 'cover',
     },
   };
 
   // Different navigation items based on user role
   const getNavItems = () => {
+    const baseDashboardPath = `/dashboard/${user.role.toLowerCase()}`;
+    
     const commonItems = [
       {
         path: '/dashboard',
@@ -165,13 +178,18 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           text: 'My Appointments',
         },
         {
+          path: '/dashboard/pet-owner/service-requests',
+          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
+          text: 'Specialist Referrals',
+        },
+        {
           path: '/my-pets',
           icon: <Person style={sidebarStyles.navIcon} />,
           text: 'My Pets',
         },
         {
           path: '/manage-reminders',
-          icon: <Bell style={sidebarStyles.navIcon} />,
+          icon: <BellFill style={sidebarStyles.navIcon} />,
           text: 'Reminders',
         },
         {
@@ -189,6 +207,11 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           path: '/provider-appointments',
           icon: <Calendar style={sidebarStyles.navIcon} />,
           text: 'Appointments',
+        },
+        {
+          path: '/dashboard/provider/service-requests',
+          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
+          text: 'Service Requests',
         },
         {
           path: '/provider-clients',
@@ -215,6 +238,11 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           path: '/clinic-appointments',
           icon: <Calendar style={sidebarStyles.navIcon} />,
           text: 'Appointments',
+        },
+        {
+          path: '/dashboard/clinic/service-requests',
+          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
+          text: 'Specialist Referrals',
         },
         {
           path: '/clinic-staff',
@@ -244,7 +272,6 @@ const DashboardLayout = ({ children, user, onLogout }) => {
       <div style={sidebarStyles.sidebar}>
         <div style={sidebarStyles.sidebarHeader}>
           <Link to="/dashboard" style={sidebarStyles.sidebarBrand}>
-            {/* Logo can be an image or an icon */}
             <span style={sidebarStyles.sidebarLogo}>🐾</span>
             {!sidebarCollapsed && <span>VisitingVet</span>}
           </Link>
@@ -273,7 +300,7 @@ const DashboardLayout = ({ children, user, onLogout }) => {
               variant="link"
               onClick={(e) => {
                 e.preventDefault();
-                onLogout();
+                logout();
               }}
               style={{
                 ...sidebarStyles.navLink,
@@ -289,10 +316,10 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           </Nav.Item>
         </Nav>
 
-        {/* Install Now Button - Visible only for authenticated users */}
+        {/* Install Now Button - Example, functionality not implemented */}
         <Button style={sidebarStyles.installButton}>
           <Download style={sidebarStyles.installIcon} />
-          {!sidebarCollapsed && <span>Install Now</span>}
+          {!sidebarCollapsed && <span>Install App</span>}
         </Button>
 
         {/* Toggle Sidebar Button */}
@@ -300,26 +327,26 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           style={sidebarStyles.toggleButton}
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
         >
-          {sidebarCollapsed ? <List /> : <X />}
+          {sidebarCollapsed ? <ListIcon /> : <XIcon />}
         </Button>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div style={sidebarStyles.mainContent}>
-        {/* Header */}
+        {/* Top Header inside Main Content */}
         <div style={sidebarStyles.header}>
           <h4>Welcome, {user?.name || user?.email?.split('@')[0] || 'User'}</h4>
           <div style={sidebarStyles.headerActions}>
-            <Bell style={sidebarStyles.actionIcon} />
-            <ChatDots style={sidebarStyles.actionIcon} />
+            <BellFill style={sidebarStyles.actionIcon} />
+            <ChatDotsFill style={sidebarStyles.actionIcon} />
             <button style={sidebarStyles.profileButton}>
               <img
-                src={user?.profileImage || '/assets/default-profile.png'}
+                src={user?.profileImage || '/assets/images/default-profile.png'}
                 alt="Profile"
                 style={sidebarStyles.profileImg}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/assets/default-profile.png';
+                  e.target.src = '/assets/images/default-profile.png';
                 }}
               />
               <span>{user?.name || user?.email?.split('@')[0] || 'User'}</span>
@@ -327,8 +354,10 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           </div>
         </div>
 
-        {/* Dashboard Content */}
-        {children}
+        {/* Dashboard Content Rendered Here */}
+        <div className="mt-3">
+          {children}
+        </div>
       </div>
     </div>
   );
