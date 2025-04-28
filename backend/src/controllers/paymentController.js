@@ -551,8 +551,25 @@ const updateProfileFromStripeAccount = async (stripeAccountId, accountData) => {
  */
 exports.getPetOwnerPaymentHistory = asyncHandler(async (req, res, next) => {
     const userId = req.user.id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 15; 
+    const skip = (page - 1) * limit;
 
-    const payments = await Payment.find({ userId: userId })
+    // Build filter
+    const filter = { userId: userId };
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.startDate || req.query.endDate) {
+        filter.createdAt = {};
+        if (req.query.startDate) filter.createdAt.$gte = new Date(req.query.startDate);
+        if (req.query.endDate) {
+            const endDate = new Date(req.query.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            filter.createdAt.$lte = endDate;
+        }
+    }
+
+    const total = await Payment.countDocuments(filter);
+    const payments = await Payment.find(filter)
         .populate({
             path: 'appointmentId',
             select: 'appointmentTime status serviceId',
@@ -565,7 +582,9 @@ exports.getPetOwnerPaymentHistory = asyncHandler(async (req, res, next) => {
             path: 'providerId', // User ref for provider
             select: 'name' // Select provider name
         })
-        .sort({ createdAt: -1 }); // Sort by most recent
+        .sort({ createdAt: -1 }) // Sort by most recent
+        .skip(skip)
+        .limit(limit);
 
     // Format data for frontend if needed
     const formattedPayments = payments.map(p => ({
@@ -580,7 +599,17 @@ exports.getPetOwnerPaymentHistory = asyncHandler(async (req, res, next) => {
         paymentIntentId: p.stripePaymentIntentId,
     }));
 
-    res.status(200).json({ success: true, count: formattedPayments.length, data: formattedPayments });
+    res.status(200).json({
+        success: true, 
+        count: payments.length, 
+        pagination: { 
+            total, 
+            page, 
+            limit, 
+            totalPages: Math.ceil(total / limit) 
+        }, 
+        data: formattedPayments 
+    });
 });
 
 /**
@@ -590,9 +619,26 @@ exports.getPetOwnerPaymentHistory = asyncHandler(async (req, res, next) => {
  */
 exports.getProviderPaymentHistory = asyncHandler(async (req, res, next) => {
     const providerUserId = req.user.id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 15;
+    const skip = (page - 1) * limit;
 
+    // Build filter
+    const filter = { providerId: providerUserId };
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.startDate || req.query.endDate) {
+        filter.createdAt = {};
+        if (req.query.startDate) filter.createdAt.$gte = new Date(req.query.startDate);
+        if (req.query.endDate) {
+            const endDate = new Date(req.query.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            filter.createdAt.$lte = endDate;
+        }
+    }
+
+    const total = await Payment.countDocuments(filter);
     // Find payments where the provider was the recipient
-    const payments = await Payment.find({ providerId: providerUserId })
+    const payments = await Payment.find(filter)
         .populate({
             path: 'appointmentId',
             select: 'appointmentTime status serviceId petOwnerId',
@@ -601,7 +647,9 @@ exports.getProviderPaymentHistory = asyncHandler(async (req, res, next) => {
                 { path: 'petOwnerId', select: 'name email' } // Include pet owner details
             ]
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
 
     // Format data for frontend
     const formattedPayments = payments.map(p => ({
@@ -620,7 +668,17 @@ exports.getProviderPaymentHistory = asyncHandler(async (req, res, next) => {
         paymentIntentId: p.stripePaymentIntentId,
     }));
 
-    res.status(200).json({ success: true, count: formattedPayments.length, data: formattedPayments });
+    res.status(200).json({
+         success: true, 
+         count: payments.length, 
+         pagination: { 
+            total, 
+            page, 
+            limit, 
+            totalPages: Math.ceil(total / limit) 
+        }, 
+        data: formattedPayments 
+    });
 });
 
 /**
