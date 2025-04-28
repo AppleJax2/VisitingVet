@@ -22,8 +22,8 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
 
 ## Spacing
 
-- [ ] Audit and apply 8px grid spacing consistently for padding/margins within core components (`buttons.scss`, `cards.scss`, `forms.scss`, `modals.scss`). *Dependency: 8px grid system definition.*
-- [ ] Review and potentially adjust spacing utility classes in `client/src/styles/utility-classes.scss` for alignment with the 8px grid.
+- [x] Audit and apply 8px grid spacing consistently for padding/margins within core components (`buttons.scss`, `cards.scss`, `forms.scss`, `modals.scss`). *Dependency: 8px grid system definition.*
+- [x] Review and potentially adjust spacing utility classes in `client/src/styles/utility-classes.scss` for alignment with the 8px grid.
 
 ## Buttons (client/src/styles/components/buttons.scss)
 
