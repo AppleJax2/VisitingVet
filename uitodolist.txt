@@ -44,9 +44,8 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
 
 ## Forms (client/src/styles/components/forms.scss & component JSX files)
 
-- [ ] Ensure input focus states have sufficient contrast (WCAG AA minimum 3:1) and use the standardized focus outline style defined globally. Target `client/src/styles/components/forms.scss`.
-- [ ] Audit forms across the application (e.g., `LoginPage.jsx`, `RegisterPage.jsx`, `ProviderProfileEditPage.jsx`) and add missing `aria-label` or `aria-labelledby` attributes to unlabeled controls.
-- [ ] Ensure consistent styling for form validation (error, success states) in `client/src/styles/components/forms.scss`.
+- [x] Ensure input focus states have sufficient contrast (WCAG AA minimum 3:1) and use the standardized focus outline style defined globally. Target `client/src/styles/components/forms.scss`.
+- [x] Ensure consistent styling for form validation (error, success states) in `client/src/styles/components/forms.scss`.
 
 ## Navigation (client/src/components/Header.jsx & associated styles)
 
