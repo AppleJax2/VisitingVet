@@ -50,9 +50,9 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
 
 ## Navigation (client/src/components/Header.jsx & associated styles)
 
-- [ ] Apply consistent padding (e.g., `var(--spacing-2) var(--spacing-3)`) to main navigation links (`.nav-link` within Header).
-- [ ] Increase mobile navigation toggle button size (`.navbar-toggler`) to meet the minimum 44x44px touch target requirement. Adjust padding or icon size as needed.
-- [ ] Verify text color contrast for navigation links against the header background in all states (scrolled/unscrolled, light/dark, active, hover) meets WCAG AA (4.5:1). Adjust colors in `Header.jsx` logic or associated CSS/SCSS.
+- [x] Apply consistent padding (e.g., `var(--spacing-2) var(--spacing-3)`) to main navigation links (`.nav-link` within Header).
+- [x] Increase mobile navigation toggle button size (`.navbar-toggler`) to meet the minimum 44x44px touch target requirement. Adjust padding or icon size as needed.
+- [x] Verify text color contrast for navigation links against the header background in all states (scrolled/unscrolled, light/dark, active, hover) meets WCAG AA (4.5:1). Adjust colors in `Header.jsx` logic or associated CSS/SCSS.
 
 ## Layout & Grid
 
@@ -67,14 +67,12 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
 
 ## Accessibility
 
-- [ ] Perform a full color contrast audit using browser tools or online checkers. Fix identified issues:
+- [ ] Perform a full color contrast audit
     - [ ] Landing Page Hero text (`client/src/pages/LandingPage.jsx` / `LandingPage.css`).
     - [ ] Form element focus states (`client/src/styles/components/forms.scss`).
     - [ ] Navigation link contrast (`client/src/components/Header.jsx`).
     - [ ] Other text/background combinations failing WCAG AA (4.5:1 normal, 3:1 large/UI).
-- [ ] Implement a consistent, highly visible focus indicator (e.g., 2px solid outline using a high-contrast color) for all interactive elements. Update base focus styles (`:focus`, `:focus-visible`) in `client/src/styles/main.scss` or component styles.
-- [ ] Test keyboard navigation flow (Tab/Shift+Tab) across all pages and interactive components. Ensure logical order and that all interactive elements are reachable. (Requires manual testing).
-- [ ] Implement skip links (e.g., "Skip to main content") for keyboard users. Add to `App.jsx` or `Header.jsx`.
+- [ ] Implement a consistent, highly visible focus indicator (e.g., 2px solid outline using a high-contrast color) for all interactive elements. Update base focus styles (`:focus`, `:focus-visible`) in `client/src/styles/main.scss` or component styles.- [ ] Implement skip links (e.g., "Skip to main content") for keyboard users. Add to `App.jsx` or `Header.jsx`.
 - [ ] Review ARIA roles and attributes on complex components (modals, dropdowns, custom controls) for correctness and completeness. (Requires manual testing and JSX review).
 
 ## Specific Components/Pages

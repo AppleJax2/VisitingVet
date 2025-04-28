@@ -102,7 +102,12 @@ const Header = () => {
   const NavLink = ({ to, children, className }) => {
     const isActive = location.pathname === to;
     const [isHovered, setIsHovered] = useState(false);
-    
+    // Use high-contrast color for all states
+    const baseColor = (isHomePage && !scrolled && !isAuthenticated)
+      ? theme.colors.text.white
+      : theme.colors.text.primary;
+    const activeColor = theme.colors.primary.main;
+    const hoverColor = theme.colors.primary.main;
     return (
       <Link 
         to={to} 
@@ -111,10 +116,8 @@ const Header = () => {
           padding: '0.5rem 1rem',
           fontWeight: 500,
           transition: 'color 0.3s ease',
-          color: isHomePage && !scrolled && !isAuthenticated 
-              ? theme.colors.text.white 
-              : (isActive || isHovered ? theme.colors.primary.main : theme.colors.text.primary),
-          borderBottom: isActive ? `2px solid ${theme.colors.primary.main}` : '2px solid transparent', 
+          color: isActive ? activeColor : (isHovered ? hoverColor : baseColor),
+          borderBottom: isActive ? `2px solid ${activeColor}` : '2px solid transparent', 
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
