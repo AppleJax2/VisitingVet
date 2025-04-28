@@ -1036,6 +1036,38 @@ export const adminGetServiceUsageMetrics = async (params = {}) => {
 
 // --- End Admin API Functions --- 
 
+// --- Admin Settings API Functions --- 
+
+/**
+ * Get all editable application settings (Admin only)
+ * @returns {Promise<Object>} Response with settings data
+ */
+export const adminGetSettings = async () => {
+  try {
+    const response = await api.get('/settings'); // Endpoint is /api/v1/settings
+    return response.data; // Expects { success: true, count: number, data: [...] }
+  } catch (error) {
+    console.error('Admin get settings error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch settings');
+  }
+};
+
+/**
+ * Update a specific application setting (Admin only)
+ * @param {string} key - The key of the setting to update
+ * @param {any} value - The new value for the setting
+ * @returns {Promise<Object>} Response with updated setting data
+ */
+export const adminUpdateSetting = async (key, value) => {
+  try {
+    const response = await api.put(`/settings/${key}`, { value });
+    return response.data; // Expects { success: true, data: { updatedSetting } }
+  } catch (error) {
+    console.error(`Admin update setting '${key}' error:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update setting');
+  }
+};
+
 // --- Upload Service --- 
 export const uploadPetImage = async (petId, imageFile) => {
     const formData = new FormData();

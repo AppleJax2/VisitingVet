@@ -18,6 +18,7 @@ const petRoutes = require('./routes/petRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const uploadRoutes = require('./routes/uploadRoutes'); // Import upload routes
+const settingsRoutes = require('./routes/settingsRoutes'); // Import settings routes
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server instance
@@ -56,6 +57,7 @@ app.use('/api/v1/profiles', profileRoutes);
 // Mount other routers...
 app.use('/api/v1/payments', paymentRoutes); // Mount other payment routes AFTER webhook
 app.use('/api/v1/upload', uploadRoutes); // Mount upload routes
+app.use('/api/v1/settings', settingsRoutes); // Mount settings routes
 
 // Error handler middleware (should be last)
 app.use(errorHandler);
