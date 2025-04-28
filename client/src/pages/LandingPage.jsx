@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
@@ -16,10 +16,23 @@ const farmAnimalImage = "https://images.unsplash.com/photo-1570042225831-d98fa75
 const ctaBgImage = "https://images.unsplash.com/photo-1551730459-92db2a308d6a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
 
 const LandingPage = () => {
+  useEffect(() => {
+    const elements = document.querySelectorAll('.scroll-fade-in');
+    const observer = new window.IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+    elements.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="landing-page">
       {/* Hero Section - Modern Design with Animated Content */}
-      <section className="hero-section position-relative overflow-hidden">
+      <section className="hero-section position-relative overflow-hidden scroll-fade-in" tabIndex="0" aria-label="Hero section">
         <div className="hero-bg-container position-absolute w-100 h-100">
           {/* Consistent overlay gradient */}
           <div className="hero-bg-overlay position-absolute w-100 h-100" 
@@ -93,7 +106,7 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section - Card-based with Icons */}
-      <section className="py-5 bg-white section">
+      <section className="py-5 bg-white section scroll-fade-in" tabIndex="0" aria-label="Services section">
         <Container>
           <div className="text-center mb-5">
             <span className="badge px-3 py-2 mb-2 section-badge-primary">OUR SERVICES</span>
@@ -162,7 +175,7 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works Section - Timeline Style */}
-      <section className="py-5 bg-light section">
+      <section className="py-5 bg-light section scroll-fade-in" tabIndex="0" aria-label="How it works section">
         <Container>
           <div className="text-center mb-5">
             <span className="badge px-3 py-2 mb-2 section-badge-secondary">SIMPLE PROCESS</span>
@@ -235,7 +248,7 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials Section - Modern Carousel */}
-      <section className="py-5 position-relative overflow-hidden section">
+      <section className="py-5 position-relative overflow-hidden section scroll-fade-in" tabIndex="0" aria-label="Testimonials section">
         <Container>
           <div className="text-center mb-5">
             <span className="badge px-3 py-2 mb-2 section-badge-accent">TESTIMONIALS</span>
@@ -250,8 +263,8 @@ const LandingPage = () => {
             indicators={true}
             interval={5000}
             className="testimonial-carousel py-3"
-            prevIcon={<span aria-hidden="true" className="carousel-control-icon prev" />}
-            nextIcon={<span aria-hidden="true" className="carousel-control-icon next" />}
+            prevIcon={<span aria-label="Previous testimonial" className="carousel-control-icon prev" />}
+            nextIcon={<span aria-label="Next testimonial" className="carousel-control-icon next" />}
           >
             {[
               {
@@ -336,7 +349,7 @@ const LandingPage = () => {
       </section>
 
       {/* Call to Action Section */}
-      <section className="cta-section py-5 position-relative" style={{
+      <section className="cta-section py-5 position-relative scroll-fade-in" tabIndex="0" aria-label="Call to action section" style={{
         background: `linear-gradient(rgba(18, 68, 56, 0.9), rgba(87, 126, 70, 0.9)), url("${ctaBgImage}") no-repeat center center/cover`,
         padding: '80px 0',
       }}>
@@ -352,6 +365,7 @@ const LandingPage = () => {
                   variant="primary"
                   size="lg"
                   className="fw-semibold px-4 py-3"
+                  aria-label="Register as Provider"
                 >
                   Register as Provider <ArrowRight className="ms-2" />
                 </Button>
@@ -361,6 +375,7 @@ const LandingPage = () => {
                   variant="outline-light" 
                   size="lg"
                   className="fw-semibold px-4 py-3"
+                  aria-label="Learn more about providing care"
                 >
                   Learn More
                 </Button>
