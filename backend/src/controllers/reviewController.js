@@ -134,7 +134,11 @@ exports.getMyReviews = asyncHandler(async (req, res, next) => {
  * @access  Private (Admin)
  */
 exports.getPendingReviews = asyncHandler(async (req, res, next) => {
-    // TODO: Add pagination
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10; // Default limit 10
+    const skip = (page - 1) * limit;
+
+    const total = await Review.countDocuments({ moderationStatus: 'Pending' });
     const reviews = await Review.find({ moderationStatus: 'Pending' })
         .populate('reviewer', 'name email')
         .populate({
@@ -147,9 +151,21 @@ exports.getPendingReviews = asyncHandler(async (req, res, next) => {
             select: 'appointmentTime serviceId',
              populate: { path: 'serviceId', select: 'name price' }
         })
-        .sort({ createdAt: 1 }); // Show oldest first for moderation queue
+        .sort({ createdAt: 1 }) // Show oldest first for moderation queue
+        .skip(skip)
+        .limit(limit);
 
-    res.status(200).json({ success: true, count: reviews.length, data: reviews });
+    res.status(200).json({
+        success: true,
+        count: reviews.length,
+        pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+        },
+        data: reviews
+    });
 });
 
 /**
