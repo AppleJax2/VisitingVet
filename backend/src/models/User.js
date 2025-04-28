@@ -78,6 +78,13 @@ const userSchema = new mongoose.Schema({
     default: 0, // Represents number of warnings or severity level
   },
 
+  // Stripe Customer ID
+  stripeCustomerId: {
+    type: String,
+    unique: true, // Each user should have a unique Stripe customer ID
+    sparse: true, // Allow null/undefined values without enforcing uniqueness
+  },
+
   // Add other fields common to all users later if needed
   // Specific role details might be in separate linked collections or embedded
 }, { timestamps: true });

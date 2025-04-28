@@ -109,6 +109,27 @@ const visitingVetProfileSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+
+  // Stripe Connect Information
+  stripeAccountId: {
+    type: String,
+    unique: true,
+    sparse: true, // Allow null/undefined, unique only when set
+  },
+  stripeAccountStatus: {
+    type: String,
+    enum: ['onboarding_incomplete', 'pending_verification', 'verified', 'restricted', 'disabled'],
+    default: 'onboarding_incomplete',
+  },
+  stripeChargesEnabled: {
+    type: Boolean,
+    default: false, // Indicates if payouts can be made
+  },
+  stripePayoutsEnabled: {
+    type: Boolean,
+    default: false, // Indicates if payouts can be sent from Stripe
+  },
+
 }, { timestamps: true });
 
 // Virtual for fetching services

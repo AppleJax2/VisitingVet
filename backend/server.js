@@ -15,6 +15,7 @@ const reminderRoutes = require('./src/routes/reminderRoutes');
 const clinicRoutes = require('./src/routes/clinicRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const paymentRoutes = require('./src/routes/paymentRoutes');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -24,7 +25,22 @@ connectDB();
 
 const app = express();
 
-// Body parser
+// IMPORTANT: Stripe webhook needs raw body, so define it BEFORE express.json()
+// We need to mount the webhook route separately here.
+app.use('/api/payments/webhook', express.raw({type: 'application/json'}), (req, res, next) => {
+    // Find the specific webhook handler from paymentRoutes and call it
+    const paymentRouter = require('./src/routes/paymentRoutes');
+    // Manually find the route handler for POST /webhook
+    const webhookHandler = paymentRouter.stack.find(layer => layer.route && layer.route.path === '/webhook' && layer.route.methods.post);
+    if (webhookHandler && webhookHandler.handle) {
+        webhookHandler.handle(req, res, next);
+    } else {
+        console.error('Stripe webhook handler not found in paymentRoutes');
+        res.status(404).send('Webhook endpoint not configured correctly');
+    }
+});
+
+// Body parser - MUST be after the raw body route for webhook
 app.use(express.json());
 
 // Cookie parser
@@ -51,6 +67,7 @@ app.use('/api/reminders', reminderRoutes);
 app.use('/api/clinics', clinicRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {

@@ -29,6 +29,12 @@ const appointmentSchema = new mongoose.Schema({
     enum: ['Requested', 'Confirmed', 'Cancelled', 'Completed', 'CancelledByOwner'],
     default: 'Requested',
   },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Paid', 'Failed', 'Refunded', 'NotApplicable'], // NotApplicable for free services?
+    default: 'Pending', // Default to Pending until paid
+    index: true,
+  },
   notes: {
     type: String,
     maxlength: [500, 'Notes cannot be more than 500 characters'],
