@@ -6,17 +6,25 @@ import {
   GeoAlt, Clock, Stars, Bell, FileEarmarkText
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
-import { fetchPetOwnerDashboardData, fetchUserReminders, fetchUserPets, fetchUpcomingAppointments } from '../../services/api';
+import { 
+  fetchPetOwnerDashboardData, 
+  fetchUserReminders, 
+  fetchUserPets, 
+  fetchUpcomingAppointments,
+  fetchTopRatedVets
+} from '../../services/api';
 import AppointmentDetailModal from '../AppointmentDetailModal';
 
 const PetOwnerDashboard = ({ user }) => {
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [pets, setPets] = useState([]);
   const [reminders, setReminders] = useState([]);
+  const [topVets, setTopVets] = useState([]);
   const [loading, setLoading] = useState({
     appointments: true,
     pets: true,
-    reminders: true
+    reminders: true,
+    topVets: true
   });
   const [error, setError] = useState(null);
   
@@ -31,18 +39,21 @@ const PetOwnerDashboard = ({ user }) => {
         const appointmentsPromise = fetchUpcomingAppointments();
         const petsPromise = fetchUserPets();
         const remindersPromise = fetchUserReminders();
+        const topVetsPromise = fetchTopRatedVets(user?.location);
         
         // Wait for all data to load
-        const [appointmentsData, petsData, remindersData] = await Promise.all([
+        const [appointmentsData, petsData, remindersData, topVetsData] = await Promise.all([
           appointmentsPromise,
           petsPromise,
-          remindersPromise
+          remindersPromise,
+          topVetsPromise
         ]);
         
         // Update state with the fetched data
         setUpcomingAppointments(appointmentsData.appointments || []);
         setPets(petsData.pets || []);
         setReminders(remindersData.reminders || []);
+        setTopVets(topVetsData.vets || []);
       } catch (err) {
         console.error('Error loading dashboard data:', err);
         setError('Failed to load some dashboard data. Please try refreshing the page.');
@@ -50,13 +61,14 @@ const PetOwnerDashboard = ({ user }) => {
         setLoading({
           appointments: false,
           pets: false,
-          reminders: false
+          reminders: false,
+          topVets: false
         });
       }
     };
     
     loadDashboardData();
-  }, [user?._id]);
+  }, [user?._id, user?.location]);
 
   // Reload data if an appointment is updated via the modal
   const handleAppointmentUpdate = (updatedAppointment) => {
@@ -171,6 +183,12 @@ const PetOwnerDashboard = ({ user }) => {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '150px',
+    },
+    vetImage: {
+      width: '50px', 
+      height: '50px', 
+      borderRadius: '50%', 
+      marginRight: '15px'
     }
   };
 
@@ -186,7 +204,7 @@ const PetOwnerDashboard = ({ user }) => {
     <div className="pet-owner-dashboard">
       {/* Quick Action Cards */}
       <Row className="mb-4">
-        <Col md={4}>
+        <Col md={3}>
           <Card style={styles.actionCard} as={Link} to="/search-providers">
             <Card.Body className="text-center p-4">
               <div style={styles.actionIcon} className="mx-auto">
@@ -199,7 +217,7 @@ const PetOwnerDashboard = ({ user }) => {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={4}>
+        <Col md={3}>
           <Card style={styles.actionCard} as={Link} to="/my-appointments">
             <Card.Body className="text-center p-4">
               <div style={styles.actionIcon} className="mx-auto">
@@ -212,7 +230,7 @@ const PetOwnerDashboard = ({ user }) => {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={4}>
+        <Col md={3}>
           <Card style={styles.actionCard} as={Link} to="/my-pets">
             <Card.Body className="text-center p-4">
               <div style={styles.actionIcon} className="mx-auto">
@@ -225,7 +243,7 @@ const PetOwnerDashboard = ({ user }) => {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={4}>
+        <Col md={3}>
           <Card style={styles.actionCard} as={Link} to="/dashboard/pet-owner/service-requests">
             <Card.Body className="text-center p-4">
               <div style={styles.actionIcon} className="mx-auto">
@@ -450,37 +468,35 @@ const PetOwnerDashboard = ({ user }) => {
               <h5 style={styles.sectionTitle} className="mb-0">Top Rated Vets Near You</h5>
             </Card.Header>
             <Card.Body>
-              <div className="d-flex mb-3 pb-3" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-                <img 
-                  src="https://randomuser.me/api/portraits/women/68.jpg" 
-                  alt="Dr. Sarah Johnson"
-                  style={{ width: '50px', height: '50px', borderRadius: '50%', marginRight: '15px' }}
-                />
-                <div>
-                  <h6 style={styles.cardTitle} className="mb-0">Dr. Sarah Johnson</h6>
-                  <div className="d-flex align-items-center mb-1">
-                    <Stars className="me-1" style={{ color: theme.colors.accent.gold }} />
-                    <span className="text-muted">4.9 (42 reviews)</span>
+              {loading.topVets ? (
+                renderLoading('top vets')
+              ) : topVets.length > 0 ? (
+                topVets.map((vet, index) => (
+                  <div 
+                    key={vet._id}
+                    className="d-flex mb-3 pb-3" 
+                    style={{ borderBottom: index !== topVets.length - 1 ? `1px solid ${theme.colors.background.light}` : 'none' }}
+                  >
+                    <img 
+                      src={vet.profileImage || 'https://via.placeholder.com/150?text=Vet'} 
+                      alt={vet.name}
+                      style={styles.vetImage}
+                    />
+                    <div>
+                      <h6 style={styles.cardTitle} className="mb-0">{vet.name}</h6>
+                      <div className="d-flex align-items-center mb-1">
+                        <Stars className="me-1" style={{ color: theme.colors.accent.gold }} />
+                        <span className="text-muted">{vet.rating.toFixed(1)} ({vet.reviewCount} reviews)</span>
+                      </div>
+                      <small className="text-muted">{vet.specialty}</small>
+                    </div>
                   </div>
-                  <small className="text-muted">Small Animals Specialist</small>
+                ))
+              ) : (
+                <div className="text-center py-3">
+                  <p className="text-muted mb-3">No veterinarians found in your area</p>
                 </div>
-              </div>
-              
-              <div className="d-flex mb-3">
-                <img 
-                  src="https://randomuser.me/api/portraits/men/32.jpg" 
-                  alt="Dr. Michael Chen"
-                  style={{ width: '50px', height: '50px', borderRadius: '50%', marginRight: '15px' }}
-                />
-                <div>
-                  <h6 style={styles.cardTitle} className="mb-0">Dr. Michael Chen</h6>
-                  <div className="d-flex align-items-center mb-1">
-                    <Stars className="me-1" style={{ color: theme.colors.accent.gold }} />
-                    <span className="text-muted">4.8 (37 reviews)</span>
-                  </div>
-                  <small className="text-muted">Exotic Animals Specialist</small>
-                </div>
-              </div>
+              )}
               
               <div className="text-center mt-3">
                 <Button 

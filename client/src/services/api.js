@@ -410,6 +410,142 @@ export const fetchClinicStaff = async (clinicId) => {
 
 // TODO: Add functions for clinic stats, inventory, reports, adding staff/appointments etc.
 
+/**
+ * Fetch clinic statistics (appointments, providers, clients, earnings)
+ * @param {string} clinicId - The ID of the clinic
+ * @returns {Promise<Object>} Response with clinic stats
+ */
+export const fetchClinicStats = async (clinicId) => {
+  try {
+    const response = await api.get(`/clinics/stats`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch clinic stats error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch clinic statistics');
+  }
+};
+
+/**
+ * Fetch clinic inventory and alerts
+ * @param {string} clinicId - The ID of the clinic
+ * @returns {Promise<Object>} Response with clinic inventory data
+ */
+export const fetchClinicInventory = async (clinicId) => {
+  try {
+    const response = await api.get(`/clinics/inventory`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch clinic inventory error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch clinic inventory');
+  }
+};
+
+/**
+ * Fetch clinic revenue data for charts
+ * @param {string} clinicId - The ID of the clinic
+ * @returns {Promise<Object>} Response with revenue data
+ */
+export const fetchClinicRevenueData = async (clinicId) => {
+  try {
+    const response = await api.get(`/clinics/revenue-data`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch clinic revenue data error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch clinic revenue data');
+  }
+};
+
+/**
+ * Fetch clinic service distribution data for charts
+ * @param {string} clinicId - The ID of the clinic
+ * @returns {Promise<Object>} Response with service distribution data
+ */
+export const fetchClinicServiceData = async (clinicId) => {
+  try {
+    const response = await api.get(`/clinics/service-data`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch clinic service data error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch clinic service data');
+  }
+};
+
+/**
+ * Fetch top rated veterinarians for pet owner dashboard
+ * @param {Object} location - User location data
+ * @returns {Promise<Object>} Response with top rated vets
+ */
+export const fetchTopRatedVets = async (location) => {
+  try {
+    const response = await api.get('/profiles/visiting-vet/top-rated', { params: { location } });
+    return response.data;
+  } catch (error) {
+    console.error('Fetch top rated vets error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch top rated vets');
+  }
+};
+
+/**
+ * Fetch provider statistics for dashboard
+ * @param {string} providerId - The ID of the provider
+ * @returns {Promise<Object>} Response with provider stats
+ */
+export const fetchProviderStats = async (providerId) => {
+  try {
+    const response = await api.get(`/profiles/visiting-vet/stats`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch provider stats error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch provider statistics');
+  }
+};
+
+/**
+ * Fetch provider revenue data for charts
+ * @param {string} providerId - The ID of the provider
+ * @param {string} timeRange - Time range to fetch data for ('week', 'month')
+ * @returns {Promise<Object>} Response with revenue data
+ */
+export const fetchProviderRevenueData = async (providerId, timeRange = 'week') => {
+  try {
+    const response = await api.get(`/profiles/visiting-vet/revenue-data`, { params: { timeRange } });
+    return response.data;
+  } catch (error) {
+    console.error('Fetch provider revenue data error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch provider revenue data');
+  }
+};
+
+/**
+ * Fetch provider appointment type distribution for charts
+ * @param {string} providerId - The ID of the provider
+ * @returns {Promise<Object>} Response with appointment type distribution
+ */
+export const fetchProviderAppointmentTypes = async (providerId) => {
+  try {
+    const response = await api.get(`/profiles/visiting-vet/appointment-types`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch provider appointment types error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch provider appointment types');
+  }
+};
+
+/**
+ * Fetch provider recent activity
+ * @param {string} providerId - The ID of the provider
+ * @returns {Promise<Object>} Response with recent activity data
+ */
+export const fetchProviderActivity = async (providerId) => {
+  try {
+    const response = await api.get(`/profiles/visiting-vet/activity`);
+    return response.data;
+  } catch (error) {
+    console.error('Fetch provider activity error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch provider activity');
+  }
+};
+
 // --- Admin API Functions ---
 
 export const adminGetAllUsers = async (page = 1, limit = 25, filters = {}) => {

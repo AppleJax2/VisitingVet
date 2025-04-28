@@ -9,7 +9,14 @@ import {
 import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
 import 'chart.js/auto';
-import { getMyAppointmentsProvider, updateAppointmentStatus } from '../../services/api';
+import { 
+  getMyAppointmentsProvider, 
+  updateAppointmentStatus, 
+  fetchProviderStats, 
+  fetchProviderRevenueData, 
+  fetchProviderAppointmentTypes,
+  fetchProviderActivity 
+} from '../../services/api';
 import AppointmentDetailModal from '../AppointmentDetailModal';
 import { format } from 'date-fns';
 
@@ -20,85 +27,24 @@ const ProviderDashboard = ({ user }) => {
   const [appointmentsError, setAppointmentsError] = useState('');
   const [activity, setActivity] = useState([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
-  const [statsData, setStatsData] = useState({});
+  const [activityError, setActivityError] = useState('');
+  const [stats, setStats] = useState({
+    pendingAppointments: 0,
+    confirmedAppointments: 0,
+    totalEarnings: 0,
+    rating: 0,
+    reviewCount: 0
+  });
   const [loadingStats, setLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState('');
   
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
-  
-  // Sample data for demonstration
-  const stats = {
-    pendingAppointments: 5,
-    confirmedAppointments: 12,
-    totalEarnings: 2450,
-    rating: 4.8,
-    reviewCount: 42
-  };
-
-  const upcomingAppointments = [
-    {
-      id: 1,
-      clientName: 'Emily Thompson',
-      petName: 'Max',
-      service: 'Wellness Checkup',
-      date: '2023-11-30',
-      time: '10:00 AM',
-      status: 'pending',
-      location: '123 Maple St',
-      distance: '2.5 miles'
-    },
-    {
-      id: 2,
-      clientName: 'Robert Adams',
-      petName: 'Bella',
-      service: 'Vaccination',
-      date: '2023-11-30',
-      time: '2:30 PM',
-      status: 'confirmed',
-      location: '456 Oak Ave',
-      distance: '3.2 miles'
-    },
-    {
-      id: 3,
-      clientName: 'Jennifer Wilson',
-      petName: 'Charlie',
-      service: 'Dental Cleaning',
-      date: '2023-12-01',
-      time: '11:15 AM',
-      status: 'confirmed',
-      location: '789 Pine Rd',
-      distance: '1.8 miles'
-    }
-  ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'new_appointment',
-      message: 'New appointment request from Sarah Miller',
-      time: '10 minutes ago'
-    },
-    {
-      id: 2,
-      type: 'completed_appointment',
-      message: 'Completed appointment with James Johnson',
-      time: '2 hours ago'
-    },
-    {
-      id: 3,
-      type: 'new_review',
-      message: 'New 5-star review from Melissa Davis',
-      time: '1 day ago'
-    }
-  ];
-  
-  // Chart data
-  const earningsData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  // Chart data state
+  const [earningsData, setEarningsData] = useState({
+    labels: [],
     datasets: [
       {
-        label: 'Weekly Earnings',
-        data: [320, 420, 380, 450, 600, 380, 340],
+        label: 'Earnings',
+        data: [],
         backgroundColor: `${theme.colors.primary.main}50`,
         borderColor: theme.colors.primary.main,
         borderWidth: 2,
@@ -106,14 +52,13 @@ const ProviderDashboard = ({ user }) => {
         fill: true,
       }
     ]
-  };
-
-  const appointmentTypeData = {
-    labels: ['Checkups', 'Vaccinations', 'Dental Care', 'Emergency', 'Other'],
+  });
+  const [appointmentTypeData, setAppointmentTypeData] = useState({
+    labels: [],
     datasets: [
       {
         label: 'Appointment Types',
-        data: [35, 25, 15, 10, 15],
+        data: [],
         backgroundColor: [
           theme.colors.primary.main,
           theme.colors.primary.light,
@@ -124,7 +69,12 @@ const ProviderDashboard = ({ user }) => {
         borderWidth: 1,
       }
     ]
-  };
+  });
+  const [loadingChartData, setLoadingChartData] = useState(true);
+  const [chartDataError, setChartDataError] = useState('');
+  
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
 
   // Chart options
   const chartOptions = {
@@ -218,7 +168,7 @@ const ProviderDashboard = ({ user }) => {
         completed: '#6c757d',
       };
       return {
-        backgroundColor: colors[status],
+        backgroundColor: colors[status.toLowerCase()],
       };
     },
     activityIcon: (type) => {
@@ -229,8 +179,8 @@ const ProviderDashboard = ({ user }) => {
         payment_received: theme.colors.secondary.main,
       };
       return {
-        backgroundColor: `${colors[type]}20`,
-        color: colors[type],
+        backgroundColor: `${colors[type] || colors.new_appointment}20`,
+        color: colors[type] || colors.new_appointment,
         width: '40px',
         height: '40px',
         borderRadius: '8px',
@@ -255,6 +205,12 @@ const ProviderDashboard = ({ user }) => {
       backgroundColor: `${theme.colors.primary.main}20`,
       color: theme.colors.primary.main,
     },
+    loadingContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '150px',
+    }
   };
 
   // Get activity icon based on activity type
@@ -275,7 +231,14 @@ const ProviderDashboard = ({ user }) => {
 
   useEffect(() => {
     fetchAppointments();
+    fetchStats();
+    fetchActivity();
+    fetchChartData(dateRange);
   }, []);
+  
+  useEffect(() => {
+    fetchChartData(dateRange);
+  }, [dateRange]);
 
   const fetchAppointments = async () => {
     setLoadingAppointments(true);
@@ -304,6 +267,106 @@ const ProviderDashboard = ({ user }) => {
       setLoadingAppointments(false);
     }
   };
+  
+  const fetchStats = async () => {
+    setLoadingStats(true);
+    setStatsError('');
+    try {
+      const response = await fetchProviderStats(user?._id);
+      if (response.success) {
+        setStats(response.stats || {
+          pendingAppointments: 0,
+          confirmedAppointments: 0,
+          totalEarnings: 0,
+          rating: 0,
+          reviewCount: 0
+        });
+      } else {
+        setStatsError(response.error || 'Failed to load provider statistics.');
+      }
+    } catch (err) {
+      console.error('Error fetching provider stats:', err);
+      setStatsError(err.message || 'An error occurred fetching statistics.');
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+  
+  const fetchActivity = async () => {
+    setLoadingActivity(true);
+    setActivityError('');
+    try {
+      const response = await fetchProviderActivity(user?._id);
+      if (response.success) {
+        setActivity(response.activity || []);
+      } else {
+        setActivityError(response.error || 'Failed to load recent activity.');
+      }
+    } catch (err) {
+      console.error('Error fetching provider activity:', err);
+      setActivityError(err.message || 'An error occurred fetching activity.');
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+  
+  const fetchChartData = async (range) => {
+    setLoadingChartData(true);
+    setChartDataError('');
+    try {
+      // Load earnings data
+      const revenueResponse = await fetchProviderRevenueData(user?._id, range);
+      if (revenueResponse.success) {
+        setEarningsData({
+          labels: revenueResponse.data.labels || [],
+          datasets: [
+            {
+              label: range === 'week' ? 'Weekly Earnings' : 'Monthly Earnings',
+              data: revenueResponse.data.values || [],
+              backgroundColor: `${theme.colors.primary.main}50`,
+              borderColor: theme.colors.primary.main,
+              borderWidth: 2,
+              tension: 0.4,
+              fill: true,
+            }
+          ]
+        });
+      } else {
+        setChartDataError(revenueResponse.error || 'Failed to load earnings data.');
+      }
+      
+      // Load appointment type distribution data
+      const appointmentTypesResponse = await fetchProviderAppointmentTypes(user?._id);
+      if (appointmentTypesResponse.success) {
+        setAppointmentTypeData({
+          labels: appointmentTypesResponse.data.labels || [],
+          datasets: [
+            {
+              label: 'Appointment Types',
+              data: appointmentTypesResponse.data.values || [],
+              backgroundColor: [
+                theme.colors.primary.main,
+                theme.colors.primary.light,
+                theme.colors.secondary.main,
+                theme.colors.accent.gold,
+                theme.colors.accent.lightGreen,
+              ],
+              borderWidth: 1,
+            }
+          ]
+        });
+      } else {
+        setChartDataError(prevError => 
+          prevError ? `${prevError} Also, failed to load appointment type data.` : 'Failed to load appointment type data.'
+        );
+      }
+    } catch (err) {
+      console.error('Error fetching chart data:', err);
+      setChartDataError(err.message || 'An error occurred fetching chart data.');
+    } finally {
+      setLoadingChartData(false);
+    }
+  };
 
   const handleUpdateStatus = async (appointmentId, newStatus) => {
       try {
@@ -329,6 +392,14 @@ const ProviderDashboard = ({ user }) => {
       setShowDetailModal(false);
       fetchAppointments(); 
   };
+  
+  const renderLoading = (section) => (
+    <div style={styles.loadingContainer}>
+      <Spinner animation="border" role="status" style={{ color: theme.colors.primary.main }}>
+        <span className="visually-hidden">Loading {section}...</span>
+      </Spinner>
+    </div>
+  );
 
   return (
     <div className="provider-dashboard">
@@ -348,7 +419,11 @@ const ProviderDashboard = ({ user }) => {
               </div>
               <div>
                 <h6 className="text-muted mb-1">Pending Appointments</h6>
-                <h3 className="mb-0">{stats.pendingAppointments}</h3>
+                {loadingStats ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <h3 className="mb-0">{stats.pendingAppointments}</h3>
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -368,7 +443,11 @@ const ProviderDashboard = ({ user }) => {
               </div>
               <div>
                 <h6 className="text-muted mb-1">Confirmed Appointments</h6>
-                <h3 className="mb-0">{stats.confirmedAppointments}</h3>
+                {loadingStats ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <h3 className="mb-0">{stats.confirmedAppointments}</h3>
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -388,7 +467,11 @@ const ProviderDashboard = ({ user }) => {
               </div>
               <div>
                 <h6 className="text-muted mb-1">Average Rating</h6>
-                <h3 className="mb-0">{stats.rating} <small className="text-muted fs-6">({stats.reviewCount})</small></h3>
+                {loadingStats ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <h3 className="mb-0">{stats.rating.toFixed(1)} <small className="text-muted fs-6">({stats.reviewCount})</small></h3>
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -408,7 +491,11 @@ const ProviderDashboard = ({ user }) => {
               </div>
               <div>
                 <h6 className="text-muted mb-1">Monthly Earnings</h6>
-                <h3 className="mb-0">${stats.totalEarnings}</h3>
+                {loadingStats ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <h3 className="mb-0">${stats.totalEarnings}</h3>
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -444,7 +531,13 @@ const ProviderDashboard = ({ user }) => {
             </Card.Header>
             <Card.Body>
               <div style={styles.chartContainer}>
-                <Chart type="line" data={earningsData} options={chartOptions} />
+                {loadingChartData ? (
+                  renderLoading('earnings data')
+                ) : chartDataError ? (
+                  <Alert variant="danger">{chartDataError}</Alert>
+                ) : (
+                  <Chart type="line" data={earningsData} options={chartOptions} />
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -457,7 +550,13 @@ const ProviderDashboard = ({ user }) => {
             </Card.Header>
             <Card.Body>
               <div style={styles.chartContainer}>
-                <Chart type="doughnut" data={appointmentTypeData} options={doughnutOptions} />
+                {loadingChartData ? (
+                  renderLoading('appointment types')
+                ) : chartDataError ? (
+                  <Alert variant="danger">{chartDataError}</Alert>
+                ) : (
+                  <Chart type="doughnut" data={appointmentTypeData} options={doughnutOptions} />
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -475,57 +574,59 @@ const ProviderDashboard = ({ user }) => {
               </Link>
             </Card.Header>
             <Card.Body>
-              {loadingAppointments && <div className="text-center"><Spinner animation="border" /></div>}
+              {loadingAppointments && renderLoading('appointments')}
               {appointmentsError && <Alert variant="danger">{appointmentsError}</Alert>}
               {!loadingAppointments && !appointmentsError && appointments.length === 0 && (
                   <p className="text-center text-muted">No upcoming appointments found.</p>
               )}
-              {upcomingAppointments.map((appointment) => (
-                <Card key={appointment.id} style={styles.appointmentCard}>
+              {!loadingAppointments && !appointmentsError && appointments.map((appointment) => (
+                <Card key={appointment._id} style={styles.appointmentCard}>
                   <Card.Body>
                     <Row>
                       <Col md={6}>
                         <h6 style={{ color: theme.colors.primary.main, fontWeight: '600' }}>
-                          {appointment.service} for {appointment.petName}
+                          {appointment.service?.name || 'Veterinary Service'} for {appointment.pet?.name || 'Pet'}
                         </h6>
                         <p className="text-muted mb-0">
-                          Client: {appointment.clientName}
+                          Client: {appointment.clientProfile?.user?.name || 'Client'}
                         </p>
                       </Col>
                       <Col md={4}>
                         <div style={styles.infoItem}>
                           <Clock style={styles.infoIcon} />
-                          {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
+                          {new Date(appointment.appointmentTime).toLocaleDateString()} at {new Date(appointment.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                         <div style={styles.infoItem}>
                           <GeoAlt style={styles.infoIcon} />
-                          {appointment.location} ({appointment.distance})
+                          {appointment.appointmentLocation || 'Location not specified'}
                         </div>
                       </Col>
                       <Col md={2} className="text-end d-flex flex-column justify-content-between">
                         <Badge 
-                          style={styles.statusBadge(appointment.status)}
+                          style={styles.statusBadge(appointment.status || 'pending')}
                           className="mb-2"
                         >
-                          {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                          {appointment.status ? 
+                            appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) : 
+                            'Pending'}
                         </Badge>
                         <div className="d-flex justify-content-end">
                           <Button 
                             variant="outline-primary" 
                             size="sm"
-                            as={Link}
-                            to={`/appointment/${appointment.id}`}
+                            onClick={() => handleShowDetails(appointment._id)}
                             className="me-1"
                             style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
                           >
                             <Eye size={16} />
                           </Button>
-                          {appointment.status === 'pending' && (
+                          {appointment.status === 'Requested' && (
                             <>
                               <Button 
                                 variant="outline-success" 
                                 size="sm"
                                 className="me-1"
+                                onClick={() => handleUpdateStatus(appointment._id, 'Confirmed')}
                                 style={{ borderColor: theme.colors.success, color: theme.colors.success }}
                               >
                                 <Check2Circle size={16} />
@@ -533,6 +634,7 @@ const ProviderDashboard = ({ user }) => {
                               <Button 
                                 variant="outline-danger" 
                                 size="sm"
+                                onClick={() => handleUpdateStatus(appointment._id, 'Cancelled')}
                                 style={{ borderColor: theme.colors.error, color: theme.colors.error }}
                               >
                                 <XCircle size={16} />
@@ -555,29 +657,36 @@ const ProviderDashboard = ({ user }) => {
               <h5 style={styles.sectionTitle} className="mb-0">Recent Activity</h5>
             </Card.Header>
             <Card.Body>
-              {recentActivity.map((activity) => (
+              {loadingActivity && renderLoading('activity')}
+              {activityError && <Alert variant="danger">{activityError}</Alert>}
+              {!loadingActivity && !activityError && activity.length === 0 && (
+                <p className="text-center text-muted">No recent activity found.</p>
+              )}
+              {!loadingActivity && !activityError && activity.map((activityItem) => (
                 <div 
-                  key={activity.id}
+                  key={activityItem._id}
                   className="d-flex align-items-start mb-4"
                 >
-                  <div style={styles.activityIcon(activity.type)}>
-                    {getActivityIcon(activity.type)}
+                  <div style={styles.activityIcon(activityItem.type)}>
+                    {getActivityIcon(activityItem.type)}
                   </div>
                   <div>
-                    <p className="mb-1">{activity.message}</p>
-                    <small className="text-muted">{activity.time}</small>
+                    <p className="mb-1">{activityItem.message}</p>
+                    <small className="text-muted">{activityItem.timeAgo}</small>
                   </div>
                 </div>
               ))}
               
-              <div className="text-center mt-3">
-                <Button 
-                  variant="outline-primary"
-                  style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                >
-                  View All Activity
-                </Button>
-              </div>
+              {!loadingActivity && !activityError && activity.length > 0 && (
+                <div className="text-center mt-3">
+                  <Button 
+                    variant="outline-primary"
+                    style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
+                  >
+                    View All Activity
+                  </Button>
+                </div>
+              )}
             </Card.Body>
           </Card>
           
@@ -618,24 +727,37 @@ const ProviderDashboard = ({ user }) => {
       </Row>
 
       {/* Service Requests Card */}
-      <Col md={4}>
-        <Card className="dashboard-card shadow-sm h-100">
-          <Card.Body className="text-center">
-            <FileEarmarkText size={40} className="mb-3 text-primary" />
-            <Card.Title>Service Requests</Card.Title>
-            <Card.Text>
-              View and respond to service requests from clinics.
-            </Card.Text>
-            <Button 
-              variant="primary" 
-              as={Link} 
-              to="/dashboard/provider/service-requests"
-            >
-              View Requests
-            </Button>
-          </Card.Body>
-        </Card>
-      </Col>
+      <Row>
+        <Col md={4}>
+          <Card className="dashboard-card shadow-sm h-100">
+            <Card.Body className="text-center">
+              <FileEarmarkText size={40} className="mb-3 text-primary" />
+              <Card.Title>Service Requests</Card.Title>
+              <Card.Text>
+                View and respond to service requests from clinics.
+              </Card.Text>
+              <Button 
+                variant="primary" 
+                as={Link} 
+                to="/dashboard/provider/service-requests"
+              >
+                View Requests
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Appointment Detail Modal */}
+      {selectedAppointmentId && (
+        <AppointmentDetailModal 
+          show={showDetailModal}
+          onHide={handleHideDetails}
+          appointmentId={selectedAppointmentId}
+          userRole="provider"
+          onUpdate={() => fetchAppointments()}
+        />
+      )}
     </div>
   );
 };

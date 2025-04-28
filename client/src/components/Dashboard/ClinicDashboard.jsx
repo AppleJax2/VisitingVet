@@ -10,7 +10,14 @@ import {
 import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
 import 'chart.js/auto';
-import { fetchClinicAppointments, fetchClinicStaff } from '../../services/api';
+import { 
+  fetchClinicAppointments, 
+  fetchClinicStaff, 
+  fetchClinicStats, 
+  fetchClinicInventory, 
+  fetchClinicRevenueData, 
+  fetchClinicServiceData 
+} from '../../services/api';
 import AppointmentDetailModal from '../AppointmentDetailModal';
 import { format } from 'date-fns';
 
@@ -23,30 +30,67 @@ const ClinicDashboard = ({ user }) => {
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [staffError, setStaffError] = useState('');
   
-  // Add inventoryAlerts state with sample data
-  const [inventoryAlerts, setInventoryAlerts] = useState([
-    { id: 1, item: 'Flea & Tick Medication', currentStock: 5, minRequired: 15, status: 'low' },
-    { id: 2, item: 'Sterile Bandages', currentStock: 3, minRequired: 20, status: 'low' },
-    { id: 3, item: 'Antibiotics', currentStock: 12, minRequired: 10, status: 'ok' },
-    { id: 4, item: 'Pet Food Samples', currentStock: 25, minRequired: 15, status: 'ok' }
-  ]);
+  // State for clinic stats
+  const [clinicStats, setClinicStats] = useState({
+    totalAppointments: 0,
+    totalProviders: 0,
+    totalClients: 0,
+    totalEarnings: 0
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState('');
+  
+  // State for inventory
+  const [inventoryAlerts, setInventoryAlerts] = useState([]);
+  const [loadingInventory, setLoadingInventory] = useState(true);
+  const [inventoryError, setInventoryError] = useState('');
+  
+  // State for chart data
+  const [revenueData, setRevenueData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Revenue',
+        data: [],
+        backgroundColor: `${theme.colors.primary.main}50`,
+        borderColor: theme.colors.primary.main,
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true,
+      }
+    ]
+  });
+  const [serviceDistributionData, setServiceDistributionData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Services',
+        data: [],
+        backgroundColor: [
+          theme.colors.primary.main,
+          theme.colors.primary.light,
+          theme.colors.secondary.main,
+          theme.colors.accent.gold,
+          theme.colors.error,
+          theme.colors.accent.lightGreen,
+        ],
+        borderWidth: 1,
+      }
+    ]
+  });
+  const [loadingChartData, setLoadingChartData] = useState(true);
+  const [chartDataError, setChartDataError] = useState('');
   
   // Modal State
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
-  
-  // Sample data for demonstration
-  const clinicStats = {
-    totalAppointments: 42,
-    totalProviders: 8,
-    totalClients: 156,
-    totalEarnings: 9850
-  };
 
   useEffect(() => {
     loadAppointments(selectedDate);
     loadStaff();
-    // TODO: Load stats, inventory, chart data
+    loadStats();
+    loadInventory();
+    loadChartData();
   }, [selectedDate]); // Reload appointments when date changes
 
   const loadAppointments = async (date) => {
@@ -85,6 +129,106 @@ const ClinicDashboard = ({ user }) => {
       }
   };
   
+  const loadStats = async () => {
+    setLoadingStats(true);
+    setStatsError('');
+    try {
+      const response = await fetchClinicStats(user?.clinicId);
+      if (response.success) {
+        setClinicStats(response.stats || {
+          totalAppointments: 0,
+          totalProviders: 0,
+          totalClients: 0,
+          totalEarnings: 0
+        });
+      } else {
+        setStatsError(response.error || 'Failed to load clinic statistics.');
+      }
+    } catch (err) {
+      console.error('Error fetching clinic stats:', err);
+      setStatsError(err.message || 'An error occurred fetching statistics.');
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+  
+  const loadInventory = async () => {
+    setLoadingInventory(true);
+    setInventoryError('');
+    try {
+      const response = await fetchClinicInventory(user?.clinicId);
+      if (response.success) {
+        setInventoryAlerts(response.inventory || []);
+      } else {
+        setInventoryError(response.error || 'Failed to load inventory alerts.');
+      }
+    } catch (err) {
+      console.error('Error fetching clinic inventory:', err);
+      setInventoryError(err.message || 'An error occurred fetching inventory.');
+    } finally {
+      setLoadingInventory(false);
+    }
+  };
+  
+  const loadChartData = async () => {
+    setLoadingChartData(true);
+    setChartDataError('');
+    try {
+      // Load revenue data
+      const revenueResponse = await fetchClinicRevenueData(user?.clinicId);
+      if (revenueResponse.success) {
+        setRevenueData({
+          labels: revenueResponse.data.labels || [],
+          datasets: [
+            {
+              label: 'Revenue',
+              data: revenueResponse.data.values || [],
+              backgroundColor: `${theme.colors.primary.main}50`,
+              borderColor: theme.colors.primary.main,
+              borderWidth: 2,
+              tension: 0.4,
+              fill: true,
+            }
+          ]
+        });
+      } else {
+        setChartDataError(revenueResponse.error || 'Failed to load revenue data.');
+      }
+      
+      // Load service distribution data
+      const serviceResponse = await fetchClinicServiceData(user?.clinicId);
+      if (serviceResponse.success) {
+        setServiceDistributionData({
+          labels: serviceResponse.data.labels || [],
+          datasets: [
+            {
+              label: 'Services',
+              data: serviceResponse.data.values || [],
+              backgroundColor: [
+                theme.colors.primary.main,
+                theme.colors.primary.light,
+                theme.colors.secondary.main,
+                theme.colors.accent.gold,
+                theme.colors.error,
+                theme.colors.accent.lightGreen,
+              ],
+              borderWidth: 1,
+            }
+          ]
+        });
+      } else {
+        setChartDataError(prevError => 
+          prevError ? `${prevError} Also, failed to load service data.` : 'Failed to load service data.'
+        );
+      }
+    } catch (err) {
+      console.error('Error fetching chart data:', err);
+      setChartDataError(err.message || 'An error occurred fetching chart data.');
+    } finally {
+      setLoadingChartData(false);
+    }
+  };
+  
   // Modal Handlers
   const handleShowDetails = (id) => {
       setSelectedAppointmentId(id);
@@ -96,41 +240,6 @@ const ClinicDashboard = ({ user }) => {
       setShowDetailModal(false);
       // Option to refetch appointments if modal changed status
       loadAppointments(selectedDate); 
-  };
-
-  // Chart data
-  const revenueData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-      {
-        label: 'Revenue',
-        data: [6500, 7200, 8100, 7900, 9200, 9850, 10200, 10500, 11200, 10800, 11500, 12000],
-        backgroundColor: `${theme.colors.primary.main}50`,
-        borderColor: theme.colors.primary.main,
-        borderWidth: 2,
-        tension: 0.4,
-        fill: true,
-      }
-    ]
-  };
-
-  const serviceDistributionData = {
-    labels: ['Checkups', 'Vaccinations', 'Surgeries', 'Dental', 'Emergency', 'Other'],
-    datasets: [
-      {
-        label: 'Services',
-        data: [30, 22, 15, 12, 8, 13],
-        backgroundColor: [
-          theme.colors.primary.main,
-          theme.colors.primary.light,
-          theme.colors.secondary.main,
-          theme.colors.accent.gold,
-          theme.colors.error,
-          theme.colors.accent.lightGreen,
-        ],
-        borderWidth: 1,
-      }
-    ]
   };
 
   // Chart options
@@ -285,7 +394,11 @@ const ClinicDashboard = ({ user }) => {
               </div>
               <div>
                 <h6 className="text-muted mb-1">Total Appointments</h6>
-                <h3 className="mb-0">{clinicStats.totalAppointments}</h3>
+                {loadingStats ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <h3 className="mb-0">{clinicStats.totalAppointments}</h3>
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -305,7 +418,11 @@ const ClinicDashboard = ({ user }) => {
               </div>
               <div>
                 <h6 className="text-muted mb-1">Staff Members</h6>
-                <h3 className="mb-0">{clinicStats.totalProviders}</h3>
+                {loadingStats ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <h3 className="mb-0">{clinicStats.totalProviders}</h3>
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -325,7 +442,11 @@ const ClinicDashboard = ({ user }) => {
               </div>
               <div>
                 <h6 className="text-muted mb-1">Clients</h6>
-                <h3 className="mb-0">{clinicStats.totalClients}</h3>
+                {loadingStats ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <h3 className="mb-0">{clinicStats.totalClients}</h3>
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -345,7 +466,11 @@ const ClinicDashboard = ({ user }) => {
               </div>
               <div>
                 <h6 className="text-muted mb-1">Monthly Revenue</h6>
-                <h3 className="mb-0">${clinicStats.totalEarnings}</h3>
+                {loadingStats ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <h3 className="mb-0">${clinicStats.totalEarnings}</h3>
+                )}
               </div>
             </Card.Body>
           </Card>
@@ -444,7 +569,12 @@ const ClinicDashboard = ({ user }) => {
               </Link>
             </Card.Header>
             <Card.Body>
-              {staff.map((staffMember, index) => (
+              {loadingStaff && <div className="text-center"><Spinner animation="border" /></div>}
+              {staffError && <Alert variant="danger">{staffError}</Alert>}
+              {!loadingStaff && !staffError && staff.length === 0 && (
+                <p className="text-center text-muted">No staff members found.</p>
+              )}
+              {!loadingStaff && !staffError && staff.map((staffMember, index) => (
                 <div 
                   key={staffMember.id}
                   className="d-flex align-items-center mb-3 pb-3"
@@ -489,7 +619,12 @@ const ClinicDashboard = ({ user }) => {
               <h5 style={styles.sectionTitle} className="mb-0">Inventory Alerts</h5>
             </Card.Header>
             <Card.Body>
-              {inventoryAlerts.map((item, index) => (
+              {loadingInventory && <div className="text-center"><Spinner animation="border" /></div>}
+              {inventoryError && <Alert variant="danger">{inventoryError}</Alert>}
+              {!loadingInventory && !inventoryError && inventoryAlerts.length === 0 && (
+                <p className="text-center text-muted">No inventory alerts at this time.</p>
+              )}
+              {!loadingInventory && !inventoryError && inventoryAlerts.map((item, index) => (
                 <div 
                   key={item.id}
                   className="d-flex justify-content-between align-items-center mb-3 pb-2"
@@ -547,7 +682,15 @@ const ClinicDashboard = ({ user }) => {
                   tabClassName="border-0"
                 >
                   <div style={styles.chartContainer} className="mt-4">
-                    <Chart type="line" data={revenueData} options={chartOptions} />
+                    {loadingChartData ? (
+                      <div className="text-center h-100 d-flex align-items-center justify-content-center">
+                        <Spinner animation="border" />
+                      </div>
+                    ) : chartDataError ? (
+                      <Alert variant="danger">{chartDataError}</Alert>
+                    ) : (
+                      <Chart type="line" data={revenueData} options={chartOptions} />
+                    )}
                   </div>
                 </Tab>
                 <Tab 
@@ -558,14 +701,26 @@ const ClinicDashboard = ({ user }) => {
                   <Row className="mt-4">
                     <Col md={7}>
                       <div style={styles.chartContainer}>
-                        <Chart type="doughnut" data={serviceDistributionData} options={doughnutOptions} />
+                        {loadingChartData ? (
+                          <div className="text-center h-100 d-flex align-items-center justify-content-center">
+                            <Spinner animation="border" />
+                          </div>
+                        ) : chartDataError ? (
+                          <Alert variant="danger">{chartDataError}</Alert>
+                        ) : (
+                          <Chart type="doughnut" data={serviceDistributionData} options={doughnutOptions} />
+                        )}
                       </div>
                     </Col>
                     <Col md={5} className="d-flex flex-column justify-content-center">
                       <h5 className="mb-3">Service Distribution</h5>
                       <p className="text-muted">
-                        Regular checkups and vaccinations make up over 50% of all services performed at your clinic. 
-                        Consider marketing your specialty services to increase revenue from surgeries and dental procedures.
+                        {serviceDistributionData.labels.length > 0 ? 
+                          `Regular checkups and vaccinations make up over ${
+                            Math.round((serviceDistributionData.datasets[0].data[0] + serviceDistributionData.datasets[0].data[1]) / 
+                            serviceDistributionData.datasets[0].data.reduce((sum, val) => sum + val, 0) * 100)
+                          }% of all services performed at your clinic.` : 
+                          'No service data available for analysis.'}
                       </p>
                       <Button 
                         variant="outline-primary"
@@ -638,6 +793,17 @@ const ClinicDashboard = ({ user }) => {
           </Card.Body>
         </Card>
       </Col>
+
+      {/* Appointment Detail Modal */}
+      {selectedAppointmentId && (
+        <AppointmentDetailModal 
+          show={showDetailModal}
+          onHide={handleHideDetails}
+          appointmentId={selectedAppointmentId}
+          userRole="clinic"
+          onUpdate={() => loadAppointments(selectedDate)}
+        />
+      )}
     </div>
   );
 };
