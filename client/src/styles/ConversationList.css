@@ -1,0 +1,14 @@
+/* client/src/styles/ConversationList.css */
+.conversation-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto; /* Allow scrolling if list is long */
+    flex-grow: 1; /* Take remaining space in panel */
+}
+
+.no-conversations {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+} 

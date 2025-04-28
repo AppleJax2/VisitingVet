@@ -569,4 +569,53 @@ export const changePassword = async (passwordData) => {
   }
 };
 
+// ---------------- Conversation API ----------------
+
+/**
+ * Get all conversations for the logged-in user
+ */
+export const getConversations = async () => {
+  try {
+    const response = await api.get('/conversations');
+    return response.data.data; // Assuming response structure { success: true, data: [...] }
+  } catch (error) {
+    console.error('Get conversations error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get conversations');
+  }
+};
+
+/**
+ * Get messages for a specific conversation with pagination
+ * @param {string} conversationId - The ID of the conversation
+ * @param {number} limit - Max number of messages to fetch
+ * @param {string|null} beforeMessageId - ID of the message to fetch messages before (for pagination)
+ */
+export const getMessagesForConversation = async (conversationId, limit = 30, beforeMessageId = null) => {
+  try {
+    let url = `/conversations/${conversationId}/messages?limit=${limit}`;
+    if (beforeMessageId) {
+        url += `&before=${beforeMessageId}`;
+    }
+    const response = await api.get(url);
+    return response.data.data; // Assuming response structure { success: true, data: [...] }
+  } catch (error) {
+    console.error('Get messages error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get messages');
+  }
+};
+
+/**
+ * Start a new conversation (or get existing) with a recipient
+ * @param {string} recipientId - The ID of the user to start conversation with
+ */
+export const startConversation = async (recipientId) => {
+  try {
+    const response = await api.post('/conversations/start', { recipientId });
+    return response.data.data; // Assuming response structure { success: true, data: {...} }
+  } catch (error) {
+    console.error('Start conversation error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to start conversation');
+  }
+};
+
 export default api; 

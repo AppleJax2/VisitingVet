@@ -45,8 +45,10 @@ import ClinicDashboard from './components/Dashboard/ClinicDashboard';
 import AboutUsPage from './pages/AboutUsPage';
 import ServicesPage from './pages/ServicesPage';
 import UserProfilePage from './pages/UserProfilePage'; // For Pet Owner profile/settings
+import MessagesPage from './pages/Dashboard/MessagesPage'; // Import the new page
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SocketProvider } from './contexts/SocketContext'; // Import SocketProvider
 
 // Import Payment Pages
 import PaymentPage from './pages/PaymentPage';
@@ -121,6 +123,8 @@ function AppRoutes() {
           {/* Logged-in User Routes (Dashboard is role-specific) */}
           <Route element={<PrivateRoute allowedRoles={['PetOwner', 'MVSProvider', 'Clinic', 'Admin']} />}>
             <Route path="/dashboard" element={<DashboardPage />} /> 
+            <Route path="/dashboard/messages" element={<MessagesPage />} />
+            <Route path="/dashboard/messages/:conversationId" element={<MessagesPage />} />
             
             {/* Pet Owner Routes */}
             <Route path="/dashboard/pet-owner" element={<PetOwnerDashboard />} />
@@ -181,9 +185,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <SocketProvider> { /* Wrap Router with SocketProvider */}
+        <Router>
+          <AppRoutes />
+        </Router>
+      </SocketProvider>
     </AuthProvider>
   );
 }

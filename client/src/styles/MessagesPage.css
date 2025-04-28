@@ -1,0 +1,65 @@
+/* client/src/styles/MessagesPage.css */
+.messages-page-container {
+    display: flex;
+    height: calc(100vh - 60px); /* Adjust based on header height */
+    background-color: #f8f9fa; /* Light background */
+    overflow: hidden;
+}
+
+.conversation-list-panel {
+    width: 30%;
+    min-width: 280px;
+    max-width: 350px;
+    border-right: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    transition: width 0.3s ease, min-width 0.3s ease;
+}
+
+.conversation-list-panel h2 {
+    padding: 1rem;
+    margin-bottom: 0;
+    font-size: 1.25rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.message-view-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* For placeholder positioning */
+    transition: width 0.3s ease;
+}
+
+.message-view-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6c757d;
+    font-size: 1.1rem;
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .conversation-list-panel.panel-collapsed {
+        width: 0;
+        min-width: 0;
+        overflow: hidden;
+        border-right: none;
+    }
+    .message-view-panel.panel-expanded {
+        width: 100%;
+    }
+    .message-view-panel.panel-collapsed {
+         display: none; /* Hide completely when list is shown */
+    }
+     .conversation-list-panel.panel-expanded {
+         width: 100%;
+         max-width: none;
+         border: none;
+     }
+} 

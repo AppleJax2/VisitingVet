@@ -1,0 +1,66 @@
+/* client/src/styles/MessageItem.css */
+.message-item-wrapper {
+    display: flex;
+    margin-bottom: 0.75rem;
+    max-width: 75%; /* Max width of message bubble */
+}
+
+.message-item-wrapper.own-message {
+    margin-left: auto; /* Align own messages to the right */
+    flex-direction: row-reverse;
+}
+
+.message-item-wrapper.other-message {
+    margin-right: auto; /* Align other messages to the left */
+}
+
+.message-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 0.5rem;
+    align-self: flex-end; /* Align avatar to bottom of message */
+}
+
+.message-item {
+    padding: 0.5rem 0.8rem;
+    border-radius: 15px;
+    position: relative; /* For timestamp positioning potentially */
+    word-wrap: break-word;
+}
+
+.own-message .message-item {
+    background-color: #0d6efd; /* Blue for own messages */
+    color: white;
+    border-bottom-right-radius: 5px; /* Bubble tail effect */
+}
+
+.other-message .message-item {
+    background-color: #e9ecef; /* Light grey for other messages */
+    color: #212529;
+    border-bottom-left-radius: 5px; /* Bubble tail effect */
+}
+
+.message-content {
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.message-timestamp {
+    font-size: 0.7rem;
+    color: inherit; /* Inherit color from bubble */
+    opacity: 0.7;
+    text-align: right;
+    margin-top: 0.2rem;
+    display: block; /* Ensure it takes its own line if needed */
+    clear: both;
+}
+
+.own-message .message-timestamp {
+     color: #e0e0e0;
+}
+
+.other-message .message-timestamp {
+     color: #6c757d;
+} 

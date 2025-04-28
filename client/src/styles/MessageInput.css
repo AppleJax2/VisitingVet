@@ -1,0 +1,60 @@
+/* client/src/styles/MessageInput.css */
+.message-input-form {
+    display: flex;
+    align-items: flex-end; /* Align items to bottom */
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.message-input-textarea {
+    flex-grow: 1;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid #ced4da;
+    border-radius: 20px;
+    resize: none; /* Disable manual resize */
+    overflow-y: auto; /* Add scroll if content exceeds max-height */
+    max-height: 100px; /* Limit height */
+    min-height: 38px; /* Approx height for one row */
+    line-height: 1.4;
+    font-size: 0.95rem;
+    margin-right: 0.75rem;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.message-input-textarea:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.075), 0 0 0 0.25rem rgba(13,110,253,.25);
+}
+
+.message-input-textarea[disabled] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.message-send-button {
+    background-color: #0d6efd;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease-in-out;
+    flex-shrink: 0; /* Prevent shrinking */
+    height: 38px; /* Match textarea min-height */
+}
+
+.message-send-button:hover {
+    background-color: #0b5ed7;
+}
+
+.message-send-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
+} 
