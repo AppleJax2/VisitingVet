@@ -969,3 +969,20 @@ export const getRecordingAccessLink = async (recordingId) => {
 };
 
 export default api; 
+
+/**
+ * Fetch verification request history (paginated, filterable)
+ * @param {number} page - Page number
+ * @param {number} limit - Results per page
+ * @param {object} filters - Filter object (status, userId, reviewerId, startDate, endDate, search)
+ * @returns {Promise<Object>} Response with data and pagination
+ */
+export const adminGetVerificationHistory = async (page = 1, limit = 25, filters = {}) => {
+  try {
+    const response = await api.get('/admin/verifications/history', { params: { page, limit, ...filters } });
+    return response.data;
+  } catch (error) {
+    console.error('Admin get verification history error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch verification history');
+  }
+}; 

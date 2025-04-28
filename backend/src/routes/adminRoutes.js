@@ -16,7 +16,8 @@ const {
   resetAdminPassword,
   getUserActivityLogs,
   handleBulkUserAction,
-  getVerificationMetrics
+  getVerificationMetrics,
+  getVerificationHistory
 } = require('../controllers/adminController');
 const { protect, checkPermission, authorize } = require('../middleware/authMiddleware');
 
@@ -49,6 +50,9 @@ router.put('/users/:userId/profile', checkPermission('profile:manage'), adminCre
 router.get('/verifications/pending', checkPermission('verifications:read'), getPendingVerifications);
 router.put('/verifications/:requestId/approve', checkPermission('verifications:manage'), approveVerification);
 router.put('/verifications/:requestId/reject', checkPermission('verifications:manage'), rejectVerification);
+
+// Add route for verification history
+router.get('/verifications/history', checkPermission('verifications:read_history'), getVerificationHistory);
 
 // Add route for verification metrics
 router.get('/verifications/metrics', checkPermission('verifications:read_metrics'), getVerificationMetrics); // Requires verifications:read_metrics

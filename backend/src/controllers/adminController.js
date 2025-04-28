@@ -903,4 +903,94 @@ exports.handleBulkUserAction = async (req, res) => {
       errors,
     },
   });
+};
+
+/**
+ * @desc    Get verification request history (paginated, filterable)
+ * @route   GET /api/admin/verifications/history
+ * @access  Private/Admin
+ */
+exports.getVerificationHistory = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 25;
+    const skip = (page - 1) * limit;
+    const { status, userId, reviewerId, startDate, endDate, search } = req.query;
+    const filter = {};
+
+    if (status) {
+      filter.status = status;
+    }
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      filter.user = userId;
+    }
+    if (reviewerId && mongoose.Types.ObjectId.isValid(reviewerId)) {
+      filter.reviewedBy = reviewerId;
+    }
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        if (!isNaN(start.getTime())) filter.createdAt.$gte = start;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        if (!isNaN(end.getTime())) filter.createdAt.$lte = end;
+      }
+      if (Object.keys(filter.createdAt).length === 0) delete filter.createdAt;
+    }
+    if (search) {
+      const searchTrimmed = search.trim();
+      if (searchTrimmed.length > 0) {
+        const searchRegex = new RegExp(searchTrimmed.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
+        filter.$or = [
+          { notes: searchRegex },
+        ];
+      }
+    }
+
+    // Fetch requests with population
+    const requests = await VerificationRequest.find(filter)
+      .populate({ path: 'user', select: 'name email role' })
+      .populate({ path: 'reviewedBy', select: 'name email role' })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Enhance with secure document URLs
+    const enhancedRequests = await Promise.all(requests.map(async (request) => {
+      const reqObj = request.toObject();
+      if (reqObj.submittedDocuments && Array.isArray(reqObj.submittedDocuments)) {
+        reqObj.submittedDocuments = await Promise.all(reqObj.submittedDocuments.map(async (doc) => {
+          if (doc.fileUrl && doc.fileUrl.startsWith('s3://')) {
+            try {
+              const fileKey = doc.fileUrl.replace('s3://', '');
+              doc.signedUrl = await getSecureDownloadUrl(fileKey);
+            } catch (err) {
+              doc.signedUrl = null;
+            }
+          }
+          return doc;
+        }));
+      }
+      return reqObj;
+    }));
+
+    const total = await VerificationRequest.countDocuments(filter);
+    res.status(200).json({
+      success: true,
+      data: enhancedRequests,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    logger.error('Error getting verification history:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
 }; 
