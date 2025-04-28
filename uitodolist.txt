@@ -1,89 +1,228 @@
-# UI/UX Audit & Design System Implementation Tasks
+# VisitingVet UI/UX Implementation Todo List
 
-## Component-Level Design Audit
-- [x] Create inventory of all UI components (shared, page-specific, feature-specific)
-- [x] Document all color hex values currently in use across components
-- [x] Identify color inconsistencies and accessibility issues (WCAG contrast ratios)
-- [x] Catalog hardcoded color values vs. theme variables
-- [x] Document all spacing values (margin/padding) across components
-- [x] Identify spacing inconsistencies between similar elements
-- [x] Map all text elements to their CSS properties (font-size, weight, line-height)
-- [x] Document responsive text scaling behavior
-- [x] Catalog all breakpoints and component-specific media queries
-- [x] Identify mobile adaptation issues and inconsistencies
-- [x] Document all hover/focus/active states implementation
-- [x] Catalog transition timings and animation implementations
-- [x] Inventory all image formats/sizes in use
-- [x] Identify icon inconsistencies and optimization opportunities
+## Global Styles & Design System
 
-## Design System Specification
-- [x] Define primary brand colors with light/dark variants
-- [x] Define secondary brand colors with light/dark variants
-- [x] Create functional color set (success, warning, error, info)
-- [x] Develop neutral color scale (8-10 shades)
-- [x] Verify text/background color combinations for accessibility
-- [x] Create scale-based spacing system with named tokens
-- [x] Define font stack (primary, secondary, monospace)
-- [x] Create complete type scale with size/weight/line-height combinations
-- [x] Define text categories with mobile and desktop values
-- [x] Document button implementation standards (sizes, variants, states)
-- [x] Document form input standards (text, select, radio, checkbox)
-- [x] Define card and container design patterns
-- [x] Standardize modal and dialog implementations
-- [x] Document navigation element standards
-- [x] Define exact breakpoint values
-- [x] Specify container widths and column configurations
-- [x] Standardize animation timing functions and durations
-- [x] Create transition pattern library
+### Color System
+- [x] Consolidate duplicate color definitions into single source of truth
+  - Target: `client/src/utils/theme.js`, `client/src/index.css`, `client/src/App.css`
+  - Notes: Primary task, other styling tasks depend on this
+- [x] Standardize all color references to use theme variables
+  - Target: All component files with inline styles
+  - Notes: After consolidating color definitions
+- [x] Ensure all colors meet WCAG 2.1 AA contrast requirements
+  - Target: `client/src/utils/theme.js`
+  - Notes: Focus on text/background combinations
+- [x] Create consistent color variations (hover, active, disabled states)
+  - Target: `client/src/utils/theme.js`, `client/src/styles/design-system.scss`
+- [x] Document and standardize opacity values for overlays and UI states
+  - Target: `client/src/utils/theme.js`, `client/src/styles/design-system.scss`
 
-## Implementation Roadmap
-- [x] Perform component-by-component gap analysis
-- [x] Create theme file structure in the project
-- [x] Develop CSS/SCSS variables file with all design tokens
-- [x] Prioritize components for update (shared → main pages → features)
-- [x] Create implementation schedule with deadlines
-- [x] Implement shared components first
-- [x] Update main page components
-- [x] Refactor feature-specific components
-- [x] Create developer guidelines for implementing the design system
-- [x] Define visual consistency metrics and accessibility targets
+### Spacing System
+- [x] Standardize spacing scale to use consistent increments
+  - Target: `client/src/utils/theme.js`, `client/src/styles/design-system.scss`
+  - Notes: Implement 8px increments (0.5rem) as base
+- [x] Refactor hardcoded spacing values to use spacing tokens
+  - Target: All component files with inline styles
+  - Notes: After defining spacing scale
+- [x] Create consistent section padding values
+  - Target: `client/src/pages/LandingPage.jsx`, all page components
+- [x] Standardize component internal spacing (padding)
+  - Target: Card components, form components, modals
+- [x] Create consistent margin values between related elements
+  - Target: All components, particularly in form layouts
 
-## Industry-Specific Considerations
-- [x] Research color psychology for the product's industry
-- [x] Develop color recommendations specific to target audience
-- [x] Create information hierarchy guidelines for domain-specific content
-- [x] Define device strategy for all target platforms
-- [x] Design trust elements appropriate for the product category
+### Shadows & Effects
+- [x] Create consistent elevation system with standardized shadows
+  - Target: `client/src/utils/theme.js`, `client/src/styles/design-system.scss`
+- [x] Standardize hover effects on interactive elements
+  - Target: All interactive components (buttons, cards, links)
+- [x] Create consistent transition timing and easing functions
+  - Target: `client/src/utils/theme.js`, `client/src/App.css`
+- [x] Standardize animation durations and effects
+  - Target: `client/src/App.css`, individual components with animations
 
-## Deliverables
-- [x] Generate CSS/SCSS variables file with all design tokens
-- [x] Create design tool-ready color styles
-- [x] Create design tool-ready typography styles
-- [x] Create design tool-ready spacing styles
-- [x] Produce before/after visual examples of key components
-- [x] Develop implementation checklist with actionable tasks
-- [x] Create component status tracking system
+## Typography
 
-## Specific Implementation Tasks
-- [x] Update global CSS variables/custom properties
-- [x] Refactor button components for consistency
-- [x] Standardize form input styling
-- [x] Create consistent card/container components
-- [x] Implement standardized spacing system
-- [x] Update typography across all components
-- [x] Refine responsive breakpoints
-- [x] Optimize image assets
-- [x] Standardize icon system
-- [x] Implement consistent animation/transitions
-- [x] Ensure all interactive elements have proper states
-- [x] Implement accessibility improvements
-- [x] Create documentation for the design system
-- [x] Set up automated visual regression testing
+- [x] Implement consistent heading sizes across all components
+  - Target: `client/src/utils/theme.js`, `client/src/index.css`, `client/src/App.css`
+  - Notes: Define hierarchical scale from h1-h6
+- [x] Standardize text styles for body, captions, labels, etc.
+  - Target: `client/src/utils/theme.js`, `client/src/App.css`
+- [x] Create responsive typography rules that scale appropriately
+  - Target: `client/src/styles/design-system.scss`, media queries
+- [x] Standardize font-weights across the application
+  - Target: All components using custom font-weight values
+- [x] Apply consistent line-height values for improved readability
+  - Target: `client/src/utils/theme.js`, `client/src/App.css`
+- [x] Create utility classes for common text styles
+  - Target: `client/src/styles/utility-classes.scss`
+- [x] Standardize link styling and hover states
+  - Target: `client/src/App.css`, `client/src/index.css`
 
-## Quality Assurance
-- [x] Test all components against WCAG accessibility guidelines
-- [x] Verify responsive behavior across all breakpoints
-- [x] Ensure consistent rendering across supported browsers
-- [x] Validate color contrast for all text elements
-- [x] Test keyboard navigation and screen reader compatibility
-- [x] Measure performance impacts of design system implementation 
+## Components
+
+### Buttons
+- [x] Standardize button padding across all button types
+  - Target: `client/src/App.css`, button styles
+  - Notes: Current inconsistency between primary/secondary/outline
+- [x] Create consistent hover/focus/active states for all buttons
+  - Target: `client/src/App.css`, inline button styles
+- [x] Fix inconsistent loading state styles in buttons
+  - Target: `client/src/components/PetEditModal.jsx` and similar components
+  - Notes: Loading spinners vary in implementation
+- [x] Standardize button size variations (sm, md, lg)
+  - Target: `client/src/App.css`, button components
+- [x] Ensure all button styles match between inline and component-based usage
+  - Target: All components using buttons
+
+### Forms
+- [x] Standardize form control heights and padding
+  - Target: `client/src/App.css`, form styles
+- [x] Create consistent input border-radius values (currently mix of 4px and 8px)
+  - Target: `client/src/App.css`, form style definitions
+- [x] Standardize form validation states and error messages
+  - Target: `client/src/components/PetEditModal.jsx` and other form components
+- [x] Apply consistent label styling (weight, spacing, color) across all forms
+  - Target: All form components
+- [x] Standardize spacing between form fields
+  - Target: `client/src/components/PetEditModal.jsx`, login forms, etc.
+- [x] Create consistent focus styles for all form elements
+  - Target: `client/src/App.css`, `client/src/index.css`
+- [x] Standardize dropdown/select styling across components
+  - Target: Form components with select elements
+
+### Cards
+- [x] Standardize card shadows across all card variations
+  - Target: `client/src/App.css` and card components
+- [x] Apply consistent card padding in all instances (1.75rem)
+  - Target: `client/src/App.css`, `client/src/components/PetCard.jsx`
+- [x] Create unified card hover effects
+  - Target: `client/src/App.css`, landing page cards, component cards
+- [x] Standardize card title font-weights (700 recommended)
+  - Target: All card components
+- [x] Apply consistent styling for links within cards
+  - Target: Card components with action links
+
+### Modals
+- [x] Standardize modal header, body, and footer padding
+  - Target: `client/src/components/PetEditModal.jsx`, `client/src/components/AppointmentDetailModal.jsx`
+- [x] Apply consistent spacing for modal action buttons
+  - Target: All modal components
+- [x] Standardize modal overlay background and opacity
+  - Target: Modal styling in components or global styles
+- [x] Ensure consistent modal close button position and styling
+  - Target: All modal components
+- [x] Create consistent modal width rules for different screen sizes
+  - Target: Modal components, responsive styles
+
+### Navigation
+- [x] Fix inconsistent navbar padding between authenticated/unauthenticated states
+  - Target: `client/src/components/Header.jsx`
+- [x] Standardize NavLink hover states across contexts
+  - Target: `client/src/components/Header.jsx`
+- [x] Make dropdown menu border radius consistent with other components (8px)
+  - Target: `client/src/components/Header.jsx`
+- [x] Fix padding in mobile menu (increase from 0.25rem to 0.5rem)
+  - Target: `client/src/components/Header.jsx`
+- [x] Standardize social media icon hover states in footer
+  - Target: `client/src/components/Footer.jsx`
+- [x] Fix newsletter input border-radius in footer on mobile
+  - Target: `client/src/components/Footer.jsx`
+- [x] Add proper focus states to footer links
+  - Target: `client/src/components/Footer.jsx`
+- [x] Fix inconsistent link grouping spacing in footer
+  - Target: `client/src/components/Footer.jsx`
+
+### Tables & Data Display
+- [x] Standardize table styles to match design system
+  - Target: Dashboard components, data tables
+- [x] Ensure status badge colors match theme color system
+  - Target: `client/src/components/Dashboard/ProviderDashboard.jsx`
+- [x] Create consistent styling for all data display elements
+  - Target: Dashboard components
+- [x] Standardize pagination controls styling
+  - Target: Components with pagination
+
+## Layout & Responsiveness
+
+- [x] Implement consistent container widths across all pages
+  - Target: Page components, `client/src/App.css`
+- [x] Standardize grid gutters and spacing
+  - Target: Components using row/column layouts
+- [x] Fix responsive behavior for all components at defined breakpoints
+  - Target: Media queries in components
+- [x] Create consistent mobile adaptations for all components
+  - Target: All responsive components
+- [x] Standardize section padding for different screen sizes
+  - Target: Page components, particularly `client/src/pages/LandingPage.jsx`
+- [x] Fix inconsistent landing page section spacing
+  - Target: `client/src/pages/LandingPage.jsx`
+- [x] Ensure touch-friendly tap targets on mobile (min 44px)
+  - Target: Mobile navigation, buttons, interactive elements
+
+## Accessibility
+
+- [x] Add visible focus indicators for all interactive elements
+  - Target: Global styles, `client/src/App.css`
+  - Notes: Critical for keyboard navigation
+- [x] Ensure all text meets WCAG 2.1 AA contrast requirements
+  - Target: All components with text
+  - Notes: After standardizing color system
+- [x] Add proper ARIA attributes to interactive elements
+  - Target: Navigation, buttons, forms, modals
+- [x] Fix missing alt text for images
+  - Target: All components with images
+- [x] Standardize form error handling and validation for screen readers
+  - Target: Form components
+- [x] Ensure keyboard navigation works properly for all interactive elements
+  - Target: Navigation, dropdowns, modals
+- [x] Create skip-to-content links for screen readers
+  - Target: `client/src/App.jsx`
+
+## Page-Specific Issues
+
+### Landing Page
+- [x] Fix inconsistent hero section color treatment
+  - Target: `client/src/pages/LandingPage.jsx`
+- [x] Standardize feature card hover effects
+  - Target: `client/src/pages/LandingPage.jsx`
+- [x] Fix testimonial section typography scale
+  - Target: `client/src/pages/LandingPage.jsx`
+- [x] Make CTA section button styles consistent with other pages
+  - Target: `client/src/pages/LandingPage.jsx`
+
+### Authentication Pages
+- [x] Standardize login/register form styling
+  - Target: `client/src/pages/LoginPage.jsx`, `client/src/pages/RegisterPage.jsx`
+- [x] Fix inconsistent form error handling visuals
+  - Target: Authentication form components
+- [x] Standardize input focus states to match other forms
+  - Target: `client/src/pages/AuthPages.css`
+- [x] Fix button spacing to match design system
+  - Target: Authentication form components
+- [x] Standardize link styling to match main site
+  - Target: `client/src/pages/AuthPages.css`
+
+### Dashboard
+- [x] Fix status badge colors to match theme color system
+  - Target: `client/src/components/Dashboard/ProviderDashboard.jsx`
+- [x] Make table styles consistent with other data displays
+  - Target: Dashboard components
+- [x] Standardize card layout spacing
+  - Target: Dashboard components
+- [x] Fix activity feed item styling to follow established patterns
+  - Target: Dashboard components
+- [x] Update chart color palette to match brand colors
+  - Target: Dashboard chart components
+
+## Documentation
+
+- [x] Create comprehensive design system documentation
+  - Target: New document in project repository
+  - Notes: Should detail all components, patterns, and usage guidelines
+- [x] Add component status tracking to monitor implementation progress
+  - Target: Project management tool or repository
+- [x] Create visual examples showing before/after component updates
+  - Target: Design assets folder
+- [x] Document accessibility guidelines and requirements
+  - Target: Project documentation

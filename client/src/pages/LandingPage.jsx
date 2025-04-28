@@ -6,12 +6,7 @@ import {
   People, ArrowRight, Star, GeoAlt, Calendar3, 
   CardChecklist, HeartPulse, TelephonePlus
 } from 'react-bootstrap-icons';
-import theme from '../utils/theme';
-import './LandingPage.css'; // Import the CSS file
-
-// Import images for hero section background
-// Note: You'll need to add these images to your assets folder
-// The paths below assume you'll create these directories and add appropriate images
+import './LandingPage.css';
 
 // Update image fallback URLs with veterinary-themed images
 const heroVetImage = "https://images.unsplash.com/photo-1581888227599-779811939961?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
@@ -26,7 +21,10 @@ const LandingPage = () => {
       {/* Hero Section - Modern Design with Animated Content */}
       <section className="hero-section position-relative overflow-hidden">
         <div className="hero-bg-container position-absolute w-100 h-100">
-          <div className="hero-bg-overlay position-absolute w-100 h-100"></div>
+          {/* Consistent overlay gradient */}
+          <div className="hero-bg-overlay position-absolute w-100 h-100" 
+               style={{ background: 'linear-gradient(135deg, rgba(18, 68, 56, 0.85) 0%, rgba(87, 126, 70, 0.8) 100%)' }}>
+          </div>
         </div>
         <Container className="position-relative py-5">
           <Row className="align-items-center min-vh-75">
@@ -62,7 +60,7 @@ const LandingPage = () => {
                   <img 
                     src={heroVetImage}
                     alt="Mobile veterinarian with pet" 
-                    className="img-fluid w-100 rounded-3"
+                    className="img-fluid w-100 rounded-3 shadow-lg"
                     style={{ maxHeight: '450px', objectFit: 'cover' }}
                     loading="eager"
                   />
@@ -95,12 +93,12 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section - Card-based with Icons */}
-      <section className="py-5 bg-white">
+      <section className="py-5 bg-white section">
         <Container>
           <div className="text-center mb-5">
             <span className="badge px-3 py-2 mb-2 section-badge-primary">OUR SERVICES</span>
-            <h2 className="section-title">Comprehensive Veterinary Services</h2>
-            <p className="text-muted section-description">
+            <h2 className="section-title fw-bold mb-3">Comprehensive Veterinary Services</h2>
+            <p className="text-muted section-description mx-auto" style={{ maxWidth: '800px' }}>
               From routine checkups to specialized treatments, our mobile veterinary professionals bring a wide range of services directly to you.
             </p>
           </div>
@@ -130,7 +128,7 @@ const LandingPage = () => {
               }
             ].map((service, index) => (
               <Col md={4} key={index}>
-                <Card className="h-100 border-0 shadow-hover fade-in" 
+                <Card className="h-100 border-0 shadow-hover service-card fade-in" 
                   style={{ animationDelay: `${0.1 * (index + 1)}s` }}>
                   <div className="position-relative service-image-container" style={{ height: '200px' }}>
                     <img 
@@ -144,8 +142,8 @@ const LandingPage = () => {
                       {service.icon}
                     </div>
                   </div>
-                  <Card.Body className="pt-4">
-                    <Card.Title className="fs-5 fw-bold text-primary">{service.title}</Card.Title>
+                  <Card.Body className="pt-4 px-4 pb-4">
+                    <Card.Title className="fs-5 fw-bold text-primary mb-3">{service.title}</Card.Title>
                     <Card.Text className="mb-3 text-muted">
                       {service.description}
                     </Card.Text>
@@ -164,27 +162,19 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works Section - Timeline Style */}
-      <section className="py-5 bg-light">
+      <section className="py-5 bg-light section">
         <Container>
           <div className="text-center mb-5">
             <span className="badge px-3 py-2 mb-2 section-badge-secondary">SIMPLE PROCESS</span>
-            <h2 className="section-title">How It Works</h2>
-            <p className="text-muted section-description">
+            <h2 className="section-title fw-bold mb-3">How It Works</h2>
+            <p className="text-muted section-description mx-auto" style={{ maxWidth: '800px' }}>
               Getting quality veterinary care for your animals has never been easier with our simple three-step process.
             </p>
           </div>
           
-          <div className="how-it-works-timeline position-relative">
+          <div className="how-it-works-timeline position-relative py-4">
             {/* Vertical line for desktop */}
-            <div className="d-none d-md-block position-absolute" style={{
-              width: '2px',
-              backgroundColor: `${theme.colors.primary.main}30`,
-              top: '20px',
-              bottom: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 1
-            }}></div>
+            <div className="d-none d-md-block position-absolute timeline-line"></div>
             
             <Row className="g-5">
               {[
@@ -192,19 +182,19 @@ const LandingPage = () => {
                   icon: <Search size={28} />,
                   title: "Search & Find",
                   description: "Browse qualified veterinary providers that specialize in your animal's needs in your area.",
-                  color: theme.colors.primary.main
+                  color: "var(--primary-main)"
                 },
                 {
                   icon: <Calendar3 size={28} />,
                   title: "Book an Appointment",
                   description: "Schedule a convenient time for the veterinarian to visit your location.",
-                  color: theme.colors.secondary.main
+                  color: "var(--secondary-main)"
                 },
                 {
                   icon: <CardChecklist size={28} />,
                   title: "Receive Quality Care",
                   description: "Get professional veterinary services delivered directly to your doorstep.",
-                  color: theme.colors.accent.gold
+                  color: "var(--accent-gold)"
                 }
               ].map((step, index) => (
                 <Col md={4} key={index} className="mb-md-0 mb-4">
@@ -214,44 +204,11 @@ const LandingPage = () => {
                     zIndex: 2
                   }}>
                     <div className="step-number position-relative mb-4">
-                      <div style={{ 
-                        width: '80px',
-                        height: '80px',
-                        borderRadius: '50%',
-                        backgroundColor: `${step.color}20`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto',
-                        position: 'relative'
-                      }}>
-                        <div style={{ 
-                          backgroundColor: step.color,
-                          width: '60px',
-                          height: '60px',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white'
-                        }}>
+                      <div className="step-circle-outer" style={{ backgroundColor: `${step.color}20` }}>
+                        <div className="step-circle-inner" style={{ backgroundColor: step.color }}>
                           {step.icon}
                         </div>
-                        <div className="step-number-badge position-absolute" style={{
-                          width: '26px',
-                          height: '26px',
-                          borderRadius: '50%',
-                          backgroundColor: 'white',
-                          border: `2px solid ${step.color}`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          top: 0,
-                          right: 0,
-                          color: step.color,
-                          fontWeight: 'bold',
-                          fontSize: '14px'
-                        }}>
+                        <div className="step-number-badge" style={{ border: `2px solid ${step.color}`, color: step.color }}>
                           {index + 1}
                         </div>
                       </div>
@@ -278,12 +235,12 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials Section - Modern Carousel */}
-      <section className="py-5 position-relative overflow-hidden">
+      <section className="py-5 position-relative overflow-hidden section">
         <Container>
           <div className="text-center mb-5">
             <span className="badge px-3 py-2 mb-2 section-badge-accent">TESTIMONIALS</span>
-            <h2 className="section-title">What Our Clients Say</h2>
-            <p className="text-muted section-description">
+            <h2 className="section-title fw-bold mb-3">What Our Clients Say</h2>
+            <p className="text-muted section-description mx-auto" style={{ maxWidth: '800px' }}>
               Hear from pet owners and farmers who have experienced the convenience and quality of our mobile veterinary services.
             </p>
           </div>
@@ -320,33 +277,15 @@ const LandingPage = () => {
                 <div className="testimonial-container py-4">
                   <Row className="justify-content-center">
                     <Col md={10} lg={8}>
-                      <Card className="border-0 shadow-lg" style={{
-                        borderRadius: theme.borderRadius.lg,
-                        overflow: 'hidden'
-                      }}>
+                      <Card className="border-0 shadow-lg testimonial-card">
                         <Card.Body className="p-0">
                           <Row className="g-0">
-                            <Col md={4} className="d-none d-md-block" style={{
-                              backgroundColor: theme.colors.primary.main,
-                              position: 'relative'
-                            }}>
-                              <div className="testimonial-quote-icon position-absolute" style={{
-                                top: '30px',
-                                left: '30px',
-                                opacity: 0.2,
-                                color: 'white',
-                                fontSize: '4rem'
-                              }}>
+                            <Col md={4} className="d-none d-md-block testimonial-profile-col">
+                              <div className="testimonial-quote-icon position-absolute">
                                 "
                               </div>
                               <div className="d-flex flex-column justify-content-center align-items-center h-100 p-4">
-                                <div className="testimonial-image mb-3" style={{
-                                  width: '100px',
-                                  height: '100px',
-                                  borderRadius: '50%',
-                                  overflow: 'hidden',
-                                  border: '3px solid white'
-                                }}>
+                                <div className="testimonial-image mb-3">
                                   <img 
                                     src={testimonial.image} 
                                     alt={testimonial.name}
@@ -354,8 +293,8 @@ const LandingPage = () => {
                                     style={{ objectFit: 'cover' }}
                                   />
                                 </div>
-                                <h5 className="text-white mb-1">{testimonial.name}</h5>
-                                <p className="text-white-50 mb-0 small">{testimonial.role}</p>
+                                <h5 className="text-white mb-1 fw-bold">{testimonial.name}</h5>
+                                <p className="text-white-80 mb-0 small">{testimonial.role}</p>
                               </div>
                             </Col>
                             <Col md={8}>
@@ -368,7 +307,7 @@ const LandingPage = () => {
                                     style={{ width: '60px', height: '60px', objectFit: 'cover' }}
                                   />
                                   <div>
-                                    <h5 className="mb-0">{testimonial.name}</h5>
+                                    <h5 className="mb-0 fw-bold">{testimonial.name}</h5>
                                     <p className="text-muted mb-0 small">{testimonial.role}</p>
                                   </div>
                                 </div>
@@ -379,7 +318,7 @@ const LandingPage = () => {
                                   <Star className="text-warning me-1" />
                                   <Star className="text-warning" />
                                 </div>
-                                <p className="testimonial-text mb-0 fs-5">"{testimonial.text}"</p>
+                                <p className="testimonial-text mb-0 fs-5 fw-medium">"{testimonial.text}"</p>
                               </div>
                             </Col>
                           </Row>
@@ -408,7 +347,9 @@ const LandingPage = () => {
                 <Button 
                   as={Link} 
                   to="/register" 
-                  className="btn-primary-gradient px-4 py-3"
+                  variant="primary"
+                  size="lg"
+                  className="fw-semibold px-4 py-3"
                 >
                   Register as Provider <ArrowRight className="ms-2" />
                 </Button>
@@ -427,22 +368,8 @@ const LandingPage = () => {
         </Container>
 
         {/* Decorative elements */}
-        <div className="position-absolute" style={{
-          width: '200px',
-          height: '200px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(255,255,255,0.05)',
-          top: '-100px',
-          left: '-100px'
-        }}></div>
-        <div className="position-absolute" style={{
-          width: '300px',
-          height: '300px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(255,255,255,0.05)',
-          bottom: '-150px',
-          right: '-150px'
-        }}></div>
+        <div className="position-absolute decorative-circle-1"></div>
+        <div className="position-absolute decorative-circle-2"></div>
       </section>
     </div>
   );

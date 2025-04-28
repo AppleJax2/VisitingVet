@@ -1,49 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap');
 
-:root {
-  /* Primary colors */
-  --primary-main: #577E46;
-  --primary-light: #6B9256;
-  --primary-dark: #3D5D2F;
-  
-  /* Secondary colors */
-  --secondary-main: #AC510A;
-  --secondary-light: #C76420;
-  --secondary-dark: #7F3C06;
-  
-  /* Background colors */
-  --background-light: #F6E6BB;
-  --background-white: #FFFFFF;
-  --background-tan: #F0DCA0;
-  --background-dark: #124438;
-  
-  /* Accent colors */
-  --accent-gold: #EDB75A;
-  --accent-dark-green: #124438;
-  --accent-light-green: #A8B99F;
-  
-  /* Text colors */
-  --text-primary: #333333;
-  --text-secondary: #555555;
-  --text-light: #777777;
-  --text-white: #FFFFFF;
-  
-  /* Font Families */
-  --heading-font: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --body-font: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
-  /* Border Radius */
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 24px;
-  
-  /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.16);
-  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.2);
-}
+/* Import CSS variables from theme.js instead of redefining them here */
 
 * {
   margin: 0;
@@ -55,28 +12,28 @@ body {
   font-family: var(--body-font);
   color: var(--text-primary);
   background-color: var(--background-white);
-  line-height: 1.6;
-  font-size: 16px;
+  line-height: var(--line-height-base);
+  font-size: var(--font-size-base);
   overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--heading-font);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   margin-bottom: 1rem;
   color: var(--text-primary);
-  line-height: 1.3;
+  line-height: var(--line-height-tight);
 }
 
 p {
   margin-bottom: 1.5rem;
-  line-height: 1.7;
+  line-height: var(--line-height-loose);
 }
 
 a {
   color: var(--primary-main);
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: var(--transition-base);
 }
 
 a:hover {
@@ -158,11 +115,11 @@ img {
 
 /* Buttons */
 .btn {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.3px;
   padding: 0.6rem 1.5rem;
   border-radius: var(--border-radius-md);
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: var(--transition-slow);
   box-shadow: var(--shadow-sm);
 }
 
@@ -233,7 +190,7 @@ img {
 
 .card-title {
   color: var(--primary-dark);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   margin-bottom: 0.75rem;
 }
 
@@ -251,7 +208,7 @@ img {
   border-radius: var(--border-radius-md);
   border: 1px solid #ced4da;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: var(--transition-base);
 }
 
 .form-control:focus {
@@ -260,7 +217,7 @@ img {
 }
 
 .form-label {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-bottom: 0.5rem;
   color: var(--text-secondary);
 }
@@ -271,22 +228,22 @@ img {
 
 /* Badge styling */
 .badge {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   padding: 0.4em 0.8em;
   border-radius: 30px;
 }
 
 /* Typography helpers */
 .fw-bold {
-  font-weight: 700 !important;
+  font-weight: var(--font-weight-bold) !important;
 }
 
 .fw-semi-bold {
-  font-weight: 600 !important;
+  font-weight: var(--font-weight-semibold) !important;
 }
 
 .fw-medium {
-  font-weight: 500 !important;
+  font-weight: var(--font-weight-medium) !important;
 }
 
 .text-primary-color {
@@ -358,7 +315,7 @@ img {
 .testimonial-card {
   border-radius: var(--border-radius-lg);
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: var(--transition-base);
 }
 
 .testimonial-image {
@@ -373,14 +330,14 @@ img {
 /* Stats counters */
 .stat-counter {
   font-size: 2.5rem;
-  font-weight: 800;
+  font-weight: var(--font-weight-bold);
   color: var(--primary-main);
   margin-bottom: 0.5rem;
 }
 
 .stat-label {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
 }
 
@@ -392,28 +349,67 @@ footer {
 
 .footer-links a {
   color: rgba(255, 255, 255, 0.7);
-  transition: all 0.3s ease;
+  transition: var(--transition-base);
 }
 
 .footer-links a:hover {
   color: var(--accent-gold) !important;
 }
 
+/* Social Icons - Updated for consistent styling */
 .social-icon {
   width: 36px;
   height: 36px;
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
+  border-radius: var(--border-radius-round);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  transition: all 0.3s ease;
+  transition: var(--transition-base);
 }
 
-.social-icon:hover {
+.social-icon:hover, 
+.social-icon:focus {
   background-color: var(--accent-gold);
   transform: translateY(-3px);
+  color: var(--text-white);
+  box-shadow: var(--shadow-md);
+}
+
+/* Footer links focus state */
+.footer-links a:focus,
+.footer-bottom-links a:focus {
+  color: var(--accent-gold) !important;
+  outline: 1px solid var(--accent-gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Fix for newsletter input in footer */
+.footer-newsletter-input {
+  border-radius: var(--border-radius-md) 0 0 var(--border-radius-md) !important;
+  border: none;
+  height: 46px;
+}
+
+.footer-newsletter-button {
+  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0 !important;
+  border: none;
+  background-color: var(--secondary-main);
+  height: 46px;
+}
+
+.text-white-70 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.text-white-80 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.text-accent-gold {
+  color: var(--accent-gold) !important;
 }
 
 /* Enhanced list styling */
@@ -500,7 +496,7 @@ ul.list-styled li:before {
   }
   
   .display-4 {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
   }
   
   .lead {
@@ -512,13 +508,20 @@ ul.list-styled li:before {
   }
 }
 
-/* Fix for potential overlapping elements */
 .position-relative {
-  z-index: 1; /* Ensure positions don't cause z-index stacking issues */
+  position: relative;
 }
 
-/* Container padding fix */
+.z-index-1 {
+  z-index: 1;
+}
+
 .container {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  position: relative;
+}
+
+/* Accessibility focus outline */
+a:focus, button:focus, input:focus, select:focus, textarea:focus, [tabindex]:focus {
+  outline: 2px solid var(--primary-main);
+  outline-offset: 2px;
 }
