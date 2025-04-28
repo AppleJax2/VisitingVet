@@ -701,5 +701,85 @@ exports.getAdminPaymentHistory = asyncHandler(async (req, res, next) => {
     });
 });
 
-// TODO: Add controller for initiating refunds (Admin/Provider role)
-// TODO: Add filtering/pagination to getProviderPaymentHistory and getPetOwnerPaymentHistory if required 
+/**
+ * @desc    Initiate a refund for a successful payment
+ * @route   POST /api/v1/payments/:paymentIntentId/refund
+ * @access  Private (Admin or Provider of the service)
+ */
+exports.initiateRefund = asyncHandler(async (req, res, next) => {
+    const { paymentIntentId } = req.params;
+    const { amount, reason } = req.body; // Optional amount in dollars, reason
+    const userId = req.user.id;
+    const userRole = req.user.role.name; // Assuming role is populated
+
+    const payment = await Payment.findOne({ stripePaymentIntentId: paymentIntentId })
+                            .populate('userId', 'name email')
+                            .populate('providerId', 'name email');
+
+    if (!payment) {
+        return next(new ErrorResponse(`Payment with Intent ID ${paymentIntentId} not found`, 404));
+    }
+
+    // Authorization: Allow Admin or the specific provider associated with the payment
+    if (userRole !== ROLES.Admin && payment.providerId?._id.toString() !== userId) {
+         return next(new ErrorResponse('User not authorized to refund this payment', 403));
+    }
+
+    // Validation: Can only refund succeeded payments that haven't been fully refunded
+    if (payment.status !== 'succeeded') {
+        return next(new ErrorResponse('Payment must be successful to be refunded', 400));
+    }
+    if ((payment.refundedAmount || 0) >= payment.amount) {
+         return next(new ErrorResponse('Payment has already been fully refunded', 400));
+    }
+
+    let refundAmountCents = null;
+    const maxRefundableAmount = payment.amount - (payment.refundedAmount || 0);
+
+    if (amount !== undefined) {
+        // Partial refund requested
+        refundAmountCents = Math.round(parseFloat(amount) * 100);
+        if (isNaN(refundAmountCents) || refundAmountCents <= 0) {
+             return next(new ErrorResponse('Invalid refund amount specified', 400));
+        }
+        if (refundAmountCents > maxRefundableAmount) {
+             return next(new ErrorResponse(`Refund amount cannot exceed the remaining refundable amount ($${(maxRefundableAmount / 100).toFixed(2)})`, 400));
+        }
+    } else {
+        // Full refund (remaining amount)
+        refundAmountCents = maxRefundableAmount;
+    }
+
+    try {
+        const refund = await stripe.refunds.create({
+            payment_intent: paymentIntentId,
+            amount: refundAmountCents, // Amount in cents
+            reason: reason || 'requested_by_customer', // Optional reason
+            // Add metadata if needed
+            metadata: {
+                initiatedByUserId: userId,
+                initiatedByUserRole: userRole,
+                paymentRecordId: payment._id.toString()
+            }
+        });
+
+        // Note: The actual update of the Payment record status and refundedAmount
+        // should ideally be handled by the 'charge.refunded' webhook event handler
+        // to ensure consistency, as refunds can take time or fail.
+        // However, we could update status to 'pending_refund' here if needed.
+        // For simplicity, we'll rely on the webhook for DB updates.
+
+        res.status(200).json({
+            success: true,
+            message: `Refund initiated successfully. Amount: $${(refund.amount / 100).toFixed(2)}, Status: ${refund.status}`,
+            refundId: refund.id // Return Stripe refund ID
+        });
+
+    } catch (error) {
+        console.error(`Error initiating refund for PaymentIntent ${paymentIntentId}:`, error);
+        // Provide more specific Stripe error messages if possible
+        return next(new ErrorResponse(error.message || 'Failed to initiate refund via Stripe', 500));
+    }
+});
+
+// TODO: Add filtering/pagination to getProviderPaymentHistory and getPetOwnerPaymentHistory if required

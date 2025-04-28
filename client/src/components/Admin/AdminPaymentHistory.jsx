@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../../services/api'; // Adjust path as needed
-import { Table, Spinner, Alert, Pagination, Form, Row, Col, Button, InputGroup, Card } from 'react-bootstrap';
+import { Table, Spinner, Alert, Pagination, Form, Row, Col, Button, InputGroup, Card, Badge } from 'react-bootstrap';
 import { format, parseISO } from 'date-fns';
+import RefundModal from './RefundModal'; // Import the modal
+import { FaUndo } from 'react-icons/fa'; // Import refund icon
 
 const ITEMS_PER_PAGE = 15;
 const PAYMENT_STATUSES = ['succeeded', 'pending', 'failed', 'requires_action', 'canceled', 'refunded'];
@@ -23,6 +25,10 @@ function AdminPaymentHistory() {
         endDate: ''
     });
     const [activeFilters, setActiveFilters] = useState({});
+
+    // State for Refund Modal
+    const [showRefundModal, setShowRefundModal] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState(null);
 
     const fetchHistory = useCallback(async (page = 1, currentFilters = {}) => {
         setIsLoading(true);
@@ -111,6 +117,16 @@ function AdminPaymentHistory() {
                  fetchHistory(1, {});
             }
         }
+    };
+
+    const handleShowRefundModal = (payment) => {
+        setSelectedPayment(payment);
+        setShowRefundModal(true);
+    };
+
+    const handleRefundSuccess = () => {
+        // Refresh the history list after a refund is initiated
+        fetchHistory(currentPage, activeFilters);
     };
 
     const renderPagination = () => {
@@ -223,6 +239,7 @@ function AdminPaymentHistory() {
                                 <th>Appt Date</th>
                                 <th>Service</th>
                                 <th>Intent ID</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -243,6 +260,18 @@ function AdminPaymentHistory() {
                                         <td>{formatDate(p.appointmentDate)}</td>
                                         <td>{p.serviceName || 'N/A'}</td>
                                         <td><small title={p.paymentIntentId}>{p.paymentIntentId?.substring(0, 10)}...</small></td>
+                                        <td>
+                                            {p.status === 'succeeded' && (
+                                                 <Button 
+                                                    variant="outline-warning" 
+                                                    size="sm"
+                                                    onClick={() => handleShowRefundModal(p)}
+                                                    title="Initiate Refund"
+                                                >
+                                                    <FaUndo />
+                                                </Button>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))
                             )}
@@ -251,6 +280,14 @@ function AdminPaymentHistory() {
                     {renderPagination()}
                 </>
             )}
+
+            {/* Refund Modal */} 
+            <RefundModal 
+                show={showRefundModal}
+                onHide={() => setShowRefundModal(false)}
+                payment={selectedPayment}
+                onRefundSuccess={handleRefundSuccess}
+            />
         </div>
     );
 }

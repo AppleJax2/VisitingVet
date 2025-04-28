@@ -1068,6 +1068,24 @@ export const adminUpdateSetting = async (key, value) => {
   }
 };
 
+// --- Payment Actions ---
+
+/**
+ * Initiate a refund for a payment (Admin/Provider only)
+ * @param {string} paymentIntentId - The Stripe Payment Intent ID
+ * @param {object} refundData - Optional { amount: number (in dollars), reason: string }
+ * @returns {Promise<Object>} Response with success status and refund details
+ */
+export const initiateRefund = async (paymentIntentId, refundData = {}) => {
+  try {
+    const response = await api.post(`/payments/${paymentIntentId}/refund`, refundData);
+    return response.data; // Expects { success: true, message: string, refundId: string }
+  } catch (error) {
+    console.error(`Initiate refund error for ${paymentIntentId}:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to initiate refund');
+  }
+};
+
 // --- Upload Service --- 
 export const uploadPetImage = async (petId, imageFile) => {
     const formData = new FormData();

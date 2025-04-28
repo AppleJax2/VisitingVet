@@ -7,6 +7,7 @@ const {
   getPetOwnerPaymentHistory,
   getProviderPaymentHistory,
   getAdminPaymentHistory,
+  initiateRefund,
 } = require('../controllers/paymentController');
 
 const router = express.Router();
@@ -37,6 +38,9 @@ router.get('/my-history', protect, authorize(ROLES.PetOwner), getPetOwnerPayment
 router.get('/provider-history', protect, authorize(ROLES.MVSProvider), getProviderPaymentHistory);
 router.get('/admin-history', protect, authorize(ROLES.Admin), getAdminPaymentHistory);
 
-// Note: Refund initiation and advanced history filtering handled by TODOs in paymentController.js
+// --- Refund --- 
+router.post('/:paymentIntentId/refund', protect, authorize(ROLES.Admin, ROLES.MVSProvider), initiateRefund);
+
+// Note: Advanced history filtering handled by TODOs in paymentController.js
 
 module.exports = router; 
