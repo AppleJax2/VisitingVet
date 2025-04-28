@@ -74,9 +74,9 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
     - [ ] Other text/background combinations failing WCAG AA (4.5:1 normal, 3:1 large/UI).
 - [x] Implement a consistent, highly visible focus indicator (e.g., 2px solid outline using a high-contrast color) for all interactive elements. Update base focus styles (`:focus`, `:focus-visible`) in `client/src/styles/main.scss` or component styles.
 - [x] Implement skip links (e.g., "Skip to main content") for keyboard users. Add to `App.jsx` or `Header.jsx`.
-- [ ] Review ARIA roles and attributes on complex components (modals, dropdowns, custom controls) for correctness and completeness. (Requires manual testing and JSX review).
+- [x] Review ARIA roles and attributes on complex components (modals, dropdowns, custom controls) for correctness and completeness. (Requires manual testing and JSX review).
 
 ## Specific Components/Pages
 
-- [ ] Fix Landing Page Hero text contrast (`client/src/pages/LandingPage.jsx` / `LandingPage.css`). *See Accessibility section.*
-- [ ] Fix inconsistent spacing between cards on different Dashboard types (`client/src/pages/Dashboard/`). *See Layout/Grid section.* 
+- [x] Fix Landing Page Hero text contrast (`client/src/pages/LandingPage.jsx` / `LandingPage.css`). *See Accessibility section.*
+- [x] Fix inconsistent spacing between cards on different Dashboard types (`client/src/pages/Dashboard/`). *See Layout/Grid section.* 
