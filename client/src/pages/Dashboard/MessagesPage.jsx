@@ -3,8 +3,8 @@ import ConversationList from '../../components/Chat/ConversationList';
 import MessageView from '../../components/Chat/MessageView';
 import { getConversations, getMessagesForConversation } from '/src/services/api';
 import { useAuth } from '../../contexts/AuthContext';
-import LoadingSpinner from '../../components/Shared/LoadingSpinner'; // Assuming a spinner component
-import ErrorMessage from '../../components/Shared/ErrorMessage'; // Assuming an error component
+import LoadingSpinner from '../components/Shared/LoadingSpinner';
+import ErrorMessage from '../components/Shared/ErrorMessage';
 import '../../styles/MessagesPage.css'; // Add styling
 
 function MessagesPage() {
