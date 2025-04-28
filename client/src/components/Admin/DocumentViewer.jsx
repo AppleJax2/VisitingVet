@@ -568,7 +568,7 @@ function DocumentViewer({ documentUrl, contentType, onSaveAnnotations, initialAn
                             <span className="mx-2">Page {pageNumber} of {numPages}</span>
                         </>
                     ) : (
-                        <div /> // Placeholder for alignment
+                        <div /> // Ensures alignment when no page controls are shown
                     )}
                 </div>
                 

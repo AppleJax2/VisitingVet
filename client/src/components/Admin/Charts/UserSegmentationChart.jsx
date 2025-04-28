@@ -5,8 +5,13 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 import { LoadingSpinner } from '../../Shared/LoadingSpinner';
 import { ErrorMessage } from '../../Shared/ErrorMessage';
 
-// Placeholder colors - can be expanded or made dynamic
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+// Define colors or import from theme
+const COLORS = {
+    PetOwner: '#0088FE', 
+    MVSProvider: '#00C49F', 
+    Clinic: '#FFBB28', 
+    Admin: '#FF8042'
+};
 
 const UserSegmentationChart = ({ data: apiData, loading, error, title = "User Segmentation" }) => {
 
@@ -44,7 +49,7 @@ const UserSegmentationChart = ({ data: apiData, loading, error, title = "User Se
                                         nameKey="segment" // Key holding the segment name/label
                                     >
                                         {chartData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            <Cell key={`cell-${index}`} fill={COLORS[entry.segment] || '#8884d8'} />
                                         ))}
                                     </Pie>
                                     <Tooltip />

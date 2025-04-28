@@ -27,7 +27,7 @@ router.get(
     '/verification-rate',
     dateRangeValidationRules,
     validateAnalyticsRequest,
-    AnalyticsController.handleGetVerificationRateMetrics // Placeholder handler
+    AnalyticsController.handleGetVerificationRateMetrics
 );
 
 // GET /api/admin/analytics/service-usage
@@ -35,7 +35,7 @@ router.get(
     '/service-usage',
     dateRangeValidationRules,
     validateAnalyticsRequest,
-    AnalyticsController.handleGetServiceUsageMetrics // Placeholder handler
+    AnalyticsController.handleGetServiceUsageMetrics
 );
 
 // GET /api/admin/analytics/retention
