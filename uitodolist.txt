@@ -15,10 +15,10 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
 
 ## Typography
 
-- [ ] Simplify type scale to 6 defined sizes in `client/src/styles/design-system.scss`.
-- [ ] Restrict available font weights to Regular (400), Medium (500), and Bold (700) in `client/src/styles/design-system.scss`.
-- [ ] Update font-size and font-weight Bootstrap overrides in `client/src/styles/_variables.scss`. *Dependency: Simplified type scale and weights.*
-- [ ] Audit and update components to use only the defined font weights consistently (e.g., check `buttons.scss`, `cards.scss`, headings, body text).
+- [x] Simplify type scale to 6 defined sizes in `client/src/styles/design-system.scss`.
+- [x] Restrict available font weights to Regular (400), Medium (500), and Bold (700) in `client/src/styles/design-system.scss`.
+- [x] Update font-size and font-weight Bootstrap overrides in `client/src/styles/_variables.scss`. *Dependency: Simplified type scale and weights.*
+- [x] Audit and update components to use only the defined font weights consistently (e.g., check `buttons.scss`, `cards.scss`, headings, body text).
 
 ## Spacing
 
