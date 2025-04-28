@@ -36,9 +36,7 @@ function ChatWindow({ conversation, onNewMessage }) {
                 queryParams.before = beforeTimestamp; // Add cursor for pagination
             }
 
-            // console.log(`Fetching messages for ${conversation._id} with params:`, queryParams);
             const fetchedMessages = await getMessagesForConversation(conversation._id, queryParams);
-            // console.log('Fetched messages:', fetchedMessages);
 
             if (fetchedMessages.length < queryParams.limit) {
                 setHasMoreMessages(false); // No more messages to load
@@ -48,12 +46,6 @@ function ChatWindow({ conversation, onNewMessage }) {
             setMessages(prevMessages => 
                 beforeTimestamp ? [...fetchedMessages, ...prevMessages] : fetchedMessages
             );
-
-            // Scroll to bottom only on initial load or when sending a new message
-            // if (!beforeTimestamp) {
-            //     // Use timeout to ensure DOM is updated
-            //     setTimeout(() => messageListRef.current?.scrollToBottom(), 0);
-            // }
 
         } catch (err) {
             console.error("Error fetching messages:", err);
@@ -83,14 +75,9 @@ function ChatWindow({ conversation, onNewMessage }) {
         if (!socket || !conversation?._id) return;
 
         const handleNewMessage = (newMessage) => {
-            // console.log('Received new message via socket:', newMessage);
-            // Only add if the message belongs to the currently viewed conversation
             if (newMessage.conversation === conversation._id) {
                 setMessages(prevMessages => [...prevMessages, newMessage]);
-                // Scroll to bottom when a new message arrives
-                // setTimeout(() => messageListRef.current?.scrollToBottom(), 0);
 
-                // Optionally, call the onNewMessage prop to update the conversation list
                 if (onNewMessage) {
                     onNewMessage(newMessage);
                 }
@@ -117,28 +104,13 @@ function ChatWindow({ conversation, onNewMessage }) {
             // conversationId is handled server-side or can be included if needed
         };
 
-        // console.log('Sending message:', messageData);
         socket.emit('sendMessage', messageData);
-
-        // Optimistic UI update (optional but good UX)
-        // const optimisticMessage = {
-        //     _id: `temp-${Date.now()}`,
-        //     sender: currentUser,
-        //     recipient: otherParticipant,
-        //     body: messageBody,
-        //     conversation: conversation._id,
-        //     createdAt: new Date().toISOString(),
-        //     isSending: true // Add a flag for styling/tracking
-        // };
-        // setMessages(prev => [...prev, optimisticMessage]);
-        // setTimeout(() => messageListRef.current?.scrollToBottom(), 0);
     };
 
     // Handler for loading more messages
     const loadMoreMessages = () => {
         if (!loadingMore && hasMoreMessages && messages.length > 0) {
             const oldestMessageTimestamp = messages[0].createdAt;
-            // console.log('Loading more messages before:', oldestMessageTimestamp);
             fetchMessages(oldestMessageTimestamp);
         }
     };

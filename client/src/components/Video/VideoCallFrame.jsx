@@ -55,15 +55,13 @@ function VideoCallFrame({ roomName, userName, appointmentId, // Pass appointment
     const [showFallbackOptions, setShowFallbackOptions] = useState(false);
     const callContainerRef = useRef(null);
 
-    const destroyFrame = useCallback(() => {
+    const destroyFrame = () => {
         if (callFrame) {
-            console.log('Destroying Daily iframe explicitly...');
-            // Remove event listeners before destroying to avoid potential issues
             callFrame.off('loaded').off('joining-meeting').off('joined-meeting').off('left-meeting').off('error');
             callFrame.destroy();
             setCallFrame(null);
         }
-    }, [callFrame]);
+    };
 
     const createAndJoinCall = useCallback(async (isRetry = false) => {
         if (!roomName || !userName) {
@@ -80,7 +78,6 @@ function VideoCallFrame({ roomName, userName, appointmentId, // Pass appointment
         setIsLoading(true);
         setError(null);
         setShowFallbackOptions(false);
-        console.log(`Attempting to get token for room: ${roomName}, user: ${userName}. Retry: ${isRetry}`);
 
         try {
             const { token, roomUrl } = await getVideoToken(roomName);
@@ -99,43 +96,43 @@ function VideoCallFrame({ roomName, userName, appointmentId, // Pass appointment
             
             const frame = DailyIframe.createFrame(callContainerRef.current, frameOptions);
             setCallFrame(frame); // Store frame instance
-            console.log('Daily iframe created.');
 
-            frame.on('loaded', () => console.log('Daily iframe loaded'));
-            frame.on('joining-meeting', () => {
-                 console.log('Joining Daily meeting...');
-                 setIsLoading(false); // Frame is visible, show joining state
-             });
+            frame.on('loaded', () => { /* Log removed */ });
+            frame.on('joining-meeting', () => { /* Log removed */ });
             frame.on('joined-meeting', (event) => {
-                 console.log('Successfully joined Daily meeting', event);
-                 setIsLoading(false);
-                 setShowFallbackOptions(false); // Hide fallbacks on success
-                 setError(null);
-             });
+                /* Log removed */
+                setIsLoading(false);
+                setShowFallbackOptions(false); // Hide fallbacks on success
+                setError(null);
+            });
             frame.on('left-meeting', () => {
-                 console.log('Left Daily meeting event');
-                 setError(null); 
-                 destroyFrame(); // Clean up frame
-                 if (onCallLeft) onCallLeft(); // Notify parent
-             });
+                /* Log removed */
+                setError(null); 
+                destroyFrame(); // Clean up frame
+                if (onCallLeft) onCallLeft(); // Notify parent
+            });
             frame.on('error', (event) => {
-                 console.error('Daily call error event:', event);
-                 const mappedError = mapDailyError(event);
-                 setError(mappedError);
-                 setShowFallbackOptions(true);
-                 setIsLoading(false);
-                 destroyFrame(); // Clean up frame on error
+                console.error('Daily error event:', event);
+                const mappedError = mapDailyError(event);
+                setError(mappedError);
+                setShowFallbackOptions(true);
+                setIsLoading(false);
+                destroyFrame(); // Clean up frame on error
             });
 
-            // Join the call (this happens after 'loaded' usually, but join() can be called directly)
-            frame.join();
+            await frame.join();
 
         } catch (err) {
             console.error('Error setting up Daily call:', err);
-            setError({ message: 'Initialization Failed', suggestion: err.message || 'Could not initialize video call.' });
+            if (!error) {
+                 setError({ 
+                     message: 'Failed to initialize video call.', 
+                     suggestion: err.message || 'Please check permissions and network connection.' 
+                 });
+            }
             setShowFallbackOptions(true);
             setIsLoading(false);
-            if (callFrame) destroyFrame(); // Cleanup if frame was partially created
+            destroyFrame(); // Ensure frame is cleaned up on setup failure
         }
     }, [roomName, userName, callFrame, destroyFrame, onCallLeft]);
 

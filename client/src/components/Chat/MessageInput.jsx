@@ -14,8 +14,6 @@ function MessageInput({ onSendMessage, disabled }) {
 
     const handleInputChange = (e) => {
         setMessage(e.target.value);
-        // TODO: Add typing indicator emission here if implementing
-        // socket.emit('typing', { conversationId });
     };
 
     const handleKeyDown = (e) => {
