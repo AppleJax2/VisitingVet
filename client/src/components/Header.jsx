@@ -128,6 +128,85 @@ const Header = () => {
   };
 
   return (
+    <>
+      <a href="#main-content" className="skip-link" style={{
+        position: 'absolute',
+        left: '-999px',
+        top: 'auto',
+        width: '1px',
+        height: '1px',
+        overflow: 'hidden',
+        zIndex: 2000,
+        background: '#EDB75A',
+        color: '#333',
+        padding: '8px 16px',
+        borderRadius: '4px',
+        fontWeight: 600,
+        textDecoration: 'none',
+        transition: 'left 0.2s',
+      }}
+      onFocus={e => e.target.style.left = '16px'}
+      onBlur={e => e.target.style.left = '-999px'}
+      >Skip to main content</a>
+      <Navbar 
+        expand="lg" 
+        fixed="top"
+        className={`main-navbar ${scrolled || !isHomePage || isAuthenticated ? 'scrolled' : ''}`}
+        variant={scrolled || !isHomePage || isAuthenticated ? 'light' : 'dark'}
+        bg={scrolled || !isHomePage || isAuthenticated ? 'white' : 'transparent'}
+        style={{
+          padding: '1rem 0', // Apply consistent padding for all states
+          boxShadow: scrolled || !isHomePage || isAuthenticated ? 'var(--shadow-sm)' : 'none',
+          transition: 'var(--transition-base)'
+        }}
+      >
+        <Container fluid="xl">
+          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center fw-bold">
+            <img
+              src={scrolled || !isHomePage || isAuthenticated ? "/assets/logo-primary.png" : "/assets/logo-white.png"} 
+              width="30"
+              height="30"
+              className="d-inline-block align-top me-2"
+              alt="VisitingVet Logo"
+            />
+            <span style={{ color: scrolled || !isHomePage || isAuthenticated ? theme.colors.primary.dark : theme.colors.text.white }}>
+               VisitingVet
+            </span>
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" style={{ 
+            borderColor: scrolled || !isHomePage || isAuthenticated ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.3)'
+          }}>
+             <List color={scrolled || !isHomePage || isAuthenticated ? theme.colors.text.primary : theme.colors.text.white} size={24} />
+          </Navbar.Toggle>
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto align-items-center">
+              <NavLink to="/" className="mx-lg-1">Home</NavLink>
+              <NavLink to="/search-providers" className="mx-lg-1">Find a Vet</NavLink>
+              <NavLink to="/about" className="mx-lg-1">About Us</NavLink>
+              <NavLink to="/services" className="mx-lg-1">Services</NavLink>
+              {/* Add Blog Link if implemented later */}
+              {/* <NavLink to="/blog" className="mx-lg-1">Blog</NavLink> */}
+              
+              {!loading && isAuthenticated ? (
+                <div className="d-flex align-items-center">
+                  <NotificationBell />
+                  
+                  <Dropdown align="end" className="ms-2">
+                    <Dropdown.Toggle 
+                      as="div"
+                      id="dropdown-basic"
+                      style={{
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <div 
+                        className="user-avatar d-flex align-items-center justify-content-center me-1"
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
     <Navbar 
       expand="lg" 
       fixed="top"

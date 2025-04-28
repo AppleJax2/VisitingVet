@@ -139,9 +139,9 @@
   transition: $transition-base;
   outline: none;
   &:focus, &:focus-visible {
-    outline: 2px solid $color-accent-gold;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 2px rgba($color-accent-gold, 0.5);
+    outline: 2px solid $color-accent-gold !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 2px rgba($color-accent-gold, 0.5) !important;
   }
   &:hover {
     filter: brightness(0.97);
