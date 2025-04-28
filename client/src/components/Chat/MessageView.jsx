@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../Shared/LoadingSpinner';
 import ErrorMessage from '../Shared/ErrorMessage';
 import '../../styles/MessageView.css'; // Add styling
+import { useVisibilityChange } from '../../hooks/useVisibilityChange'; // Assume a custom hook
 
 const MESSAGES_PER_PAGE = 20;
 
@@ -24,6 +25,7 @@ function MessageView({ conversation, onBack }) {
     const messageListRef = useRef(null);
     const initialLoadRef = useRef(true); // Track initial load for scroll behavior
     const messagesEndRef = useRef(null); // Ref for scrolling to bottom
+    const isVisible = useVisibilityChange(); // Use custom hook
 
     const fetchMessages = useCallback(async (beforeMessageId = null) => {
         if (!conversationId) return;
@@ -72,28 +74,40 @@ function MessageView({ conversation, onBack }) {
         }
     }, [messages, isFetchingMore]);
 
-    // Socket listeners
+    // Socket listeners and Mark as Read logic
     useEffect(() => {
         if (socket && isConnected && conversationId) {
             const messageHandler = (newMessage) => {
                 if (newMessage.conversationId === conversationId) {
                     setMessages(prev => [...prev, newMessage]);
-                    // TODO: Mark as read if window/tab is focused
-                    if (document.hasFocus()) {
-                         // Socket emit removed for now, was causing issues
+                    // If window is visible/focused when message arrives, mark as read immediately
+                    if (isVisible && document.hasFocus()) {
+                        socket.emit('markAsRead', { conversationId });
                     }
                 }
             };
             socket.on('newMessage', messageHandler);
 
-            // Mark as read when opening the conversation view
-            // Socket emit removed for now
+            // Mark as read when component mounts/becomes visible and is focused
+            const markReadIfVisible = () => {
+                if (isVisible && document.hasFocus()) {
+                    socket.emit('markAsRead', { conversationId });
+                }
+            };
+            
+            markReadIfVisible(); // Initial check
+            
+            // Add event listeners for focus/visibility changes
+            window.addEventListener('focus', markReadIfVisible);
+            document.addEventListener('visibilitychange', markReadIfVisible);
 
             return () => {
                 socket.off('newMessage', messageHandler);
+                window.removeEventListener('focus', markReadIfVisible);
+                document.removeEventListener('visibilitychange', markReadIfVisible);
             };
         }
-    }, [socket, isConnected, conversationId]);
+    }, [socket, isConnected, conversationId, isVisible]); // Add isVisible dependency
 
     // Send message handler
     const handleSendMessage = useCallback((content) => {

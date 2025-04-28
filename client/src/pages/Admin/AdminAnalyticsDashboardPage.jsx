@@ -304,7 +304,7 @@ function AdminAnalyticsDashboardPage() {
                         <Card.Body>
                             {loading ? <LoadingSpinner/> : error ? <Alert variant="danger">{error}</Alert> : 
                                 <VerificationMetricsChart
-                                    data={verificationData}
+                                    data={verificationData?.results || []}
                                     loading={loading}
                                     error={error ? { message: error } : null}
                                 />
@@ -318,7 +318,7 @@ function AdminAnalyticsDashboardPage() {
                         <Card.Body>
                             {loading ? <LoadingSpinner/> : error ? <Alert variant="danger">{error}</Alert> : 
                                 <UserGrowthChart
-                                    data={userGrowthData}
+                                    data={userGrowthData?.results || []}
                                     loading={loading}
                                     error={error ? { message: error } : null}
                                 />
@@ -331,7 +331,7 @@ function AdminAnalyticsDashboardPage() {
             {/* Row 3: More Charts/Data (Service Usage, Segmentation) */}
             <div className="row gy-3">
                 <div className="col-12 col-lg-6">
-                    <ServiceUsageChart data={usageData} loading={loading} error={error} />
+                    <ServiceUsageChart data={usageData?.results || []} loading={loading} error={error} />
                 </div>
                 <div className="col-12 col-lg-6">
                      {/* Replace Top API Endpoints card with Segmentation Chart */}
