@@ -20,6 +20,7 @@ const {
   getVerificationHistory
 } = require('../controllers/adminController');
 const { protect, checkPermission, authorize } = require('../middleware/authMiddleware');
+const { ProviderController, validateManualVerification } = require('../controllers/providerController');
 
 const router = express.Router();
 
@@ -65,5 +66,14 @@ router.get('/users/:userId/activity', checkPermission('users:read_activity'), ge
 
 // Add route for bulk actions
 router.post('/users/bulk-action', checkPermission('users:bulk_manage'), handleBulkUserAction); // Requires users:bulk_manage
+
+// --- Provider Management Routes (including manual verification) ---
+// Add the PUT route for manual DORA verification update
+router.put(
+    '/providers/:providerId/manual-verification', 
+    authorize('updateProviderVerification'), // Optional: more granular permission check
+    validateManualVerification, 
+    ProviderController.updateManualDoraVerification
+);
 
 module.exports = router; 

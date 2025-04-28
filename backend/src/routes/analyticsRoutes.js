@@ -1,9 +1,12 @@
 const express = require('express');
-const AnalyticsController = require('../controllers/analyticsController');
-const authMiddleware = require('../middleware/authMiddleware'); // Assuming admin auth middleware
+const { AnalyticsController, validateAnalyticsRequest } = require('../controllers/analyticsController');
+const { authenticateAdmin } = require('../middleware/authMiddleware'); // Assuming admin auth middleware
 const { query } = require('express-validator'); // For input validation
 
 const router = express.Router();
+
+// Apply admin authentication and request validation to all analytics routes
+router.use(authenticateAdmin);
 
 // Validation rules for date range queries
 const dateRangeValidationRules = [
@@ -11,29 +14,27 @@ const dateRangeValidationRules = [
     query('endDate').optional().isISO8601().toDate().withMessage('endDate must be a valid ISO 8601 date'),
 ];
 
-// Mount admin-only routes under /admin/analytics
-
 // GET /api/admin/analytics/user-growth
 router.get(
     '/user-growth',
-    authMiddleware.isAdmin, // Ensure only admins can access
     dateRangeValidationRules,
+    validateAnalyticsRequest,
     AnalyticsController.handleGetUserGrowthMetrics
 );
 
 // GET /api/admin/analytics/verification-rate
 router.get(
     '/verification-rate',
-    authMiddleware.isAdmin,
     dateRangeValidationRules,
+    validateAnalyticsRequest,
     AnalyticsController.handleGetVerificationRateMetrics // Placeholder handler
 );
 
 // GET /api/admin/analytics/service-usage
 router.get(
     '/service-usage',
-    authMiddleware.isAdmin,
     dateRangeValidationRules,
+    validateAnalyticsRequest,
     AnalyticsController.handleGetServiceUsageMetrics // Placeholder handler
 );
 

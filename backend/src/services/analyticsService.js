@@ -1,10 +1,12 @@
 const logger = require('../utils/logger');
 // Assume necessary repositories or models are imported
 // const UserRepository = require('../repositories/userRepository');
-// const VerificationRepository = require('../repositories/verificationRepository');
+const VerificationRepository = require('../repositories/verificationRepository'); // Uncommented
 // const AppointmentRepository = require('../repositories/appointmentRepository');
 const ServiceUsageLog = require('../models/ServiceUsageLog'); // Import the usage log model
 const mongoose = require('mongoose'); // Needed for aggregation pipeline
+const { getDateFormatForAggregation } = require('../utils/aggregationHelpers'); // Assuming a helper exists
+const User = require('../models/User'); // Added for User model
 
 /**
  * Service responsible for calculating and aggregating various
@@ -21,185 +23,376 @@ class AnalyticsService {
     }
 
     /**
-     * Calculates user growth metrics over a specified period.
+     * Calculates user growth metrics, potentially grouped by a comparison period.
      *
      * @param {Date} startDate - The start date for the reporting period.
      * @param {Date} endDate - The end date for the reporting period.
-     * @returns {Promise<object>} An object containing user growth metrics (e.g., new users, total users, growth rate).
+     * @param {string} [comparisonPeriod='total'] - Grouping period ('day', 'week', 'month', 'year', or 'total').
+     * @returns {Promise<object|Array>} Metrics object (for 'total') or array of metric objects (for other periods).
      */
-    async getUserGrowthMetrics(startDate, endDate) {
-        logger.info('Calculating user growth metrics', { startDate, endDate });
+    async getUserGrowthMetrics(startDate, endDate, comparisonPeriod = 'total') {
+        logger.info('Calculating user growth metrics', { startDate, endDate, comparisonPeriod });
         try {
-            // --- Placeholder Logic --- //
-            // In reality, this would query the user database/repository
-            // const newUsers = await this.userRepository.countNewUsers(startDate, endDate);
-            // const totalUsers = await this.userRepository.countTotalUsers(endDate);
-            // const previousTotalUsers = await this.userRepository.countTotalUsers(startDate);
-            // const growthRate = totalUsers / previousTotalUsers - 1;
+            const dateField = 'createdAt'; // Field indicating user creation
 
-            // Simulate data
-            const simulatedNewUsers = Math.floor(Math.random() * 100) + 50;
-            const simulatedTotalUsers = Math.floor(Math.random() * 1000) + 500;
-            const simulatedGrowthRate = (Math.random() * 0.1).toFixed(4);
+            // --- Total calculation (simplified, may need repository) ---
+            if (comparisonPeriod === 'total') {
+                 // Query the user database/repository for counts
+                 const newUsers = await User.countDocuments({
+                     [dateField]: { $gte: startDate, $lte: endDate }
+                 });
+                 // Total users up to the end date
+                 const totalUsers = await User.countDocuments({ [dateField]: { $lte: endDate } });
+                
+                 // Simplistic growth rate - might need refinement based on definition
+                 const previousTotalUsers = await User.countDocuments({ [dateField]: { $lt: startDate } });
+                 const growthRate = previousTotalUsers > 0 ? ((totalUsers / previousTotalUsers) - 1) : (totalUsers > 0 ? Infinity : 0); 
 
-            const metrics = {
-                newUsers: simulatedNewUsers,
-                totalUsers: simulatedTotalUsers,
-                growthRate: parseFloat(simulatedGrowthRate),
-                period: { start: startDate.toISOString(), end: endDate.toISOString() }
-            };
-            logger.info('User growth metrics calculated (simulated)', metrics);
-            return metrics;
+                 const metrics = {
+                     newUsers: newUsers,
+                     totalUsers: totalUsers,
+                     growthRate: parseFloat(growthRate.toFixed(4)),
+                     period: { start: startDate.toISOString(), end: endDate.toISOString() },
+                     comparisonPeriod: 'total'
+                 };
+                 logger.info('Total user growth metrics calculated', metrics);
+                 return metrics;
+            }
+            
+            // --- Aggregation for comparison periods ---
+            const { dateFormat, dateTrunc } = getDateFormatForAggregation(comparisonPeriod, dateField);
+             if (!dateFormat || !dateTrunc) {
+                throw new Error(`Invalid comparison period specified: ${comparisonPeriod}`);
+             }
+
+             const pipeline = [
+                 { // Match users created within the overall date range
+                    $match: {
+                        [dateField]: { $gte: startDate, $lte: endDate }
+                    }
+                 },
+                 { // Group by the specified period
+                    $group: {
+                         _id: { period: dateTrunc },
+                         newUsers: { $sum: 1 }
+                    }
+                 },
+                 { // Project the results into the desired shape
+                    $project: {
+                        _id: 0,
+                        period: '$_id.period', // Start of the period
+                        newUsers: 1,
+                        // Note: Calculating totalUsers *at the end of each period* within a single aggregation is complex.
+                        // It often requires multiple stages or lookups. 
+                        // We'll return only newUsers per period for now for simplicity.
+                        // Total users can be derived on the frontend by summing newUsers if needed for a chart.
+                        // Or, fetch total users at the start date separately if growth rate per period is essential.
+                    }
+                 },
+                 {
+                     $sort: { period: 1 } // Sort chronologically
+                 }
+             ];
+
+             logger.debug('User growth aggregation pipeline:', JSON.stringify(pipeline));
+             const results = await User.aggregate(pipeline);
+
+             logger.info(`User growth metrics calculated for period: ${comparisonPeriod}`, { count: results.length });
+
+            // Add total users at the start for context if needed
+            const totalUsersAtStart = await User.countDocuments({ [dateField]: { $lt: startDate } });
+
+             // Return array of results
+             return {
+                 results: results,
+                 totalAtStart: totalUsersAtStart,
+                 period: { start: startDate.toISOString(), end: endDate.toISOString() },
+                 comparisonPeriod: comparisonPeriod
+             };
+
         } catch (error) {
-            logger.error('Error calculating user growth metrics:', error);
-            throw new Error('Failed to calculate user growth metrics.');
+            logger.error(`Error calculating user growth metrics (period: ${comparisonPeriod}):`, error);
+             if (error.message.includes('Invalid comparison period')) {
+                 throw error; 
+             }
+            if (!User || typeof User.aggregate !== 'function' || typeof User.countDocuments !== 'function') {
+                 logger.error('User model or its methods (aggregate, countDocuments) are not available/defined.');
+                 throw new Error('Analytics Service Misconfiguration: User model not available.');
+             }
+            throw new Error('Failed to calculate user growth metrics due to a database or aggregation error.');
         }
     }
 
     /**
-     * Calculates verification rate metrics over a specified period.
+     * Calculates verification rate metrics, potentially grouped by a comparison period.
      *
      * @param {Date} startDate - The start date for the reporting period.
      * @param {Date} endDate - The end date for the reporting period.
-     * @returns {Promise<object>} An object containing verification metrics (e.g., submitted, approved, rejected, pending, approval rate).
+     * @param {string} [comparisonPeriod='total'] - Grouping period ('day', 'week', 'month', 'year', or 'total').
+     * @returns {Promise<object|Array>} Metrics object (for 'total') or array of metric objects (for other periods).
      */
-    async getVerificationRateMetrics(startDate, endDate) {
-        logger.info('Calculating verification rate metrics', { startDate, endDate });
+    async getVerificationRateMetrics(startDate, endDate, comparisonPeriod = 'total') {
+        logger.info('Calculating verification rate metrics', { startDate, endDate, comparisonPeriod });
         try {
-            // --- Placeholder Logic --- //
-            // Query verification database/repository for counts within the date range
-            // const submitted = await this.verificationRepository.countByStatus('Submitted', startDate, endDate);
-            // const approved = await this.verificationRepository.countByStatus('Approved', startDate, endDate);
-            // const rejected = await this.verificationRepository.countByStatus('Rejected', startDate, endDate);
-            // const pending = await this.verificationRepository.countTotalPending(endDate); // Current pending count
-            // const approvalRate = approved / (approved + rejected) || 0;
+            const dateFieldForStatusChange = 'updatedAt'; // When status changed
+            const dateFieldForSubmission = 'createdAt'; // When submitted
 
-            // Simulate data
-            const simulatedSubmitted = Math.floor(Math.random() * 50) + 20;
-            const simulatedApproved = Math.floor(simulatedSubmitted * (Math.random() * 0.4 + 0.5)); // 50-90% approval
-            const simulatedRejected = simulatedSubmitted - simulatedApproved;
-            const simulatedPending = Math.floor(Math.random() * 15);
-            const simulatedApprovalRate = (simulatedApproved / simulatedSubmitted || 0).toFixed(4);
-
-            const metrics = {
-                submitted: simulatedSubmitted,
-                approved: simulatedApproved,
-                rejected: simulatedRejected,
-                currentlyPending: simulatedPending,
-                approvalRate: parseFloat(simulatedApprovalRate),
-                period: { start: startDate.toISOString(), end: endDate.toISOString() }
-            };
-            logger.info('Verification rate metrics calculated (simulated)', metrics);
-            return metrics;
-        } catch (error) {
-            logger.error('Error calculating verification rate metrics:', error);
-            throw new Error('Failed to calculate verification rate metrics.');
-        }
-    }
-
-    /**
-     * Calculates service usage metrics over a specified period.
-     *
-     * @param {Date} startDate - The start date for the reporting period.
-     * @param {Date} endDate - The end date for the reporting period.
-     * @returns {Promise<object>} An object containing service usage metrics (e.g., appointments booked, video calls completed, messages sent).
-     */
-    async getServiceUsageMetrics(startDate, endDate) {
-        logger.info('Calculating service usage metrics', { startDate, endDate });
-        try {
+            // Match documents within the date range based on submission time
             const matchStage = {
                 $match: {
-                    timestamp: {
+                    [dateFieldForSubmission]: {
                         $gte: startDate,
                         $lte: endDate
                     }
                 }
             };
 
-            // Aggregation pipeline to count occurrences of key event types
-            const pipeline = [
+            // If only total is needed, use simpler count methods (more efficient)
+            if (comparisonPeriod === 'total') {
+                 const approved = await VerificationRepository.countByStatusAndDateRange('Approved', startDate, endDate, dateFieldForStatusChange);
+                 const rejected = await VerificationRepository.countByStatusAndDateRange('Rejected', startDate, endDate, dateFieldForStatusChange);
+                 const submitted = await VerificationRepository.countByDateRange(startDate, endDate, dateFieldForSubmission);
+                 const pending = await VerificationRepository.countByStatus('Pending'); // Total pending
+                 const totalDecided = approved + rejected;
+                 const approvalRate = totalDecided > 0 ? (approved / totalDecided) : 0;
+
+                 const metrics = {
+                    submitted: submitted, 
+                    approved: approved,
+                    rejected: rejected,
+                    currentlyPending: pending,
+                    approvalRate: parseFloat(approvalRate.toFixed(4)),
+                    period: { start: startDate.toISOString(), end: endDate.toISOString() },
+                    comparisonPeriod: 'total'
+                 };
+                 logger.info('Total verification rate metrics calculated', metrics);
+                 return metrics;
+            }
+
+            // --- Aggregation for comparison periods (day, week, month, year) ---
+            const { dateFormat, dateTrunc } = getDateFormatForAggregation(comparisonPeriod, dateFieldForSubmission);
+             if (!dateFormat || !dateTrunc) {
+                throw new Error(`Invalid comparison period specified: ${comparisonPeriod}`);
+             }
+
+             // Aggregation pipeline
+             const pipeline = [
                 matchStage,
                 {
                     $group: {
-                        _id: '$eventType',
-                        count: { $sum: 1 }
+                        _id: { 
+                            // Group by the truncated date (day, start of week/month/year)
+                            period: dateTrunc 
+                        },
+                        // Count submissions within each period
+                        submitted: { $sum: 1 }, 
+                        // Conditionally count status changes *within the period* 
+                        // Note: This relies on updatedAt also being within the $match range implicitly or explicitly
+                        // This part might need refinement depending on exact requirements 
+                        // (e.g., count approvals/rejections regardless of submission date within the period?)
+                        approved: { 
+                            $sum: { 
+                                $cond: [ { $eq: ['$status', 'Approved'] }, 1, 0 ] 
+                            }
+                        },
+                        rejected: {
+                            $sum: {
+                                $cond: [ { $eq: ['$status', 'Rejected'] }, 1, 0 ]
+                            }
+                        }
                     }
                 },
                 {
                     $project: {
-                        _id: 0, // Exclude the default _id field
-                        eventType: '$_id',
-                        count: 1
+                        _id: 0, // Exclude the default _id
+                        period: '$_id.period', // The start of the period (day, week, month, year)
+                        submitted: 1,
+                        approved: 1,
+                        rejected: 1,
+                        // Calculate approval rate for the period
+                        approvalRate: {
+                            $let: {
+                                vars: { totalDecided: { $add: ['$approved', '$rejected'] } },
+                                in: {
+                                    $cond: [ { $gt: ['$$totalDecided', 0] }, { $divide: ['$approved', '$$totalDecided'] }, 0 ]
+                                }
+                            }
+                        }
                     }
+                },
+                {
+                     $sort: { period: 1 } // Sort chronologically
                 }
-            ];
+             ];
 
-            // Execute the aggregation
-            const usageCounts = await ServiceUsageLog.aggregate(pipeline);
+             logger.debug('Verification aggregation pipeline:', JSON.stringify(pipeline));
+             // TODO: Need Verification model to run aggregation directly
+             // const results = await Verification.aggregate(pipeline); 
+             // Replace VerificationRepository with Verification model or adapt repo
+             // For now, assume VerificationRepository exposes an aggregate method
+             const results = await VerificationRepository.aggregate(pipeline);
 
-            // Aggregate API call details (e.g., top endpoints, average duration)
-            const apiCallPipeline = [
-                 matchStage,
-                 {
-                    $match: { eventType: 'API_CALL' }
-                 },
-                 {
-                    $group: {
-                        _id: '$details.path', // Group by API path
-                        count: { $sum: 1 },
-                        avgDurationMs: { $avg: '$details.durationMs' },
-                        // Could add counts per status code, method, etc.
-                    }
-                 },
-                 {
-                    $sort: { count: -1 } // Sort by most frequent
-                 },
-                 {
-                    $limit: 10 // Limit to top 10 endpoints
-                 },
-                  {
-                    $project: {
-                        _id: 0,
-                        path: '$_id',
-                        count: 1,
-                        avgDurationMs: { $round: ['$avgDurationMs', 2] } // Round average duration
-                    }
-                 }
-            ];
-
-            const topEndpoints = await ServiceUsageLog.aggregate(apiCallPipeline);
-
-            // Format the results into a structured object
-            const metrics = {
-                totalEvents: usageCounts.reduce((sum, item) => sum + item.count, 0),
-                eventsByType: {},
-                topApiEndpoints: topEndpoints,
-                period: { start: startDate.toISOString(), end: endDate.toISOString() }
-            };
-
-            usageCounts.forEach(item => {
-                metrics.eventsByType[item.eventType] = item.count;
-            });
-
-            // Ensure primary tracked metrics are present, even if count is 0
-            const primaryEventTypes = ['API_CALL', 'APPOINTMENT_CREATED', 'VIDEO_SESSION_START'];
-            primaryEventTypes.forEach(type => {
-                if (!metrics.eventsByType[type]) {
-                    metrics.eventsByType[type] = 0;
-                }
-            });
-
-            logger.info('Service usage metrics calculated', { 
-                totalEvents: metrics.totalEvents,
-                apiCalls: metrics.eventsByType['API_CALL'],
-                appointments: metrics.eventsByType['APPOINTMENT_CREATED'],
-                videoStarts: metrics.eventsByType['VIDEO_SESSION_START']
-             });
-            return metrics;
+             logger.info(`Verification metrics calculated for period: ${comparisonPeriod}`, { count: results.length });
+             
+             // Add currently pending count (doesn't fit aggregation easily)
+             // This could be fetched separately or added post-aggregation if needed per period (more complex)
+             const pendingTotal = await VerificationRepository.countByStatus('Pending');
+             
+             // Return array of results, potentially adding pendingTotal to the response structure if needed
+             return {
+                results: results.map(r => ({ ...r, approvalRate: parseFloat(r.approvalRate.toFixed(4)) })), 
+                currentlyPending: pendingTotal, // Overall pending count
+                period: { start: startDate.toISOString(), end: endDate.toISOString() },
+                comparisonPeriod: comparisonPeriod
+             };
 
         } catch (error) {
-            logger.error('Error calculating service usage metrics:', error);
-            throw new Error('Failed to calculate service usage metrics.');
+            logger.error(`Error calculating verification rate metrics (period: ${comparisonPeriod}):`, error);
+            // Add more specific error checks if needed
+             if (error.message.includes('Invalid comparison period')) {
+                 throw error; // Re-throw specific known errors
+             }
+            if (!VerificationRepository) {
+                 logger.error('VerificationRepository or its methods are not properly defined.');
+                 throw new Error('Analytics Service Misconfiguration: VerificationRepository not available.');
+             }
+            throw new Error('Failed to calculate verification rate metrics due to a database or aggregation error.');
+        }
+    }
+
+    /**
+     * Calculates service usage metrics, potentially grouped by a comparison period.
+     *
+     * @param {Date} startDate - The start date for the reporting period.
+     * @param {Date} endDate - The end date for the reporting period.
+     * @param {string} [comparisonPeriod='total'] - Grouping period ('day', 'week', 'month', 'year', or 'total').
+     * @returns {Promise<object|Array>} Metrics object (for 'total') or array of metric objects (for other periods).
+     */
+    async getServiceUsageMetrics(startDate, endDate, comparisonPeriod = 'total') {
+        logger.info('Calculating service usage metrics', { startDate, endDate, comparisonPeriod });
+        try {
+            const dateField = 'timestamp'; // Field indicating event time
+            const matchStage = {
+                $match: {
+                    [dateField]: { $gte: startDate, $lte: endDate }
+                }
+            };
+
+            // --- Total Calculation (existing logic) ---
+            if (comparisonPeriod === 'total') {
+                // Existing total aggregation logic (slightly refactored)
+                const usageCountsPipeline = [
+                    matchStage, 
+                    { $group: { _id: '$eventType', count: { $sum: 1 } } },
+                    { $project: { _id: 0, eventType: '$_id', count: 1 } }
+                ];
+                const apiCallPipeline = [
+                     matchStage,
+                     { $match: { eventType: 'API_CALL' } },
+                     { $group: { _id: '$details.path', count: { $sum: 1 }, avgDurationMs: { $avg: '$details.durationMs' } } },
+                     { $sort: { count: -1 } },
+                     { $limit: 10 },
+                     { $project: { _id: 0, path: '$_id', count: 1, avgDurationMs: { $round: ['$avgDurationMs', 2] } } }
+                 ];
+                
+                const [usageCounts, topEndpoints] = await Promise.all([
+                    ServiceUsageLog.aggregate(usageCountsPipeline),
+                    ServiceUsageLog.aggregate(apiCallPipeline)
+                ]);
+                
+                const metrics = {
+                    totalEvents: usageCounts.reduce((sum, item) => sum + item.count, 0),
+                    eventsByType: usageCounts.reduce((acc, item) => { acc[item.eventType] = item.count; return acc; }, {}),
+                    topApiEndpoints: topEndpoints,
+                    period: { start: startDate.toISOString(), end: endDate.toISOString() },
+                    comparisonPeriod: 'total'
+                 };
+                 // Ensure primary tracked metrics are present
+                 const primaryEventTypes = ['API_CALL', 'APPOINTMENT_CREATED', 'VIDEO_SESSION_START'];
+                 primaryEventTypes.forEach(type => {
+                     if (!metrics.eventsByType[type]) metrics.eventsByType[type] = 0;
+                 });
+
+                 logger.info('Total service usage metrics calculated', metrics);
+                return metrics;
+            }
+
+            // --- Aggregation for comparison periods ---
+             const { dateFormat, dateTrunc } = getDateFormatForAggregation(comparisonPeriod, dateField);
+             if (!dateFormat || !dateTrunc) {
+                throw new Error(`Invalid comparison period specified: ${comparisonPeriod}`);
+             }
+
+             // Group by period and eventType to get counts per type per period
+             const pipeline = [
+                 matchStage,
+                 {
+                    $group: {
+                        _id: {
+                            period: dateTrunc,
+                            eventType: '$eventType'
+                        },
+                        count: { $sum: 1 }
+                    }
+                 },
+                 { // Regroup by period to structure eventsByType
+                    $group: {
+                        _id: '$_id.period',
+                        events: {
+                            $push: {
+                                k: '$_id.eventType',
+                                v: '$count'
+                            }
+                        }
+                    }
+                 },
+                 {
+                     $project: {
+                         _id: 0,
+                         period: '$_id',
+                         eventsByType: { $arrayToObject: '$events' },
+                         // totalEvents: { $sum: '$events.v' } // Calculate total if needed
+                     }
+                 },
+                  {
+                     $sort: { period: 1 } // Sort chronologically
+                 }
+             ];
+
+             logger.debug('Service usage aggregation pipeline:', JSON.stringify(pipeline));
+             const results = await ServiceUsageLog.aggregate(pipeline);
+
+            // Ensure primary event types are present in each period's eventsByType
+            const primaryEventTypes = ['API_CALL', 'APPOINTMENT_CREATED', 'VIDEO_SESSION_START'];
+            results.forEach(result => {
+                primaryEventTypes.forEach(type => {
+                    if (!result.eventsByType[type]) {
+                        result.eventsByType[type] = 0;
+                    }
+                });
+                 // Calculate total events per period if needed
+                 result.totalEvents = Object.values(result.eventsByType).reduce((sum, count) => sum + count, 0);
+            });
+
+             logger.info(`Service usage metrics calculated for period: ${comparisonPeriod}`, { count: results.length });
+
+            // Top API endpoints don't aggregate well by period, omit for comparison view
+            return {
+                 results: results, 
+                 period: { start: startDate.toISOString(), end: endDate.toISOString() },
+                 comparisonPeriod: comparisonPeriod
+             };
+
+        } catch (error) {
+            logger.error(`Error calculating service usage metrics (period: ${comparisonPeriod}):`, error);
+            if (error.message.includes('Invalid comparison period')) {
+                 throw error; 
+             }
+             if (!ServiceUsageLog || typeof ServiceUsageLog.aggregate !== 'function') {
+                 logger.error('ServiceUsageLog model or its aggregate method not available/defined.');
+                 throw new Error('Analytics Service Misconfiguration: ServiceUsageLog model not available.');
+             }
+            throw new Error('Failed to calculate service usage metrics due to a database or aggregation error.');
         }
     }
 

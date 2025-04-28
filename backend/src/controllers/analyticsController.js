@@ -1,6 +1,13 @@
 const AnalyticsService = require('../services/analyticsService');
 const logger = require('../utils/logger');
-const { validationResult } = require('express-validator');
+const { validationResult, query } = require('express-validator');
+
+// Validation middleware for analytics endpoints
+const validateAnalyticsRequest = [
+    query('startDate').optional().isISO8601().toDate().withMessage('Invalid start date format, use YYYY-MM-DD or ISO8601'),
+    query('endDate').optional().isISO8601().toDate().withMessage('Invalid end date format, use YYYY-MM-DD or ISO8601'),
+    query('comparisonPeriod').optional().isIn(['day', 'week', 'month', 'year', 'total']).withMessage('Invalid comparison period')
+];
 
 /**
  * Controller for handling analytics-related API requests.
@@ -10,67 +17,114 @@ class AnalyticsController {
     /**
      * Handles the request for user growth metrics.
      * GET /api/admin/analytics/user-growth
-     * Query params: startDate (ISO 8601), endDate (ISO 8601)
+     * Query params: startDate?, endDate?, comparisonPeriod? ('day', 'week', 'month', 'year', 'total')
      */
     async handleGetUserGrowthMetrics(req, res) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            logger.warn('Invalid input for user growth metrics endpoint', { errors: errors.array() });
+            logger.warn('Invalid input for user growth metrics', { errors: errors.array() });
             return res.status(400).json({ errors: errors.array() });
         }
 
         try {
-            // Default to last 30 days if dates are not provided
-            const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
-            const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date(new Date().setDate(endDate.getDate() - 30));
+            const endDate = req.query.endDate || new Date();
+            const startDate = req.query.startDate || new Date(new Date().setDate(endDate.getDate() - 30));
+            const comparisonPeriod = req.query.comparisonPeriod || 'total'; // Default to total
 
-            // Basic validation: Ensure dates are valid and startDate is before endDate
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
-                 logger.warn('Invalid date range provided for user growth metrics', { startDate: req.query.startDate, endDate: req.query.endDate });
-                return res.status(400).json({ message: 'Invalid date range. Ensure startDate is before endDate and dates are valid ISO 8601 format.' });
+            if (startDate >= endDate) {
+                 logger.warn('Invalid date range for user growth', { startDate, endDate });
+                return res.status(400).json({ message: 'Start date must be before end date.' });
             }
 
-            logger.info(`Request received for user growth metrics: ${startDate.toISOString()} to ${endDate.toISOString()}`);
-            const metrics = await AnalyticsService.getUserGrowthMetrics(startDate, endDate);
+            logger.info(`Request for user growth metrics`, { startDate: startDate.toISOString(), endDate: endDate.toISOString(), comparisonPeriod });
+            const metrics = await AnalyticsService.getUserGrowthMetrics(startDate, endDate, comparisonPeriod);
             res.status(200).json(metrics);
 
         } catch (error) {
-            logger.error(`Error handling getUserGrowthMetrics request: ${error.message}`, { error: error.stack });
-            res.status(500).json({ message: 'Internal server error while fetching user growth metrics.' });
+            logger.error(`Error handling getUserGrowthMetrics: ${error.message}`, { error: error.stack });
+            res.status(500).json({ message: 'Internal server error fetching user growth metrics.' });
         }
     }
 
-    // Add handlers for other analytics endpoints (verification, service usage, etc.) here
+    /**
+     * Handles the request for verification rate metrics.
+     * GET /api/admin/analytics/verification-metrics
+     * Query params: startDate?, endDate?, comparisonPeriod? ('day', 'week', 'month', 'year', 'total')
+     */
     async handleGetVerificationRateMetrics(req, res) {
-        // Implementation for verification rate metrics
-        res.status(501).json({ message: 'Verification rate metrics endpoint not implemented yet.'});
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            logger.warn('Invalid input for verification rate metrics', { errors: errors.array() });
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const endDate = req.query.endDate || new Date();
+            const startDate = req.query.startDate || new Date(new Date().setDate(endDate.getDate() - 30));
+            const comparisonPeriod = req.query.comparisonPeriod || 'total';
+            
+            if (startDate >= endDate) {
+                logger.warn('Invalid date range for verification rate', { startDate, endDate });
+                return res.status(400).json({ message: 'Start date must be before end date.' });
+            }
+
+            logger.info(`Request for verification rate metrics`, { startDate: startDate.toISOString(), endDate: endDate.toISOString(), comparisonPeriod });
+            const metrics = await AnalyticsService.getVerificationRateMetrics(startDate, endDate, comparisonPeriod);
+            res.status(200).json(metrics);
+
+        } catch (error) {
+            logger.error(`Error handling getVerificationRateMetrics: ${error.message}`, { error: error.stack });
+            if (error.message.includes('Invalid comparison period')) {
+                 return res.status(400).json({ message: error.message });
+            }
+            if (error.message.includes('Misconfiguration')) {
+                res.status(500).json({ message: 'Internal server configuration error.' });
+            } else if (error.message.includes('database') || error.message.includes('aggregation')) {
+                 res.status(500).json({ message: 'Internal server error processing verification metrics.' });
+            } else {
+                res.status(500).json({ message: 'Internal server error fetching verification rate metrics.' });
+            }
+        }
     }
 
+    /**
+     * Handles the request for service usage metrics.
+     * GET /api/admin/analytics/service-usage
+     * Query params: startDate?, endDate?, comparisonPeriod? ('day', 'week', 'month', 'year', 'total')
+     */
      async handleGetServiceUsageMetrics(req, res) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            logger.warn('Invalid input for service usage metrics endpoint', { errors: errors.array() });
+            logger.warn('Invalid input for service usage metrics', { errors: errors.array() });
             return res.status(400).json({ errors: errors.array() });
         }
 
         try {
-            const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
-            const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date(new Date().setDate(endDate.getDate() - 30));
+            const endDate = req.query.endDate || new Date();
+            const startDate = req.query.startDate || new Date(new Date().setDate(endDate.getDate() - 30));
+            const comparisonPeriod = req.query.comparisonPeriod || 'total';
 
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
-                logger.warn('Invalid date range provided for service usage metrics', { startDate: req.query.startDate, endDate: req.query.endDate });
-                return res.status(400).json({ message: 'Invalid date range. Ensure startDate is before endDate and dates are valid ISO 8601 format.' });
+            if (startDate >= endDate) {
+                logger.warn('Invalid date range for service usage', { startDate, endDate });
+                return res.status(400).json({ message: 'Start date must be before end date.' });
             }
 
-            logger.info(`Request received for service usage metrics: ${startDate.toISOString()} to ${endDate.toISOString()}`);
-            const metrics = await AnalyticsService.getServiceUsageMetrics(startDate, endDate);
+            logger.info(`Request for service usage metrics`, { startDate: startDate.toISOString(), endDate: endDate.toISOString(), comparisonPeriod });
+            // Note: Service needs implementation for comparisonPeriod aggregation
+            const metrics = await AnalyticsService.getServiceUsageMetrics(startDate, endDate, comparisonPeriod);
             res.status(200).json(metrics);
 
         } catch (error) {
-            logger.error(`Error handling getServiceUsageMetrics request: ${error.message}`, { error: error.stack });
-            res.status(500).json({ message: 'Internal server error while fetching service usage metrics.' });
+            logger.error(`Error handling getServiceUsageMetrics: ${error.message}`, { error: error.stack });
+             if (error.message.includes('Invalid comparison period')) {
+                 return res.status(400).json({ message: error.message });
+            }
+            res.status(500).json({ message: 'Internal server error fetching service usage metrics.' });
         }
     }
 }
 
-module.exports = new AnalyticsController(); 
+module.exports = {
+    AnalyticsController: new AnalyticsController(),
+    validateAnalyticsRequest // Export validation middleware
+}; 
