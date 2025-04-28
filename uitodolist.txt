@@ -27,13 +27,13 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
 
 ## Buttons (client/src/styles/components/buttons.scss)
 
-- [ ] Standardize padding for all button variants based on the 8px grid.
-- [ ] Standardize border-radius across all button variants (e.g., use `$border-radius-md`).
-- [ ] Ensure consistent icon spacing within buttons.
-- [ ] Implement standardized hover states for all button variants.
-- [ ] Implement standardized active states for all button variants.
-- [ ] Implement standardized focus states (using the defined accessible focus outline) for all button variants.
-- [ ] Implement standardized disabled states for all button variants.
+- [x] Standardize padding for all button variants based on the 8px grid.
+- [x] Standardize border-radius across all button variants (e.g., use `$border-radius-md`).
+- [x] Ensure consistent icon spacing within buttons.
+- [x] Implement standardized hover states for all button variants.
+- [x] Implement standardized active states for all button variants.
+- [x] Implement standardized focus states (using the defined accessible focus outline) for all button variants.
+- [x] Implement standardized disabled states for all button variants.
 
 ## Cards (client/src/styles/components/cards.scss)
 

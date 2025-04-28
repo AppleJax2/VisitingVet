@@ -20,8 +20,9 @@
   
   // Focus styles
   &:focus, &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px transparentize($color-primary, 0.7);
+    outline: 2px solid $color-accent-gold;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba($color-accent-gold, 0.5);
   }
   
   // Icon spacing 
@@ -31,6 +32,18 @@
     &:only-child {
       margin-right: 0;
     }
+  }
+  
+  &:hover {
+    filter: brightness(0.97);
+  }
+  &:active {
+    filter: brightness(0.93);
+  }
+  &:disabled, &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: not-allowed;
   }
 }
 
