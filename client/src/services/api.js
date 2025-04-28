@@ -56,7 +56,7 @@ export const checkAuthStatus = async () => {
 // Profile management
 export const createUpdateProfile = async (profileData) => {
   try {
-    const response = await api.post('/profiles/visiting-vet', profileData);
+    const response = await api.post('/profiles/visiting-vet/services', profileData);
     return response.data;
   } catch (error) {
     console.error('Profile update error:', error.response?.data || error.message);
@@ -985,4 +985,53 @@ export const adminGetVerificationHistory = async (page = 1, limit = 25, filters 
     console.error('Admin get verification history error:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to fetch verification history');
   }
-}; 
+};
+
+// --- Admin Analytics API Functions ---
+
+/**
+ * Fetch user growth metrics.
+ * @param {object} params - Optional query parameters (startDate, endDate).
+ * @returns {Promise<Object>} Response with user growth data.
+ */
+export const adminGetUserGrowthMetrics = async (params = {}) => {
+  try {
+    const response = await api.get('/admin/analytics/user-growth', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Admin get user growth metrics error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch user growth metrics');
+  }
+};
+
+/**
+ * Fetch verification rate metrics.
+ * @param {object} params - Optional query parameters (startDate, endDate).
+ * @returns {Promise<Object>} Response with verification rate data.
+ */
+export const adminGetVerificationRateMetrics = async (params = {}) => {
+  try {
+    const response = await api.get('/admin/analytics/verification-rate', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Admin get verification rate metrics error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch verification rate metrics');
+  }
+};
+
+/**
+ * Fetch service usage metrics.
+ * @param {object} params - Optional query parameters (startDate, endDate).
+ * @returns {Promise<Object>} Response with service usage data.
+ */
+export const adminGetServiceUsageMetrics = async (params = {}) => {
+  try {
+    const response = await api.get('/admin/analytics/service-usage', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Admin get service usage metrics error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch service usage metrics');
+  }
+};
+
+// --- End Admin API Functions --- 

@@ -40,6 +40,7 @@ import AdminUserDetailPage from './pages/Admin/AdminUserDetailPage';
 import AdminMFASetupPage from './pages/Admin/AdminMFASetupPage';
 import AdminSessionsPage from './pages/Admin/AdminSessionsPage';
 import AdminPermissionsPage from './pages/Admin/AdminPermissionsPage';
+import AdminAnalyticsDashboardPage from './pages/Admin/AdminAnalyticsDashboardPage';
 
 // Import specific Dashboard components if needed for routing/layout
 import PetOwnerDashboard from './components/Dashboard/PetOwnerDashboard';
@@ -179,7 +180,7 @@ function AppRoutes() {
               <Route path="mfa-setup" element={<AdminMFASetupPage />} />
               <Route path="sessions" element={<AdminSessionsPage />} />
               <Route path="permissions" element={<AdminPermissionsPage />} />
-              {/* Admin Service Request Routes */}
+              <Route path="analytics" element={<AdminAnalyticsDashboardPage />} />
               <Route path="service-requests" element={<ServiceRequestsPage />} />
               <Route path="service-requests/:id" element={<ServiceRequestDetailPage />} />
             </Route>
