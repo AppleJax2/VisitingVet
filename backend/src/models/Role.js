@@ -28,9 +28,6 @@ const roleSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Ensure the name is unique
-roleSchema.index({ name: 1 }, { unique: true });
-
 const Role = mongoose.model('Role', roleSchema);
 
 module.exports = Role; 
