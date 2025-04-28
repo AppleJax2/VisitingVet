@@ -212,9 +212,10 @@ const ClinicDashboard = ({ user }) => {
         off: theme.colors.error,
         low: theme.colors.error,
         ok: theme.colors.success,
+        unknown: '#999999' // Default color for unknown status
       };
       return {
-        backgroundColor: colors[status],
+        backgroundColor: colors[status] || colors.unknown,
       };
     },
     staffCard: {
@@ -403,10 +404,12 @@ const ClinicDashboard = ({ user }) => {
                   </Col>
                   <Col md={2} className="text-end">
                     <Badge 
-                      style={styles.statusBadge(appointment.status)}
+                      style={styles.statusBadge(appointment.status || 'unknown')}
                       className="me-2"
                     >
-                      {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                      {appointment.status ? 
+                        appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) :
+                        'Unknown'}
                     </Badge>
                     <Button 
                       variant="outline-primary" 
@@ -463,8 +466,10 @@ const ClinicDashboard = ({ user }) => {
                       {staffMember.appointmentsToday} appointments today
                     </small>
                   </div>
-                  <Badge style={styles.statusBadge(staffMember.status)}>
-                    {staffMember.status.charAt(0).toUpperCase() + staffMember.status.slice(1)}
+                  <Badge style={styles.statusBadge(staffMember.status || 'unknown')}>
+                    {staffMember.status ? 
+                      (staffMember.status.charAt(0).toUpperCase() + staffMember.status.slice(1)) : 
+                      'Unknown'}
                   </Badge>
                 </div>
               ))}
@@ -497,7 +502,7 @@ const ClinicDashboard = ({ user }) => {
                     </small>
                   </div>
                   <div>
-                    <Badge style={styles.statusBadge(item.status)} className="me-2">
+                    <Badge style={styles.statusBadge(item.status || 'unknown')} className="me-2">
                       {item.status === 'low' ? 'Low Stock' : 'In Stock'}
                     </Badge>
                     {item.status === 'low' && (
