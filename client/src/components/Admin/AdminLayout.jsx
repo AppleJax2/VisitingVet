@@ -1,16 +1,21 @@
-import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import { Container, Nav, Navbar, Offcanvas } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Container, Nav, Navbar, Button, Offcanvas } from 'react-bootstrap';
 import { 
     HouseDoorFill, PeopleFill, PatchCheckFill, 
-    ClipboardDataFill, GearFill, BoxArrowRight 
+    ClipboardDataFill, GearFill, BoxArrowRight,
+    List, Bell, Person, Search
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
-import { logout } from '../../services/api'; // Assuming logout API function exists
+import { logout } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import './AdminLayout.css';
 
 const AdminLayout = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [showSidebar, setShowSidebar] = useState(true);
+    const [showOffcanvas, setShowOffcanvas] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -18,93 +23,176 @@ const AdminLayout = () => {
             navigate('/login');
         } catch (error) {
             console.error('Admin logout failed:', error);
-            // Optionally show an error message to the admin
         }
     };
 
-    const sidebarStyles = {
-        sidebar: {
-          backgroundColor: theme.colors.primary.dark, 
-          minHeight: 'calc(100vh - 56px)', // Adjust based on header height if header is outside layout
-          color: theme.colors.text.white,
-          paddingTop: '20px',
-          position: 'fixed',
-          top: 56, // Assuming header height is 56px
-          left: 0,
-          width: '250px',
-          zIndex: 1020, // Below navbar
-        },
-        navLink: {
-          color: theme.colors.text.white + 'cc', // Lighter white
-          padding: '12px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          textDecoration: 'none',
-          transition: 'background-color 0.2s ease, color 0.2s ease',
-        },
-        navLinkActive: {
-          backgroundColor: theme.colors.primary.main,
-          color: theme.colors.text.white,
-          fontWeight: 'bold',
-        },
-        navIcon: {
-          marginRight: '15px',
-          fontSize: '1.2rem',
-        },
-        content: {
-            marginLeft: '250px', // Same as sidebar width
-            padding: '20px',
-            marginTop: '56px', // Adjust if header is inside layout
-        }
-    };
-
-    // Determine active link (simple implementation)
-    const isActive = (path) => window.location.pathname === path || window.location.pathname.startsWith(path + '/');
+    // Determine active link
+    const isActive = (path) => 
+        location.pathname === path || location.pathname.startsWith(path + '/');
 
     const navItems = [
-        { path: '/admin', icon: <HouseDoorFill style={sidebarStyles.navIcon} />, text: 'Overview' },
-        { path: '/admin/users', icon: <PeopleFill style={sidebarStyles.navIcon} />, text: 'Users' },
-        { path: '/admin/verifications', icon: <PatchCheckFill style={sidebarStyles.navIcon} />, text: 'Verifications' },
-        { path: '/admin/logs', icon: <ClipboardDataFill style={sidebarStyles.navIcon} />, text: 'Action Logs' },
-        { path: '/admin/settings', icon: <GearFill style={sidebarStyles.navIcon} />, text: 'Settings' },
+        { path: '/admin', icon: <HouseDoorFill className="me-3 text-primary" />, text: 'Dashboard' },
+        { path: '/admin/users', icon: <PeopleFill className="me-3 text-primary" />, text: 'Users' },
+        { path: '/admin/verifications', icon: <PatchCheckFill className="me-3 text-primary" />, text: 'Verifications' },
+        { path: '/admin/logs', icon: <ClipboardDataFill className="me-3 text-primary" />, text: 'Action Logs' },
+        { path: '/admin/settings', icon: <GearFill className="me-3 text-primary" />, text: 'Settings' }
     ];
 
+    // Get current page title
+    const getCurrentPageTitle = () => {
+        const currentItem = navItems.find(item => isActive(item.path));
+        return currentItem ? currentItem.text : 'Admin';
+    };
+
+    const toggleSidebar = () => {
+        setShowSidebar(!showSidebar);
+    };
+
     return (
-        <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
-            <div style={sidebarStyles.sidebar}>
-                <Nav className="flex-column">
-                    {navItems.map((item, index) => (
-                        <Nav.Item key={index}>
-                            <Link 
-                                to={item.path} 
-                                style={{
-                                    ...sidebarStyles.navLink,
-                                    ...(isActive(item.path) ? sidebarStyles.navLinkActive : {})
-                                }}
-                                className={isActive(item.path) ? 'active' : ''}
-                            >
-                                {item.icon}
-                                <span>{item.text}</span>
-                            </Link>
-                        </Nav.Item>
-                    ))}
-                    <Nav.Item style={{ marginTop: 'auto', marginBottom: '20px' }}>
-                        <Nav.Link 
-                            onClick={handleLogout}
-                            style={{...sidebarStyles.navLink, cursor: 'pointer'}}
+        <div className="d-flex">
+            {/* Top Navbar */}
+            <Navbar bg="white" expand={false} className="shadow-sm py-2 px-3 position-fixed top-0 w-100" style={{ zIndex: 1030, height: '56px' }}>
+                <Container fluid className="px-0">
+                    <div className="d-flex align-items-center">
+                        <Button 
+                            variant="outline-light" 
+                            onClick={toggleSidebar}
+                            className="border-0 d-none d-lg-block"
                         >
-                            <BoxArrowRight style={sidebarStyles.navIcon} />
-                            <span>Logout</span>
-                        </Nav.Link>
-                    </Nav.Item>
-                </Nav>
+                            <List size={24} className="text-dark" />
+                        </Button>
+                        
+                        <Button 
+                            variant="outline-light" 
+                            onClick={() => setShowOffcanvas(true)}
+                            className="border-0 d-lg-none"
+                        >
+                            <List size={24} className="text-dark" />
+                        </Button>
+                        
+                        <Navbar.Brand className="ms-2 fw-bold" as={Link} to="/admin">
+                            <span style={{ color: theme.colors.primary.main }}>Visiting</span>
+                            <span style={{ color: theme.colors.primary.dark }}>Vet</span>
+                            <span className="ms-2 badge bg-primary">Admin</span>
+                        </Navbar.Brand>
+                    </div>
+
+                    <div className="d-flex align-items-center">
+                        <Button variant="outline-light" className="border-0 p-1 mx-1">
+                            <Bell size={18} className="text-dark" />
+                        </Button>
+                        <Button variant="outline-light" className="border-0 p-1 mx-1">
+                            <Person size={18} className="text-dark" />
+                        </Button>
+                    </div>
+                </Container>
+            </Navbar>
+
+            {/* Sidebar for Desktop */}
+            <div 
+                className={`bg-dark text-white d-none d-lg-block position-fixed h-100 ${showSidebar ? '' : 'sidebar-collapsed'}`} 
+                style={{ 
+                    width: showSidebar ? '240px' : '70px', 
+                    zIndex: 1020,
+                    top: '56px',
+                    transition: 'width 0.3s ease-in-out'
+                }}
+            >
+                <div className="px-3 py-4">
+                    <Nav className="flex-column">
+                        {navItems.map((item, index) => (
+                            <Nav.Item key={index}>
+                                <Link 
+                                    to={item.path} 
+                                    className={`nav-link py-2 px-3 mb-2 rounded d-flex align-items-center ${isActive(item.path) ? 'active bg-primary text-white' : 'text-white-50'}`}
+                                >
+                                    <span>{item.icon}</span>
+                                    <span className={showSidebar ? '' : 'd-none'}>{item.text}</span>
+                                </Link>
+                            </Nav.Item>
+                        ))}
+
+                        <hr className="my-3 bg-secondary" />
+                        
+                        <Nav.Item>
+                            <Nav.Link 
+                                onClick={handleLogout}
+                                className="py-2 px-3 text-white-50 d-flex align-items-center"
+                            >
+                                <BoxArrowRight className="me-3 text-danger" />
+                                <span className={showSidebar ? '' : 'd-none'}>Logout</span>
+                            </Nav.Link>
+                        </Nav.Item>
+                    </Nav>
+                </div>
             </div>
 
+            {/* Offcanvas Sidebar for Mobile */}
+            <Offcanvas show={showOffcanvas} onHide={() => setShowOffcanvas(false)} placement="start" style={{ width: '240px' }}>
+                <Offcanvas.Header closeButton className="bg-dark text-white border-bottom border-secondary">
+                    <Offcanvas.Title>
+                        <span className="fw-bold">
+                            <span style={{ color: theme.colors.primary.main }}>Visiting</span>
+                            <span style={{ color: '#fff' }}>Vet</span>
+                        </span>
+                    </Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body className="bg-dark text-white p-0">
+                    <Nav className="flex-column">
+                        {navItems.map((item, index) => (
+                            <Nav.Item key={index}>
+                                <Link 
+                                    to={item.path} 
+                                    className={`nav-link py-3 px-3 d-flex align-items-center ${isActive(item.path) ? 'active bg-primary text-white' : 'text-white-50'}`}
+                                    onClick={() => setShowOffcanvas(false)}
+                                >
+                                    <span>{item.icon}</span>
+                                    <span>{item.text}</span>
+                                </Link>
+                            </Nav.Item>
+                        ))}
+                        
+                        <hr className="my-3 bg-secondary mx-3" />
+                        
+                        <Nav.Item>
+                            <Nav.Link 
+                                onClick={handleLogout}
+                                className="py-3 px-3 text-white-50 d-flex align-items-center"
+                            >
+                                <BoxArrowRight className="me-3 text-danger" />
+                                <span>Logout</span>
+                            </Nav.Link>
+                        </Nav.Item>
+                    </Nav>
+                </Offcanvas.Body>
+            </Offcanvas>
+
             {/* Main Content Area */}
-            <main style={sidebarStyles.content} className="flex-grow-1">
-                {/* Render the matched child route component here */}
-                <Outlet /> 
+            <main 
+                className="flex-grow-1 bg-light" 
+                style={{ 
+                    marginLeft: showSidebar ? '240px' : '70px',
+                    marginTop: '56px',
+                    minHeight: 'calc(100vh - 56px)',
+                    transition: 'margin-left 0.3s ease-in-out',
+                    padding: '20px'
+                }}
+            >
+                <div className="mb-4">
+                    <h1 className="fs-4 mb-1">{getCurrentPageTitle()}</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item"><Link to="/admin">Admin</Link></li>
+                            {location.pathname !== '/admin' && (
+                                <li className="breadcrumb-item active" aria-current="page">
+                                    {getCurrentPageTitle()}
+                                </li>
+                            )}
+                        </ol>
+                    </nav>
+                </div>
+                
+                <Outlet />
             </main>
         </div>
     );

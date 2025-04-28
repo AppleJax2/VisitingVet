@@ -1,4 +1,128 @@
-/* LandingPage.css - Updated with improved styling and responsiveness */
+/* LandingPage.css - Bootstrap-enhanced styling */
+
+/* Animation Utilities */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pageLoad {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.landing-page {
+  animation: pageLoad 0.6s ease-in-out;
+}
+
+/* Hover utilities */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Object fit utilities */
+.object-fit-cover {
+  object-fit: cover;
+}
+
+.object-fit-contain {
+  object-fit: contain;
+}
+
+/* Text utilities */
+.text-white-80 {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.text-white-60 {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Color utilities - for custom theme colors */
+.bg-overlay-primary {
+  background: linear-gradient(135deg, rgba(18, 68, 56, 0.85) 0%, rgba(87, 126, 70, 0.75) 100%);
+}
+
+/* Hero section specific styling */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  min-height: 75vh;
+}
+
+.hero-bg-container {
+  z-index: 0;
+}
+
+/* Min height utilities */
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+.min-vh-50 {
+  min-height: 50vh;
+}
+
+/* Responsive media queries */
+@media (max-width: 992px) {
+  .hero-section {
+    min-height: auto;
+  }
+  
+  .min-vh-75 {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    text-align: center;
+  }
+
+  .testimonial-carousel .carousel-control-prev, 
+  .testimonial-carousel .carousel-control-next {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .display-4 {
+    font-size: calc(1.4rem + 1.5vw) !important;
+  }
+  
+  .lead {
+    font-size: 1rem !important;
+  }
+  
+  .fs-1 {
+    font-size: calc(1.325rem + 0.9vw) !important;
+  }
+}
+
+/* Additional custom styling */
+.rounded-top-4 {
+  border-top-left-radius: 0.5rem !important;
+  border-top-right-radius: 0.5rem !important;
+}
+
+.rounded-4 {
+  border-radius: 0.5rem !important;
+}
 
 /* Root variables from theme */
 :root {

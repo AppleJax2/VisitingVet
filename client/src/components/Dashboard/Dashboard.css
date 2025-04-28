@@ -1,0 +1,199 @@
+/* Dashboard Layout Styling */
+
+/* Basic layout styles */
+.dashboard-layout {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Sidebar Styling */
+.dashboard-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 260px;
+  z-index: 1030;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar-header {
+  min-height: 60px;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-logo {
+  font-size: 1.5rem;
+}
+
+/* Sidebar Navigation */
+.nav-icon {
+  margin-right: 15px;
+  font-size: 1.2rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.dashboard-sidebar.collapsed .nav-icon {
+  margin-right: 0;
+}
+
+.nav-link {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+}
+
+/* Main content area */
+.dashboard-content {
+  margin-left: 260px;
+  min-height: 100vh;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.dashboard-content.expanded {
+  margin-left: 70px;
+}
+
+/* Scrollbar styling */
+.dashboard-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-track {
+  background: #343a40;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-thumb {
+  background-color: #495057;
+  border-radius: 6px;
+}
+
+/* Card styling */
+.dashboard-card {
+  border: none;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Stats cards */
+.stat-card {
+  height: 100%;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  font-size: 1.5rem;
+}
+
+/* Chart container */
+.chart-container {
+  height: 300px;
+  position: relative;
+}
+
+/* Status badges */
+.badge-status {
+  padding: 0.5rem 0.75rem;
+  border-radius: 30px;
+  font-weight: 500;
+}
+
+/* Activity item */
+.activity-item {
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.activity-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+/* Utility cursor pointer */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .dashboard-sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .dashboard-sidebar.show {
+    transform: translateX(0);
+  }
+  
+  .dashboard-content {
+    margin-left: 0;
+  }
+  
+  .dashboard-content.expanded {
+    margin-left: 0;
+  }
+} 

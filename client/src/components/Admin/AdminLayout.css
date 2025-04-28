@@ -1,0 +1,109 @@
+/* AdminLayout.css - Custom styling for admin dashboard */
+
+/* Sidebar transitions */
+.sidebar-collapsed {
+  transition: width 0.3s ease-in-out;
+}
+
+/* Custom scrollbar for sidebar */
+.bg-dark::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bg-dark::-webkit-scrollbar-track {
+  background: #343a40;
+}
+
+.bg-dark::-webkit-scrollbar-thumb {
+  background-color: #495057;
+  border-radius: 6px;
+}
+
+/* Active nav link styling */
+.nav-link.active {
+  position: relative;
+  font-weight: 500;
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+/* Card hover effects */
+.dashboard-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom table styling */
+.table-hover tbody tr:hover {
+  background-color: rgba(87, 126, 70, 0.05);
+}
+
+/* Badge styling */
+.badge.rounded-pill {
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* Progress bar animation */
+.progress-bar {
+  transition: width 1s ease;
+  animation: progressAnimation 1s;
+}
+
+@keyframes progressAnimation {
+  0% {
+    width: 0%;
+  }
+}
+
+/* Mobile-specific styling */
+@media (max-width: 992px) {
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .h3, h3 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Animation for dashboard cards */
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom button states */
+.btn-outline-primary:hover {
+  background-color: rgba(87, 126, 70, 0.1);
+  color: #577E46;
+  border-color: #577E46;
+} 

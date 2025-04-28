@@ -1,0 +1,206 @@
+// Import our Bootstrap theme configuration 
+@import './utils/bootstrap-theme.scss';
+
+// Import Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+// Theme Variables - Keep as CSS variables for runtime use
+:root {
+  --primary-main: #577E46;
+  --primary-light: #6B9256;
+  --primary-dark: #3D5D2F;
+  --secondary-main: #AC510A;
+  --secondary-light: #C76420;
+  --secondary-dark: #7F3C06;
+  --background-light: #F6E6BB;
+  --background-white: #FFFFFF;
+  --background-tan: #F0DCA0;
+  --background-dark: #124438;
+  --accent-gold: #EDB75A;
+  --accent-dark-green: #124438;
+  --accent-light-green: #A8B99F;
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --text-light: #777777;
+  --text-white: #FFFFFF;
+}
+
+// Base styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  position: relative;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--primary-main);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: none;
+}
+
+button {
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+button:focus {
+  outline: none;
+}
+
+/* Fix for potential input zoom on iPhones */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  select,
+  textarea,
+  input {
+    font-size: 16px;
+  }
+}
+
+// Utility classes
+.text-primary-color {
+  color: var(--primary-main) !important;
+}
+
+.text-secondary-color {
+  color: var(--secondary-main) !important;
+}
+
+.bg-primary-color {
+  background-color: var(--primary-main) !important;
+}
+
+.bg-secondary-color {
+  background-color: var(--secondary-main) !important;
+}
+
+.bg-light-color {
+  background-color: var(--background-light) !important;
+}
+
+// Icon circles for dropdown
+.icon-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// Main content adjustments
+.main-content {
+  padding-top: 76px; // Adjust based on header height
+}
+
+// Landing page adjustments
+.landing-page {
+  margin-top: -76px; // Negative margin to pull content up under transparent header
+}
+
+// Bootstrap utilities extensions
+.text-white-70 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.text-white-80 {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.text-white-90 {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+// Additional shadows
+.shadow-hover {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  &:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+  }
+}
+
+// Animation classes
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Hide scrollbar
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// Media queries
+@media (max-width: 992px) {
+  .nav-link-custom {
+    margin: 0.25rem 0 !important;
+  }
+  
+  .navbar-collapse {
+    padding: 1rem 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  
+  h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+} 

@@ -333,17 +333,11 @@ const ProviderDashboard = ({ user }) => {
   return (
     <div className="provider-dashboard">
       {/* Stats Cards */}
-      <Row className="mb-4">
-        <Col md={3}>
-          <Card style={styles.statCard}>
-            <Card.Body className="d-flex align-items-center">
-              <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.primary.main}20`,
-                  color: theme.colors.primary.main
-                }}
-              >
+      <Row className="g-4 mb-4">
+        <Col md={3} sm={6}>
+          <Card className="dashboard-card shadow-sm h-100 fade-in" style={{ animationDelay: '0.1s' }}>
+            <Card.Body className="d-flex align-items-center p-3">
+              <div className="stat-icon bg-primary bg-opacity-10 text-primary me-3">
                 <Calendar3 />
               </div>
               <div>
@@ -354,16 +348,10 @@ const ProviderDashboard = ({ user }) => {
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
-            <Card.Body className="d-flex align-items-center">
-              <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.success}20`,
-                  color: theme.colors.success
-                }}
-              >
+        <Col md={3} sm={6}>
+          <Card className="dashboard-card shadow-sm h-100 fade-in" style={{ animationDelay: '0.2s' }}>
+            <Card.Body className="d-flex align-items-center p-3">
+              <div className="stat-icon bg-success bg-opacity-10 text-success me-3">
                 <Check2Circle />
               </div>
               <div>
@@ -374,16 +362,10 @@ const ProviderDashboard = ({ user }) => {
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
-            <Card.Body className="d-flex align-items-center">
-              <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.accent.gold}20`,
-                  color: theme.colors.accent.gold
-                }}
-              >
+        <Col md={3} sm={6}>
+          <Card className="dashboard-card shadow-sm h-100 fade-in" style={{ animationDelay: '0.3s' }}>
+            <Card.Body className="d-flex align-items-center p-3">
+              <div className="stat-icon bg-warning bg-opacity-10 text-warning me-3">
                 <Star />
               </div>
               <div>
@@ -394,16 +376,10 @@ const ProviderDashboard = ({ user }) => {
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
-            <Card.Body className="d-flex align-items-center">
-              <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.secondary.main}20`,
-                  color: theme.colors.secondary.main
-                }}
-              >
+        <Col md={3} sm={6}>
+          <Card className="dashboard-card shadow-sm h-100 fade-in" style={{ animationDelay: '0.4s' }}>
+            <Card.Body className="d-flex align-items-center p-3">
+              <div className="stat-icon bg-secondary bg-opacity-10 text-secondary me-3">
                 <Wallet2 />
               </div>
               <div>
@@ -416,34 +392,30 @@ const ProviderDashboard = ({ user }) => {
       </Row>
 
       {/* Charts */}
-      <Row className="mb-4">
+      <Row className="g-4 mb-4">
         <Col md={8}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-white d-flex justify-content-between align-items-center" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Earnings Overview</h5>
+          <Card className="dashboard-card shadow-sm h-100 fade-in" style={{ animationDelay: '0.5s' }}>
+            <Card.Header className="bg-white d-flex justify-content-between align-items-center p-3 border-0">
+              <h5 className="mb-0 fw-bold">Earnings Overview</h5>
               <div>
                 <Button 
-                  style={{
-                    ...styles.switchButton,
-                    ...(dateRange === 'week' ? styles.activeSwitchButton : {})
-                  }}
+                  variant={dateRange === 'week' ? 'light' : 'outline-light'}
+                  className={`text-${dateRange === 'week' ? 'primary' : 'secondary'} border-0 py-1 px-3 me-2`}
                   onClick={() => setDateRange('week')}
                 >
                   Weekly
                 </Button>
                 <Button 
-                  style={{
-                    ...styles.switchButton,
-                    ...(dateRange === 'month' ? styles.activeSwitchButton : {})
-                  }}
+                  variant={dateRange === 'month' ? 'light' : 'outline-light'}
+                  className={`text-${dateRange === 'month' ? 'primary' : 'secondary'} border-0 py-1 px-3`}
                   onClick={() => setDateRange('month')}
                 >
                   Monthly
                 </Button>
               </div>
             </Card.Header>
-            <Card.Body>
-              <div style={styles.chartContainer}>
+            <Card.Body className="p-3">
+              <div className="chart-container">
                 <Chart type="line" data={earningsData} options={chartOptions} />
               </div>
             </Card.Body>
@@ -451,12 +423,12 @@ const ProviderDashboard = ({ user }) => {
         </Col>
         
         <Col md={4}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-white" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Appointment Types</h5>
+          <Card className="dashboard-card shadow-sm h-100 fade-in" style={{ animationDelay: '0.6s' }}>
+            <Card.Header className="bg-white p-3 border-0">
+              <h5 className="mb-0 fw-bold">Appointment Types</h5>
             </Card.Header>
-            <Card.Body>
-              <div style={styles.chartContainer}>
+            <Card.Body className="p-3">
+              <div className="chart-container">
                 <Chart type="doughnut" data={appointmentTypeData} options={doughnutOptions} />
               </div>
             </Card.Body>
@@ -465,153 +437,121 @@ const ProviderDashboard = ({ user }) => {
       </Row>
 
       {/* Upcoming Appointments & Activity */}
-      <Row className="mb-4">
-        <Col md={8}>
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white d-flex justify-content-between align-items-center" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Upcoming Appointments</h5>
-              <Link to="/provider-appointments" style={styles.viewAllLink}>
+      <Row className="g-4 mb-4">
+        <Col lg={8}>
+          <Card className="dashboard-card shadow-sm fade-in" style={{ animationDelay: '0.7s' }}>
+            <Card.Header className="bg-white d-flex justify-content-between align-items-center p-3 border-0">
+              <h5 className="mb-0 fw-bold">Upcoming Appointments</h5>
+              <Link to="/provider-appointments" className="text-primary text-decoration-none fw-semibold">
                 View All
               </Link>
             </Card.Header>
-            <Card.Body>
-              {loadingAppointments && <div className="text-center"><Spinner animation="border" /></div>}
-              {appointmentsError && <Alert variant="danger">{appointmentsError}</Alert>}
-              {!loadingAppointments && !appointmentsError && appointments.length === 0 && (
-                  <p className="text-center text-muted">No upcoming appointments found.</p>
+            <Card.Body className="p-0">
+              {loadingAppointments && (
+                <div className="text-center py-4">
+                  <Spinner animation="border" variant="primary" />
+                </div>
               )}
-              {upcomingAppointments.map((appointment) => (
-                <Card key={appointment.id} style={styles.appointmentCard}>
-                  <Card.Body>
-                    <Row>
-                      <Col md={6}>
-                        <h6 style={{ color: theme.colors.primary.main, fontWeight: '600' }}>
-                          {appointment.service} for {appointment.petName}
-                        </h6>
-                        <p className="text-muted mb-0">
-                          Client: {appointment.clientName}
-                        </p>
-                      </Col>
-                      <Col md={4}>
-                        <div style={styles.infoItem}>
-                          <Clock style={styles.infoIcon} />
-                          {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
-                        </div>
-                        <div style={styles.infoItem}>
-                          <GeoAlt style={styles.infoIcon} />
-                          {appointment.location} ({appointment.distance})
-                        </div>
-                      </Col>
-                      <Col md={2} className="text-end d-flex flex-column justify-content-between">
-                        <Badge 
-                          style={styles.statusBadge(appointment.status)}
-                          className="mb-2"
-                        >
-                          {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                        </Badge>
-                        <div className="d-flex justify-content-end">
-                          <Button 
-                            variant="outline-primary" 
-                            size="sm"
-                            as={Link}
-                            to={`/appointment/${appointment.id}`}
-                            className="me-1"
-                            style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                          >
-                            <Eye size={16} />
-                          </Button>
-                          {appointment.status === 'pending' && (
-                            <>
-                              <Button 
-                                variant="outline-success" 
+              
+              {appointmentsError && (
+                <Alert variant="danger" className="m-3">
+                  {appointmentsError}
+                </Alert>
+              )}
+              
+              {!loadingAppointments && !appointmentsError && appointments.length === 0 && (
+                <p className="text-center text-muted py-4">No upcoming appointments found.</p>
+              )}
+              
+              <ListGroup variant="flush">
+                {upcomingAppointments.map((appointment) => (
+                  <ListGroup.Item key={appointment.id} className="p-0">
+                    <Card className="border-0 rounded-0">
+                      <Card.Body className="p-3">
+                        <Row>
+                          <Col md={6}>
+                            <h6 className="text-primary fw-semibold mb-1">
+                              {appointment.service} for {appointment.petName}
+                            </h6>
+                            <p className="text-muted mb-2">
+                              Client: {appointment.clientName}
+                            </p>
+                            <div className="d-flex align-items-center text-muted mb-2 small">
+                              <Clock className="me-2" />
+                              {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
+                            </div>
+                            <div className="d-flex align-items-center text-muted small">
+                              <GeoAlt className="me-2" />
+                              {appointment.location} ({appointment.distance})
+                            </div>
+                          </Col>
+                          <Col md={6} className="d-flex flex-column align-items-end justify-content-between">
+                            <Badge 
+                              bg={getStatusColor(appointment.status)}
+                              className="mb-3 badge-status"
+                            >
+                              {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                            </Badge>
+                            <div className="d-flex mt-2">
+                              <Button
+                                variant="outline-secondary"
                                 size="sm"
-                                className="me-1"
-                                style={{ borderColor: theme.colors.success, color: theme.colors.success }}
+                                className="me-2"
+                                onClick={() => handleShowDetails(appointment.id)}
                               >
-                                <Check2Circle size={16} />
+                                <Eye className="me-1" /> Details
                               </Button>
-                              <Button 
-                                variant="outline-danger" 
-                                size="sm"
-                                style={{ borderColor: theme.colors.error, color: theme.colors.error }}
-                              >
-                                <XCircle size={16} />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
-              ))}
+                              {appointment.status === 'pending' && (
+                                <Button
+                                  variant="success"
+                                  size="sm"
+                                  onClick={() => handleUpdateStatus(appointment.id, 'Confirmed')}
+                                >
+                                  <Check2Circle className="me-1" /> Confirm
+                                </Button>
+                              )}
+                              {appointment.status === 'confirmed' && (
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  onClick={() => handleUpdateStatus(appointment.id, 'Cancelled')}
+                                >
+                                  <XCircle className="me-1" /> Cancel
+                                </Button>
+                              )}
+                            </div>
+                          </Col>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
             </Card.Body>
           </Card>
         </Col>
         
-        <Col md={4}>
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Recent Activity</h5>
+        <Col lg={4}>
+          <Card className="dashboard-card shadow-sm h-100 fade-in" style={{ animationDelay: '0.8s' }}>
+            <Card.Header className="bg-white d-flex justify-content-between align-items-center p-3 border-0">
+              <h5 className="mb-0 fw-bold">Recent Activity</h5>
             </Card.Header>
-            <Card.Body>
-              {recentActivity.map((activity) => (
-                <div 
-                  key={activity.id}
-                  className="d-flex align-items-start mb-4"
-                >
-                  <div style={styles.activityIcon(activity.type)}>
-                    {getActivityIcon(activity.type)}
-                  </div>
-                  <div>
-                    <p className="mb-1">{activity.message}</p>
-                    <small className="text-muted">{activity.time}</small>
-                  </div>
-                </div>
-              ))}
-              
-              <div className="text-center mt-3">
-                <Button 
-                  variant="outline-primary"
-                  style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                >
-                  View All Activity
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
-          
-          {/* Install Now Button Card */}
-          <Card className="border-0 shadow-sm mt-4">
-            <Card.Body className="d-flex flex-column align-items-center text-center p-4">
-              <div 
-                style={{
-                  backgroundColor: `${theme.colors.secondary.main}20`,
-                  color: theme.colors.secondary.main,
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '2rem',
-                  marginBottom: '16px',
-                }}
-              >
-                <Download />
-              </div>
-              <h5 style={{ color: theme.colors.primary.dark, fontWeight: '600' }}>Desktop Application</h5>
-              <p className="text-muted mb-3">
-                Install our desktop application for quick access to your dashboard and offline features.
-              </p>
-              <Button 
-                style={{
-                  backgroundColor: theme.colors.secondary.main,
-                  borderColor: theme.colors.secondary.main,
-                }}
-              >
-                <Download className="me-2" /> Install Now
-              </Button>
+            <Card.Body className="p-0">
+              <ListGroup variant="flush">
+                {recentActivity.map((activity) => (
+                  <ListGroup.Item key={activity.id} className="activity-item p-3">
+                    <div className="d-flex">
+                      <div className={`activity-icon bg-${getStatusColor(activity.type)}-subtle text-${getStatusColor(activity.type)}`}>
+                        {getActivityIcon(activity.type)}
+                      </div>
+                      <div>
+                        <div className="mb-1">{activity.message}</div>
+                        <small className="text-muted">{activity.time}</small>
+                      </div>
+                    </div>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
             </Card.Body>
           </Card>
         </Col>
@@ -636,6 +576,15 @@ const ProviderDashboard = ({ user }) => {
           </Card.Body>
         </Card>
       </Col>
+
+      {/* Appointment Detail Modal */}
+      {showDetailModal && selectedAppointmentId && (
+        <AppointmentDetailModal
+          show={showDetailModal}
+          onHide={handleHideDetails}
+          appointmentId={selectedAppointmentId}
+        />
+      )}
     </div>
   );
 };

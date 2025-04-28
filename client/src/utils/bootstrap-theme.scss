@@ -1,0 +1,72 @@
+// Bootstrap theme configuration for VisitingVet
+// This file customizes Bootstrap variables to match our theme
+
+// Override Bootstrap's variables before import
+
+// Primary Color
+$primary: #577E46; // Sage Green
+$secondary: #AC510A; // Warm Terracotta
+$success: #388E3C;
+$info: #0288D1;
+$warning: #F9A825; 
+$danger: #D32F2F;
+$light: #F6E6BB; // Cream
+$dark: #124438; // Deep Forest Green
+
+// Body
+$body-bg: #FFFFFF;
+$body-color: #333333;
+
+// Links
+$link-color: #577E46;
+$link-hover-color: #3D5D2F;
+
+// Typography
+$font-family-sans-serif: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$headings-font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$headings-color: #333333;
+
+// Border Radius
+$border-radius: 6px;
+$border-radius-sm: 3px;
+$border-radius-lg: 12px;
+
+// Cards
+$card-border-width: 0;
+$card-border-radius: 12px;
+$card-box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+
+// Buttons
+$btn-font-weight: 600;
+$btn-border-radius: 8px;
+$btn-border-radius-lg: 10px;
+$btn-border-radius-sm: 6px;
+
+// Inputs
+$input-border-radius: 8px;
+$input-border-color: #D1D1D1;
+$input-focus-border-color: #577E46;
+$input-focus-box-shadow: 0 0 0 0.25rem rgba(87, 126, 70, 0.25);
+
+// Modals
+$modal-content-border-radius: 12px;
+$modal-backdrop-opacity: 0.7;
+
+// Shadows
+$box-shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+$box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+$box-shadow-lg: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+
+// Custom color map for additional theme colors
+$theme-colors: (
+  "gold": #EDB75A,
+  "dark-green": #124438,
+  "light-green": #A8B99F,
+  "tan": #F0DCA0,
+);
+
+// Custom gradients
+$enable-gradients: true;
+
+// Enable shadows
+$enable-shadows: true; 
