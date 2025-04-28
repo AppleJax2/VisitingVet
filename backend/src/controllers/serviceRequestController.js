@@ -3,7 +3,7 @@ const Appointment = require('../models/Appointment');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const mongoose = require('mongoose');
-const { sendNotification } = require('../utils/notificationHelper');
+const { sendNotification } = require('../utils/notificationService');
 
 // Create a new service request (from clinic to provider)
 exports.createServiceRequest = async (req, res) => {
