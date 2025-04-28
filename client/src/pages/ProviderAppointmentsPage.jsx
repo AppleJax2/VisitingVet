@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Table, Button, Badge, Spinner, Alert, Tabs, Tab, Modal, Form } from 'react-bootstrap';
-import { getMyAppointmentsProvider, updateAppointmentStatus, checkAuthStatus } from '../services/api';
+import { getMyAppointmentsProvider, updateAppointmentStatus } from '../services/api';
 import { formatDate } from '../utils/dateUtils';
 import AppointmentDetailModal from '../components/AppointmentDetailModal';
 import ProviderCalendar from '../components/ProviderCalendar';
+import { useAuth } from '../contexts/AuthContext';
 
 const ProviderAppointmentsPage = () => {
   const [appointments, setAppointments] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [localLoading, setLocalLoading] = useState(true);
   const [error, setError] = useState('');
   const [updateSuccess, setUpdateSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('requested');
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
   // State for appointment details modal
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
@@ -48,34 +50,27 @@ const ProviderAppointmentsPage = () => {
     }
   };
 
-  // Fetch appointments when the component mounts or active tab changes
+  // Fetch appointments when the component mounts, tab changes, or user becomes available
   useEffect(() => {
-    const verifyUser = async () => {
-      try {
-        const data = await checkAuthStatus();
-        if (!data || !data.success) {
-          navigate('/login');
-          return;
-        }
-        
-        if (data.user.role !== 'MVSProvider') {
-          navigate('/dashboard');
-          return;
-        }
-        
+    // Ensure user is loaded and is a provider before fetching
+    if (!authLoading && user) {
+      if (user.role !== 'MVSProvider') {
+        // Redirect if user is not a provider
+        navigate('/dashboard');
+      } else {
+        // User is authenticated and is a provider, fetch appointments
         fetchAppointments();
-      } catch (err) {
-        setError('Authentication failed. Please login again.');
-        navigate('/login');
       }
-    };
-
-    verifyUser();
-  }, [navigate, activeTab]);
+    } else if (!authLoading && !user) {
+        // If not loading and no user, redirect to login
+        navigate('/login');
+    }
+    // Dependency array includes user state and activeTab
+  }, [user, authLoading, navigate, activeTab]);
 
   // Function to fetch appointments based on status
   const fetchAppointments = async () => {
-    setIsLoading(true);
+    setLocalLoading(true);
     setError('');
     try {
       let status = null;
@@ -92,28 +87,28 @@ const ProviderAppointmentsPage = () => {
         const cancelledByOwnerData = await getMyAppointmentsProvider('CancelledByOwner');
         
         const allPastAppointments = [
-          ...(completedData.success ? completedData.data : []),
-          ...(cancelledData.success ? cancelledData.data : []),
-          ...(cancelledByOwnerData.success ? cancelledByOwnerData.data : [])
+          ...(completedData?.success ? completedData.data : []),
+          ...(cancelledData?.success ? cancelledData.data : []),
+          ...(cancelledByOwnerData?.success ? cancelledByOwnerData.data : [])
         ];
         
         // Sort by appointment time, most recent first
         allPastAppointments.sort((a, b) => new Date(b.appointmentTime) - new Date(a.appointmentTime));
         
         setAppointments(allPastAppointments);
-        setIsLoading(false);
+        setLocalLoading(false);
         return;
       } else if (activeTab === 'calendar') {
         // Calendar tab doesn't need to fetch appointments here
-        setIsLoading(false);
+        setLocalLoading(false);
         return;
       }
       
       // Fetch appointments with the selected status
       const response = await getMyAppointmentsProvider(status);
-      if (response.success) {
+      if (response?.success) {
         // Sort by appointment time
-        const sortedAppointments = [...response.data].sort(
+        const sortedAppointments = [...(response.data || [])].sort(
           (a, b) => new Date(a.appointmentTime) - new Date(b.appointmentTime)
         );
         setAppointments(sortedAppointments);
@@ -122,7 +117,7 @@ const ProviderAppointmentsPage = () => {
       setError('Failed to load appointments. Please try again.');
       console.error(err);
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -248,8 +243,17 @@ const ProviderAppointmentsPage = () => {
     }
   };
 
+  if (authLoading) {
+    return (
+        <Container className="mt-4 text-center">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-2">Loading user data...</p>
+        </Container>
+    );
+  }
+  
   return (
-    <Container className="py-4">
+    <Container className="mt-4">
       <h1 className="mb-4">Manage Appointments</h1>
       
       {error && (
@@ -392,7 +396,7 @@ const ProviderAppointmentsPage = () => {
   );
 
   function renderAppointmentsTable(tabKey) {
-    if (isLoading) {
+    if (localLoading) {
       return (
         <div className="text-center my-5">
           <Spinner animation="border" role="status">

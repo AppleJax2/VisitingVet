@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { login, checkAuthStatus } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Form, 
@@ -23,60 +22,39 @@ import {
   GeoAlt
 } from 'react-bootstrap-icons';
 import './AuthPages.css';
+import { useAuth } from '../contexts/AuthContext';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
+  const navigate = useNavigate();
+  const { login, user, loading: authLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const navigate = useNavigate();
 
-  // Check if user is already logged in
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const data = await checkAuthStatus();
-        if (data && data.success) {
-          // User is already logged in, redirect to dashboard
-          navigate('/dashboard');
-        }
-      } catch (err) {
-        // Not logged in, stay on login page
-        console.log('User not logged in');
-      } finally {
-        setIsChecking(false);
-      }
-    };
-    
-    checkAuth();
-  }, [navigate]);
+    if (!authLoading && user) {
+      navigate('/dashboard');
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Clear previous errors
-    setIsLoading(true);
+    setError('');
+    setIsSubmitting(true);
     
     try {
-      const data = await login({ email, password, rememberMe });
+      const response = await login({ email, password, rememberMe });
       
-      if (data && data.success) {
-        // Handle successful login
-        console.log('Login successful:', data.user);
-        
-        // Show a success toast notification
+      if (response && response.success) {
+        console.log('Login successful via context:', response.user);
         setToastMessage('Login successful! Redirecting to dashboard...');
         setShowToast(true);
-        
-        // Navigate after a brief delay to allow the toast to be seen
-        setTimeout(() => {
-          navigate('/dashboard'); // Redirect to dashboard
-        }, 1500);
       } else {
-        setError(data?.message || 'Login failed. Please check your credentials.');
+        setError(response?.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -85,12 +63,13 @@ function LoginPage() {
         err.message || 
         'An error occurred during login. Please try again.'
       );
+      setShowToast(false);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  if (isChecking) {
+  if (authLoading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 76px)' }}>
         <Spinner animation="border" variant="primary" role="status">
@@ -100,9 +79,12 @@ function LoginPage() {
     );
   }
 
+  if (user) {
+    return null;
+  }
+
   return (
     <div className="auth-page">
-      {/* Toast notification for success messages */}
       <ToastContainer position="top-end" className="p-3">
         <Toast 
           onClose={() => setShowToast(false)} 
@@ -124,7 +106,6 @@ function LoginPage() {
           <Col lg={10} xl={9}>
             <Card className="auth-card overflow-hidden">
               <Row className="g-0">
-                {/* Left sidebar with features */}
                 <Col lg={5} className="auth-sidebar d-none d-lg-flex">
                   <div>
                     <div className="auth-logo">
@@ -164,7 +145,6 @@ function LoginPage() {
                   </div>
                 </Col>
                 
-                {/* Right side with form */}
                 <Col lg={7}>
                   <div className="auth-content">
                     <div className="d-flex justify-content-center mb-4 d-lg-none">
@@ -204,7 +184,7 @@ function LoginPage() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          disabled={isLoading}
+                          disabled={isSubmitting}
                         />
                       </Form.Group>
 
@@ -221,7 +201,7 @@ function LoginPage() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          disabled={isLoading}
+                          disabled={isSubmitting}
                         />
                       </Form.Group>
                       
@@ -231,17 +211,17 @@ function LoginPage() {
                           label="Remember me"
                           checked={rememberMe}
                           onChange={(e) => setRememberMe(e.target.checked)}
-                          disabled={isLoading}
+                          disabled={isSubmitting}
                         />
                       </Form.Group>
                       
                       <Button 
                         variant="primary" 
                         type="submit" 
-                        disabled={isLoading}
+                        disabled={isSubmitting}
                         className="btn-primary w-100"
                       >
-                        {isLoading ? (
+                        {isSubmitting ? (
                           <>
                             <Spinner
                               as="span"

@@ -433,30 +433,30 @@ const ClinicDashboard = ({ user }) => {
               </Link>
             </Card.Header>
             <Card.Body>
-              {staffList.map((staff) => (
+              {staff.map((staffMember, index) => (
                 <div 
-                  key={staff.id}
+                  key={staffMember.id}
                   className="d-flex align-items-center mb-3 pb-3"
-                  style={{ borderBottom: staff.id !== staffList.length ? `1px solid ${theme.colors.background.light}` : 'none' }}
+                  style={{ borderBottom: index !== staff.length - 1 ? `1px solid ${theme.colors.background.light}` : 'none' }}
                 >
                   <img 
-                    src={staff.image}
-                    alt={staff.name}
+                    src={staffMember.image}
+                    alt={staffMember.name}
                     style={styles.staffImage}
                   />
                   <div className="flex-grow-1">
                     <h6 className="mb-0" style={{ color: theme.colors.primary.main }}>
-                      {staff.name}
+                      {staffMember.name}
                     </h6>
                     <small className="d-block text-muted">
-                      {staff.role} • {staff.specialty}
+                      {staffMember.role} • {staffMember.specialty}
                     </small>
                     <small className="d-block">
-                      {staff.appointmentsToday} appointments today
+                      {staffMember.appointmentsToday} appointments today
                     </small>
                   </div>
-                  <Badge style={styles.statusBadge(staff.status)}>
-                    {staff.status.charAt(0).toUpperCase() + staff.status.slice(1)}
+                  <Badge style={styles.statusBadge(staffMember.status)}>
+                    {staffMember.status.charAt(0).toUpperCase() + staffMember.status.slice(1)}
                   </Badge>
                 </div>
               ))}
