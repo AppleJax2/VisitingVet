@@ -9,8 +9,9 @@ VisitingVet is a comprehensive platform designed to connect pet owners with mobi
 - Offering specialized care options for different animal types (small, large, exotic, farm animals, etc.)
 - Streamlining appointment scheduling, service discovery, and pet health management
 - Creating a trusted marketplace with verified providers and transparent reviews
+- Facilitating coordination between traditional veterinary clinics, mobile veterinary specialists, and pet owners for specialized care
 
-The platform serves the growing demand for mobile veterinary services while addressing the challenges of traditional clinic visits, particularly for pets with mobility issues, anxious pets, or owners with transportation limitations.
+The platform serves the growing demand for mobile veterinary services while addressing the challenges of traditional clinic visits, particularly for pets with mobility issues, anxious pets, or owners with transportation limitations. Additionally, it enhances collaboration between brick-and-mortar clinics and mobile specialists to provide comprehensive care.
 
 ## 2. USER PERSONAS AND USE CASES
 
@@ -27,9 +28,9 @@ The platform serves the growing demand for mobile veterinary services while addr
 - **Goals**: Grow their mobile practice with a streamlined booking system
 
 #### Veterinary Clinics
-- **Characteristics**: Traditional clinics extending services to include mobile options
-- **Needs**: Expanded client reach, organized mobile service scheduling
-- **Goals**: Diversify service offerings and increase revenue
+- **Characteristics**: Traditional clinics extending services to include mobile options or seeking to refer patients to mobile specialists
+- **Needs**: Expanded client reach, organized mobile service scheduling, efficient referral system for specialized services
+- **Goals**: Diversify service offerings, increase revenue, provide comprehensive care through partnerships
 
 #### Platform Administrators
 - **Characteristics**: VisitingVet staff managing the platform
@@ -46,6 +47,7 @@ The platform serves the growing demand for mobile veterinary services while addr
 - Set medication/treatment reminders
 - View upcoming appointments
 - Receive notifications about appointment status changes
+- Respond to service recommendations from their regular veterinary clinic
 
 #### For MVS Providers:
 - Create detailed professional profiles highlighting credentials and specialties
@@ -54,6 +56,17 @@ The platform serves the growing demand for mobile veterinary services while addr
 - Manage incoming appointment requests
 - View scheduled appointments and client information
 - Record visit notes and follow-up recommendations
+- Respond to service requests from veterinary clinics
+- Coordinate with clinics for specialized services
+
+#### For Veterinary Clinics:
+- Create clinic profile with services and facilities information
+- Request specialized mobile services for patients (e.g., ultrasound, dental care)
+- Specify available times for hosting mobile specialists
+- Review MVS provider responses and available times
+- Facilitate coordination between pet owners and mobile specialists
+- Access service results and reports from mobile specialists
+- Maintain continuity of care with referral tracking
 
 #### For Administrators:
 - Verify provider credentials and approve applications
@@ -113,6 +126,15 @@ The platform serves the growing demand for mobile veterinary services while addr
 - User management controls
 - Action logging for accountability
 - Document verification system
+
+### 3.8 Clinic-MVS-Pet Owner Coordination
+- Clinic-initiated specialized service requests
+- MVS provider discovery and availability sharing
+- Three-way scheduling coordination
+- Service fulfillment tracking
+- Result sharing and documentation
+- Seamless communication between all parties
+- Status updates throughout the process
 
 ## 4. SYSTEM ARCHITECTURE AND TECH STACK
 
@@ -190,6 +212,18 @@ The application follows a modern client-server architecture with:
 - Custom field responses
 - Notification tracking
 
+#### ServiceRequest
+- Requesting clinic reference
+- Pet reference
+- Required service type
+- Clinical reason and notes
+- Preferred date range and times
+- Status tracking
+- Selected MVS provider reference
+- Confirmed time slot
+- Owner response status
+- Result documentation
+
 #### Availability
 - Provider reference
 - Available time slots
@@ -225,6 +259,19 @@ The application follows a modern client-server architecture with:
 7. Owner receives notification of status change
 8. Appointment is added to both parties' calendars
 
+#### Clinic-Initiated Specialized Service Flow
+1. Clinic creates specialized service request for a specific pet
+2. System identifies MVS providers who offer the requested service
+3. Selected MVS providers receive notification of service request
+4. MVS providers respond with availability during clinic's specified timeframes
+5. Pet owner receives notification about recommended service with available times
+6. Pet owner selects preferred time slot from options
+7. All parties receive confirmation of scheduled appointment
+8. MVS provider performs service at clinic location
+9. MVS provider uploads results/reports to the platform
+10. Clinic and pet owner receive notification of completed service with results
+11. Clinic can add follow-up recommendations or schedule additional appointments
+
 #### Provider Verification Flow
 1. Provider registers as MVS Provider
 2. Provider uploads verification documents
@@ -246,6 +293,7 @@ The application follows a modern client-server architecture with:
 - The platform likely operates on a commission or subscription model for providers
 - Provider verification is a manual process requiring admin approval
 - The platform supports both B2C (direct to pet owners) and potentially B2B (clinic partnerships)
+- Clinics may act as referral sources and hosts for specialized mobile services
 
 ### 6.2 Technical Design Decisions
 - MongoDB chosen for flexibility with evolving data models
@@ -253,12 +301,14 @@ The application follows a modern client-server architecture with:
 - Separate profiles for users and MVS provider details for clean separation of concerns
 - Custom fields in services to accommodate diverse service requirements
 - Multi-channel notifications to ensure reliable communication
+- Three-way coordination system designed to work without requiring integration with existing scheduling systems
 
 ### 6.3 UX/UI Design Decisions
 - Mobile-first responsive design
 - Dashboard-centric interfaces for frequent users
 - Calendar-based scheduling interface
 - Clear status indicators for appointments
+- Intuitive workflows for three-way coordination
 
 ## 7. IDENTIFIED GAPS AND ENHANCEMENT OPPORTUNITIES
 
@@ -271,6 +321,7 @@ The application follows a modern client-server architecture with:
 - Integrated messaging between providers and pet owners
 - Analytics dashboard for providers to track business metrics
 - Mobile app versions for enhanced on-the-go experience
+- Advanced clinic-MVS-pet owner coordination features (e.g., recurring specialty services, multi-patient scheduling)
 
 ### 7.2 Technical Improvement Opportunities
 - Real-time notifications using WebSockets
@@ -295,6 +346,7 @@ The application follows a modern client-server architecture with:
 - Provider profile creation and service definition
 - Basic appointment scheduling
 - Email notifications
+- Clinic service request system for MVS providers
 
 ### 8.2 Phase 2: Enhanced Experience
 - Advanced availability management
@@ -302,6 +354,7 @@ The application follows a modern client-server architecture with:
 - SMS notifications
 - Reminders system
 - Enhanced search capabilities
+- Three-way coordination enhancements
 
 ### 8.3 Phase 3: Platform Growth
 - Review and rating system
@@ -316,4 +369,4 @@ VisitingVet represents a comprehensive solution to the growing demand for conven
 
 The architecture and technology choices provide a solid foundation for scalability and future enhancements, while the data model supports the complex relationships between users, providers, pets, services, and appointments.
 
-By focusing on user experience and streamlined workflows, VisitingVet has the potential to significantly impact how pet healthcare is delivered, making quality veterinary care more accessible while reducing stress for pets and their owners.
+By focusing on user experience and streamlined workflows, VisitingVet has the potential to significantly impact how pet healthcare is delivered, making quality veterinary care more accessible while reducing stress for pets and their owners. The platform's innovative approach to facilitating coordination between traditional clinics, mobile specialists, and pet owners creates a unique value proposition that benefits all parties while improving overall pet healthcare delivery.
