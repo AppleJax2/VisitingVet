@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ConversationList from '../../components/Chat/ConversationList';
 import MessageView from '../../components/Chat/MessageView';
-import { getConversations } from '../../services/conversationService'; // Assuming a service file exists
+import { getConversations } from '../services/conversationService'; // Corrected path
 import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../../components/Shared/LoadingSpinner'; // Assuming a spinner component
 import ErrorMessage from '../../components/Shared/ErrorMessage'; // Assuming an error component
