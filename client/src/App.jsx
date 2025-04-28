@@ -16,8 +16,6 @@ import MyPetsPage from './pages/MyPetsPage';
 import AddReminderPage from './pages/AddReminderPage';
 import PetProfilePage from './pages/PetProfilePage';
 import ManageRemindersPage from './pages/ManageRemindersPage';
-import ServiceRequestsPage from './pages/ServiceRequestsPage';
-import ServiceRequestDetailPage from './pages/ServiceRequestDetailPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import './App.css';

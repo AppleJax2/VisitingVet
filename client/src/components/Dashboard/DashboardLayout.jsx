@@ -4,8 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   House, Calendar, Search, Person, 
   Building, Gear, BoxArrowRight, Download,
-  List, X, Bell, ChatDots, FileEarmarkText,
-  ArrowRightCircle
+  List, X, Bell, ChatDots
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 
@@ -166,11 +165,6 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           text: 'My Appointments',
         },
         {
-          path: '/dashboard/pet-owner/service-requests',
-          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
-          text: 'Specialist Referrals',
-        },
-        {
           path: '/my-pets',
           icon: <Person style={sidebarStyles.navIcon} />,
           text: 'My Pets',
@@ -197,11 +191,6 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           text: 'Appointments',
         },
         {
-          path: '/dashboard/provider/service-requests',
-          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
-          text: 'Service Requests',
-        },
-        {
           path: '/provider-clients',
           icon: <Person style={sidebarStyles.navIcon} />,
           text: 'Clients',
@@ -226,11 +215,6 @@ const DashboardLayout = ({ children, user, onLogout }) => {
           path: '/clinic-appointments',
           icon: <Calendar style={sidebarStyles.navIcon} />,
           text: 'Appointments',
-        },
-        {
-          path: '/dashboard/clinic/service-requests',
-          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
-          text: 'Specialist Referrals',
         },
         {
           path: '/clinic-staff',

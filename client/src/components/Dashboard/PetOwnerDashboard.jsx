@@ -3,7 +3,7 @@ import { Row, Col, Card, Button, Badge, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   Search, Calendar2Check, PlusCircle, 
-  GeoAlt, Clock, Stars, Bell, FileEarmarkText
+  GeoAlt, Clock, Stars, Bell
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { fetchPetOwnerDashboardData, fetchUserReminders, fetchUserPets, fetchUpcomingAppointments } from '../../services/api';
@@ -494,48 +494,6 @@ const PetOwnerDashboard = ({ user }) => {
             onUpdate={handleAppointmentUpdate}
         />
       )}
-
-      <div className="dashboard-quick-actions">
-        <Button 
-          variant="outline-primary" 
-          className="quick-action-button"
-          as={Link} 
-          to="/dashboard/pet-owner/service-requests"
-        >
-          <FileEarmarkText size={24} />
-          <span>Specialist Referrals</span>
-        </Button>
-      </div>
-
-      <Card className="dashboard-card">
-        <Card.Body>
-          <Card.Title>Specialist Referrals</Card.Title>
-          <Card.Text>
-            View and manage your specialist referrals from your vet clinic.
-          </Card.Text>
-          <Button 
-            variant="primary" 
-            as={Link} 
-            to="/dashboard/pet-owner/service-requests"
-          >
-            View Referrals
-          </Button>
-        </Card.Body>
-      </Card>
-
-      <StatCard
-        title="Pending Referrals"
-        value="2"
-        icon={<FileEarmarkText className="stat-icon" />}
-        linkTo="/dashboard/pet-owner/service-requests"
-      />
-
-      <ActionTile
-        title="Specialist Referrals"
-        icon={<FileEarmarkText className="action-icon" />}
-        linkTo="/dashboard/pet-owner/service-requests"
-        description="View specialist referrals from your clinic"
-      />
     </div>
   );
 };
