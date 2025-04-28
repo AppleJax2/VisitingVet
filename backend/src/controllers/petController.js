@@ -176,8 +176,10 @@ exports.updatePet = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to update this pet' });
     }
 
-    // Prevent owner field from being updated
+    // Prevent owner field from being updated directly
     delete updateData.owner;
+    // Allow profileImage to be updated (it will contain the URL from upload)
+    // delete updateData.profileImage; // No longer needed
 
     const updatedPet = await Pet.findByIdAndUpdate(petId, updateData, {
       new: true, // Return the updated document

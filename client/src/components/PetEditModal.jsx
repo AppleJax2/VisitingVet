@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { updatePet } from '../services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { Modal, Button, Form, Row, Col, Alert, Spinner, Image } from 'react-bootstrap';
+import { updatePet, uploadPetImage } from '../services/api';
+import { toast } from 'react-toastify';
 
 function PetEditModal({ show, onHide, pet, onUpdate }) {
   const [formData, setFormData] = useState({});
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     // Initialize form data when pet prop changes or modal shows
@@ -19,18 +23,55 @@ function PetEditModal({ show, onHide, pet, onUpdate }) {
         gender: pet.gender || 'Unknown',
         weight: pet.weight || '',
         weightUnit: pet.weightUnit || 'lbs',
+        profileImage: pet.profileImage || '',
         microchipId: pet.microchipId || '',
         medicalHistory: pet.medicalHistory || '',
         lastCheckup: pet.lastCheckup ? new Date(pet.lastCheckup).toISOString().split('T')[0] : '',
       });
+      setPreviewUrl(pet.profileImage || null);
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } else {
       // Reset form if no pet is provided (though this shouldn't happen in edit mode)
       setFormData({});
+      setPreviewUrl(null);
+      setSelectedFile(null);
     }
     // Clear errors when modal opens or pet changes
     setError('');
     setValidationErrors({});
   }, [pet, show]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Basic type check (can be more robust)
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file (JPG, PNG, GIF).');
+        setSelectedFile(null);
+        setPreviewUrl(formData.profileImage || null); // Revert to original image
+        return;
+      }
+      // Size check (e.g., 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image file is too large (Max 5MB).');
+        setSelectedFile(null);
+        setPreviewUrl(formData.profileImage || null); // Revert to original image
+        return;
+      }
+      
+      setSelectedFile(file);
+      // Create a temporary URL for preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setError(''); // Clear errors on valid selection
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -93,26 +134,41 @@ function PetEditModal({ show, onHide, pet, onUpdate }) {
     }
     
     setIsLoading(true);
+    let imageUrl = formData.profileImage;
 
     try {
-      const payload = { ...formData };
-      // Ensure age is a number
-      payload.age = Number(payload.age);
-      // Handle optional weight
-      payload.weight = payload.weight ? Number(payload.weight) : null;
-      // Handle optional lastCheckup date
-      payload.lastCheckup = payload.lastCheckup || null;
+      // 1. Upload new image if selected
+      if (selectedFile) {
+        const uploadResponse = await uploadPetImage(pet._id, selectedFile);
+        if (uploadResponse && uploadResponse.success && uploadResponse.data?.imageUrl) {
+          imageUrl = uploadResponse.data.imageUrl;
+          toast.info('Profile image uploaded.');
+        } else {
+          throw new Error(uploadResponse.error || 'Failed to upload image.');
+        }
+      }
 
+      // 2. Update pet details with potentially new image URL
+      const payload = { 
+        ...formData, 
+        profileImage: imageUrl,
+        age: Number(formData.age),
+        weight: formData.weight ? Number(formData.weight) : null,
+        lastCheckup: formData.lastCheckup || null,
+      };
+      
       const result = await updatePet(pet._id, payload);
       if (result.success) {
-        onUpdate(result.pet); // Pass the updated pet data back to the parent
-        onHide(); // Close the modal
+        toast.success('Pet details updated successfully!');
+        onUpdate(result.pet);
+        onHide();
       } else {
-        setError(result.error || 'Failed to update pet.');
+        setError(result.error || 'Failed to update pet details.');
       }
     } catch (err) {
-      console.error('Error updating pet:', err);
+      console.error('Error updating pet profile:', err);
       setError(err.message || 'An error occurred while updating the pet.');
+      toast.error(`Update failed: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -259,6 +315,36 @@ function PetEditModal({ show, onHide, pet, onUpdate }) {
                     <option value="lbs">lbs</option>
                     <option value="kg">kg</option>
                   </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row className="mb-3 align-items-center">
+              <Col md={3} className="text-center">
+                <Image 
+                  src={previewUrl || 'https://via.placeholder.com/150?text=No+Image'} 
+                  roundedCircle 
+                  thumbnail 
+                  width={100} 
+                  height={100} 
+                  style={{ objectFit: 'cover' }}
+                  alt="Pet profile preview"
+                />
+              </Col>
+              <Col md={9}>
+                <Form.Group controlId="editPetProfileImageFile">
+                  <Form.Label className="fw-semibold">Profile Image</Form.Label>
+                  <Form.Control
+                    type="file"
+                    name="petImage"
+                    accept="image/png, image/jpeg, image/gif"
+                    onChange={handleFileChange}
+                    ref={fileInputRef}
+                    className="form-control shadow-sm"
+                  />
+                  <Form.Text muted>
+                    Upload a new image (JPG, PNG, GIF, max 5MB). Leave blank to keep current image.
+                  </Form.Text>
                 </Form.Group>
               </Col>
             </Row>

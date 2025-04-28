@@ -335,10 +335,10 @@ export const fetchPetById = async (petId) => {
 export const updatePet = async (petId, petData) => {
   try {
     const response = await api.put(`/pets/${petId}`, petData);
-    return response.data;
+    return response.data; // Expects { success: true, pet: updatedPet } or { success: false, error: ... }
   } catch (error) {
-    console.error(`Update pet ${petId} error:`, error.response?.data || error.message);
-    throw error.response?.data || new Error('Failed to update pet');
+    console.error('API Error updating pet:', error.response?.data || error.message);
+    return { success: false, error: error.response?.data?.error || error.message || 'Network Error' };
   }
 };
 
@@ -346,10 +346,10 @@ export const updatePet = async (petId, petData) => {
 export const deletePet = async (petId) => {
   try {
     const response = await api.delete(`/pets/${petId}`);
-    return response.data;
+    return response.data; // Expects { success: true } or { success: false, error: ... }
   } catch (error) {
-    console.error(`Delete pet ${petId} error:`, error.response?.data || error.message);
-    throw error.response?.data || new Error('Failed to delete pet');
+    console.error('API Error deleting pet:', error.response?.data || error.message);
+    return { success: false, error: error.response?.data?.error || error.message || 'Network Error' };
   }
 };
 
@@ -1035,3 +1035,24 @@ export const adminGetServiceUsageMetrics = async (params = {}) => {
 };
 
 // --- End Admin API Functions --- 
+
+// --- Upload Service --- 
+export const uploadPetImage = async (petId, imageFile) => {
+    const formData = new FormData();
+    formData.append('petImage', imageFile); // 'petImage' must match the field name expected by multer
+
+    try {
+        const response = await api.post(`/upload/pet-image/${petId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data; // Expects { success: true, data: { imageUrl: '...' } } or { success: false, error: ... }
+    } catch (error) {
+        console.error('API Error uploading pet image:', error.response?.data || error.message);
+        return { success: false, error: error.response?.data?.error || error.message || 'Network Error' };
+    }
+};
+
+// --- Vaccination Records --- 
+// ... other functions ... 
