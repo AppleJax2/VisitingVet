@@ -561,11 +561,31 @@ export const updateUserDetails = async (userData) => {
  */
 export const changePassword = async (passwordData) => {
   try {
-    const response = await api.put('/users/me/password', passwordData);
+    const response = await api.post('/auth/change-password', passwordData);
     return response.data;
   } catch (error) {
     console.error('Change password error:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to change password');
+  }
+};
+
+export const requestPasswordReset = async (emailData) => {
+  try {
+    const response = await api.post('/auth/forgot-password', emailData);
+    return response.data;
+  } catch (error) {
+    console.error('Password reset request error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to request password reset');
+  }
+};
+
+export const resetPassword = async (token, passwordData) => {
+  try {
+    const response = await api.post(`/auth/reset-password/${token}`, passwordData);
+    return response.data;
+  } catch (error) {
+    console.error('Password reset error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to reset password');
   }
 };
 
