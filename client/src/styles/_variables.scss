@@ -1,0 +1,53 @@
+// Centralized Bootstrap Theme Configuration
+// Override default Bootstrap variables here.
+
+// Unified Color Scheme (Based on current theme - replace placeholders)
+$primary: #0d6efd;   // Standard Bootstrap Blue (Placeholder)
+$secondary: #6c757d; // Standard Bootstrap Gray (Placeholder)
+$success: #198754;   // Standard Bootstrap Green (Placeholder)
+$info: #0dcaf0;      // Standard Bootstrap Teal (Placeholder)
+$warning: #ffc107;   // Standard Bootstrap Yellow (Placeholder)
+$danger: #dc3545;    // Standard Bootstrap Red (Placeholder)
+$light: #f8f9fa;     // Standard Bootstrap Light Gray (Placeholder)
+$dark: #212529;      // Standard Bootstrap Dark Gray (Placeholder)
+
+// Example Color Overrides:
+// $primary: #563d7c; // Example primary color
+// $secondary: #6c757d;
+// $success: #28a745;
+// $info: #17a2b8;
+// $warning: #ffc107;
+// $danger: #dc3545;
+// $light: #f8f9fa;
+// $dark: #343a40;
+
+// Example Font Overrides:
+// $font-family-sans-serif: "Open Sans", sans-serif;
+// $headings-font-family: "Montserrat", sans-serif;
+// $font-size-base: 1rem; // Assumes the browser default, typically 16px
+
+// Example Spacing Overrides:
+// $spacer: 1rem;
+// $spacers: (
+//   0: 0,
+//   1: $spacer * .25,
+//   2: $spacer * .5,
+//   3: $spacer,
+//   4: $spacer * 1.5,
+//   5: $spacer * 3,
+// );
+
+// Example Component Variable Overrides:
+// $border-radius: .2rem;
+// $border-radius-lg: .3rem;
+// $border-radius-sm: .15rem;
+
+// $link-color: $primary;
+// $link-hover-color: darken($primary, 15%);
+
+// $navbar-dark-color: rgba(255, 255, 255, .75);
+// $navbar-dark-hover-color: rgba(255, 255, 255, 1);
+// $navbar-light-color: rgba(0, 0, 0, .55);
+// $navbar-light-hover-color: rgba(0, 0, 0, .9);
+
+// Add more variable overrides as needed... 

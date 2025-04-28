@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css'; // Import SCSS instead
+import './styles/main.scss'; // Import custom SCSS
 import { checkAuthStatus } from './services/api';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';

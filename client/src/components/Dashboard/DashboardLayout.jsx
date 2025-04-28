@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Nav, Button, Navbar, Dropdown } from 'react-bootstrap';
+import { Container, Row, Col, Nav, Button } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   House, Calendar, Search, Person, 
@@ -8,7 +8,6 @@ import {
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { useAuth } from '../../contexts/AuthContext';
-import './Dashboard.css'; // Import the Dashboard CSS
 
 // DashboardLayout serves as the base layout for all dashboard types
 const DashboardLayout = ({ children }) => {
@@ -21,6 +20,138 @@ const DashboardLayout = ({ children }) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
+  // Sidebar styles
+  const sidebarStyles = {
+    sidebar: {
+      position: 'fixed',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      width: sidebarCollapsed ? '70px' : '260px',
+      backgroundColor: theme.colors.primary.dark,
+      transition: 'all 0.3s ease',
+      zIndex: 1030,
+      overflowY: 'auto',
+      boxShadow: theme.shadows.md,
+    },
+    sidebarHeader: {
+      padding: '20px',
+      textAlign: sidebarCollapsed ? 'center' : 'left',
+      borderBottom: '1px solid rgba(255,255,255,0.1)',
+    },
+    sidebarBrand: {
+      color: theme.colors.text.white,
+      fontFamily: theme.fonts.heading,
+      fontWeight: 'bold',
+      fontSize: sidebarCollapsed ? '1.2rem' : '1.5rem',
+      textDecoration: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+    },
+    sidebarLogo: {
+      marginRight: sidebarCollapsed ? '0' : '10px',
+      width: '30px',
+      height: '30px',
+    },
+    navItem: {
+      margin: '5px 0',
+    },
+    navLink: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: '12px 20px',
+      color: 'rgba(255,255,255,0.7)',
+      transition: 'all 0.3s ease',
+      textDecoration: 'none',
+      borderRadius: '5px',
+      marginRight: '10px',
+      marginLeft: '10px',
+    },
+    navLinkActive: {
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      color: theme.colors.text.white,
+    },
+    navIcon: {
+      marginRight: sidebarCollapsed ? '0' : '15px',
+      fontSize: '1.2rem',
+      minWidth: '20px',
+      textAlign: 'center',
+    },
+    navText: {
+      display: sidebarCollapsed ? 'none' : 'block',
+    },
+    mainContent: {
+      marginLeft: sidebarCollapsed ? '70px' : '260px',
+      padding: '20px',
+      transition: 'all 0.3s ease',
+      minHeight: 'calc(100vh - 60px)',
+      backgroundColor: theme.colors.background.light,
+    },
+    toggleButton: {
+      position: 'absolute',
+      bottom: '20px',
+      left: sidebarCollapsed ? '15px' : '105px',
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      color: theme.colors.text.white,
+      border: 'none',
+      transition: 'all 0.3s ease',
+    },
+    installButton: {
+      backgroundColor: theme.colors.secondary.main,
+      border: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+      padding: '12px 20px',
+      marginTop: '20px',
+      marginRight: '10px',
+      marginLeft: '10px',
+      borderRadius: '5px',
+    },
+    installIcon: {
+      marginRight: sidebarCollapsed ? '0' : '10px',
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '20px',
+      backgroundColor: theme.colors.background.white,
+      padding: '15px 20px',
+      borderRadius: theme.borderRadius.md,
+      boxShadow: theme.shadows.sm,
+      position: 'sticky',
+      top: 0,
+      zIndex: 1020,
+    },
+    headerActions: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '15px',
+    },
+    actionIcon: {
+      fontSize: '1.3rem',
+      color: theme.colors.text.primary,
+      cursor: 'pointer',
+    },
+    profileButton: {
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+      border: 'none',
+      color: theme.colors.text.primary,
+      padding: 0,
+    },
+    profileImg: {
+      width: '40px',
+      height: '40px',
+      borderRadius: '50%',
+      marginRight: '10px',
+      objectFit: 'cover',
+    },
+  };
+
   // Different navigation items based on user role
   const getNavItems = () => {
     const baseDashboardPath = `/dashboard/${user.role.toLowerCase()}`;
@@ -28,7 +159,7 @@ const DashboardLayout = ({ children }) => {
     const commonItems = [
       {
         path: '/dashboard',
-        icon: <House className="nav-icon" />,
+        icon: <House style={sidebarStyles.navIcon} />,
         text: 'Dashboard',
       },
     ];
@@ -38,32 +169,32 @@ const DashboardLayout = ({ children }) => {
         ...commonItems,
         {
           path: '/search-providers',
-          icon: <Search className="nav-icon" />,
+          icon: <Search style={sidebarStyles.navIcon} />,
           text: 'Find Vets',
         },
         {
           path: '/my-appointments',
-          icon: <Calendar className="nav-icon" />,
+          icon: <Calendar style={sidebarStyles.navIcon} />,
           text: 'My Appointments',
         },
         {
           path: '/dashboard/pet-owner/service-requests',
-          icon: <FileEarmarkText className="nav-icon" />,
+          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
           text: 'Specialist Referrals',
         },
         {
           path: '/my-pets',
-          icon: <Person className="nav-icon" />,
+          icon: <Person style={sidebarStyles.navIcon} />,
           text: 'My Pets',
         },
         {
           path: '/manage-reminders',
-          icon: <BellFill className="nav-icon" />,
+          icon: <BellFill style={sidebarStyles.navIcon} />,
           text: 'Reminders',
         },
         {
           path: '/profile',
-          icon: <Gear className="nav-icon" />,
+          icon: <Gear style={sidebarStyles.navIcon} />,
           text: 'Settings',
         },
       ];
@@ -74,27 +205,27 @@ const DashboardLayout = ({ children }) => {
         ...commonItems,
         {
           path: '/provider-appointments',
-          icon: <Calendar className="nav-icon" />,
+          icon: <Calendar style={sidebarStyles.navIcon} />,
           text: 'Appointments',
         },
         {
           path: '/dashboard/provider/service-requests',
-          icon: <FileEarmarkText className="nav-icon" />,
+          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
           text: 'Service Requests',
         },
         {
           path: '/provider-clients',
-          icon: <Person className="nav-icon" />,
+          icon: <Person style={sidebarStyles.navIcon} />,
           text: 'Clients',
         },
         {
           path: '/provider-profile',
-          icon: <Person className="nav-icon" />,
+          icon: <Person style={sidebarStyles.navIcon} />,
           text: 'My Profile',
         },
         {
           path: '/provider-settings',
-          icon: <Gear className="nav-icon" />,
+          icon: <Gear style={sidebarStyles.navIcon} />,
           text: 'Settings',
         },
       ];
@@ -105,27 +236,27 @@ const DashboardLayout = ({ children }) => {
         ...commonItems,
         {
           path: '/clinic-appointments',
-          icon: <Calendar className="nav-icon" />,
+          icon: <Calendar style={sidebarStyles.navIcon} />,
           text: 'Appointments',
         },
         {
           path: '/dashboard/clinic/service-requests',
-          icon: <FileEarmarkText className="nav-icon" />,
+          icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
           text: 'Specialist Referrals',
         },
         {
           path: '/clinic-staff',
-          icon: <Person className="nav-icon" />,
+          icon: <Person style={sidebarStyles.navIcon} />,
           text: 'Staff Management',
         },
         {
           path: '/clinic-profile',
-          icon: <Building className="nav-icon" />,
+          icon: <Building style={sidebarStyles.navIcon} />,
           text: 'Clinic Profile',
         },
         {
           path: '/clinic-settings',
-          icon: <Gear className="nav-icon" />,
+          icon: <Gear style={sidebarStyles.navIcon} />,
           text: 'Settings',
         },
       ];
@@ -136,55 +267,64 @@ const DashboardLayout = ({ children }) => {
   };
 
   return (
-    <div className="dashboard-layout d-flex">
+    <div className="dashboard-layout">
       {/* Sidebar */}
-      <div className={`dashboard-sidebar bg-dark text-white ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <div className="sidebar-header py-3 px-3 border-bottom border-secondary">
-          <Link to="/dashboard" className="sidebar-brand text-decoration-none text-white">
-            <span className="sidebar-logo me-2">🐾</span>
-            {!sidebarCollapsed && <span className="fs-4 fw-bold">VisitingVet</span>}
+      <div style={sidebarStyles.sidebar}>
+        <div style={sidebarStyles.sidebarHeader}>
+          <Link to="/dashboard" style={sidebarStyles.sidebarBrand}>
+            <span style={sidebarStyles.sidebarLogo}>🐾</span>
+            {!sidebarCollapsed && <span>VisitingVet</span>}
           </Link>
         </div>
 
         {/* Navigation */}
-        <Nav className="flex-column mt-3">
+        <Nav className="flex-column mt-4">
           {getNavItems().map((item, index) => (
-            <Nav.Item key={index} className="px-3 py-1">
+            <Nav.Item key={index} style={sidebarStyles.navItem}>
               <Link
                 to={item.path}
-                className={`nav-link py-2 px-3 rounded d-flex align-items-center ${isActive(item.path) ? 'active bg-primary' : 'text-white-50'}`}
+                style={{
+                  ...sidebarStyles.navLink,
+                  ...(isActive(item.path) ? sidebarStyles.navLinkActive : {}),
+                }}
               >
                 {item.icon}
-                <span className={sidebarCollapsed ? 'd-none' : ''}>{item.text}</span>
+                <span style={sidebarStyles.navText}>{item.text}</span>
               </Link>
             </Nav.Item>
           ))}
 
           {/* Logout */}
-          <Nav.Item className="px-3 py-1 mt-auto">
+          <Nav.Item style={sidebarStyles.navItem}>
             <Button
               variant="link"
-              onClick={logout}
-              className="nav-link py-2 px-3 text-white-50 w-100 text-start border-0 bg-transparent"
+              onClick={(e) => {
+                e.preventDefault();
+                logout();
+              }}
+              style={{
+                ...sidebarStyles.navLink,
+                border: 'none',
+                background: 'none',
+                width: '100%',
+                textAlign: 'left'
+              }}
             >
-              <BoxArrowRight className="nav-icon" />
-              <span className={sidebarCollapsed ? 'd-none' : ''}>Logout</span>
+              <BoxArrowRight style={sidebarStyles.navIcon} />
+              <span style={sidebarStyles.navText}>Logout</span>
             </Button>
           </Nav.Item>
         </Nav>
 
         {/* Install Now Button - Example, functionality not implemented */}
-        <div className="px-3 mt-3">
-          <Button variant="warning" className="w-100 d-flex align-items-center justify-content-center py-2">
-            <Download className={`${sidebarCollapsed ? '' : 'me-2'}`} />
-            {!sidebarCollapsed && <span>Install App</span>}
-          </Button>
-        </div>
+        <Button style={sidebarStyles.installButton}>
+          <Download style={sidebarStyles.installIcon} />
+          {!sidebarCollapsed && <span>Install App</span>}
+        </Button>
 
         {/* Toggle Sidebar Button */}
         <Button
-          variant="outline-secondary"
-          className="sidebar-toggle mt-4 mx-auto d-block"
+          style={sidebarStyles.toggleButton}
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
         >
           {sidebarCollapsed ? <ListIcon /> : <XIcon />}
@@ -192,46 +332,32 @@ const DashboardLayout = ({ children }) => {
       </div>
 
       {/* Main Content Area */}
-      <div className={`dashboard-content bg-light ${sidebarCollapsed ? 'expanded' : ''}`}>
-        {/* Top Header */}
-        <Navbar bg="white" className="shadow-sm mb-4 px-3 py-2 rounded">
-          <Container fluid className="px-0">
-            <h5 className="mb-0">Welcome, {user?.name || user?.email?.split('@')[0] || 'User'}</h5>
-            
-            <div className="d-flex align-items-center">
-              <Button variant="outline-light" className="border-0 p-1 position-relative me-3">
-                <BellFill size={20} className="text-dark" />
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  3
-                </span>
-              </Button>
-              
-              <Button variant="outline-light" className="border-0 p-1 me-3">
-                <ChatDotsFill size={20} className="text-dark" />
-              </Button>
-              
-              <Dropdown align="end">
-                <Dropdown.Toggle as="div" className="d-flex align-items-center cursor-pointer">
-                  <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white me-2" style={{ width: 38, height: 38 }}>
-                    {user?.name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || 'U'}
-                  </div>
-                </Dropdown.Toggle>
-                
-                <Dropdown.Menu className="shadow-sm border-0">
-                  <Dropdown.Item as={Link} to="/profile">My Profile</Dropdown.Item>
-                  <Dropdown.Item as={Link} to="/settings">Settings</Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={logout}>Logout</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            </div>
-          </Container>
-        </Navbar>
+      <div style={sidebarStyles.mainContent}>
+        {/* Top Header inside Main Content */}
+        <div style={sidebarStyles.header}>
+          <h4>Welcome, {user?.name || user?.email?.split('@')[0] || 'User'}</h4>
+          <div style={sidebarStyles.headerActions}>
+            <BellFill style={sidebarStyles.actionIcon} />
+            <ChatDotsFill style={sidebarStyles.actionIcon} />
+            <button style={sidebarStyles.profileButton}>
+              <img
+                src={user?.profileImage || '/assets/images/default-profile.png'}
+                alt="Profile"
+                style={sidebarStyles.profileImg}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/assets/images/default-profile.png';
+                }}
+              />
+              <span>{user?.name || user?.email?.split('@')[0] || 'User'}</span>
+            </button>
+          </div>
+        </div>
 
-        {/* Dashboard Content */}
-        <Container fluid className="pb-4">
+        {/* Dashboard Content Rendered Here */}
+        <div className="mt-3">
           {children}
-        </Container>
+        </div>
       </div>
     </div>
   );
