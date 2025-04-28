@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import MessageItem from './MessageItem';
 import MessageInput from './MessageInput';
-import { getMessagesForConversation } from '../../services/conversationService';
+import { getMessagesForConversation } from '../../services/api';
 import { useSocket } from '../../contexts/SocketContext';
 import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../Shared/LoadingSpinner';
