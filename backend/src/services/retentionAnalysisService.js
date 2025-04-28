@@ -1,7 +1,8 @@
 const logger = require('../utils/logger');
-// Assume User model and potentially an ActivityLog/ServiceUsageLog model are available
-// const User = require('../models/User');
-// const ServiceUsageLog = require('../models/ServiceUsageLog');
+const User = require('../models/User'); // Assuming User model
+const ServiceUsageLog = require('../models/ServiceUsageLog'); // Assuming ServiceUsageLog model
+const mongoose = require('mongoose');
+const { startOfMonth, endOfMonth, addMonths, format } = require('date-fns'); // Using date-fns for date manipulation
 
 class RetentionAnalysisService {
 
@@ -9,6 +10,92 @@ class RetentionAnalysisService {
         logger.info('RetentionAnalysisService initialized');
     }
 
+    /**
+     * Calculates monthly user retention based on signup cohort and subsequent monthly logins.
+     *
+     * @param {Date} analysisEndDate - The date up to which analysis should run (determines the latest cohort).
+     * @param {number} [cohortMonths=12] - How many past months of cohorts to analyze.
+     * @param {number} [periodsToTrack=6] - How many months post-signup to track retention for.
+     * 
+     * @returns {Promise<object>} An object containing retention data.
+     */
+    async calculateMonthlyLoginRetention(analysisEndDate = new Date(), cohortMonths = 12, periodsToTrack = 6) {
+        logger.info('Calculating monthly login retention', { analysisEndDate, cohortMonths, periodsToTrack });
+
+        if (!User || !ServiceUsageLog) {
+            logger.error('User or ServiceUsageLog model not available for retention analysis.');
+            throw new Error('Retention Analysis Misconfiguration: Required models not available.');
+        }
+
+        const allCohortsData = [];
+        const analysisEndMonthStart = startOfMonth(analysisEndDate);
+
+        for (let i = 0; i < cohortMonths; i++) {
+            const cohortMonthStartDate = startOfMonth(addMonths(analysisEndMonthStart, -i));
+            const cohortMonthEndDate = endOfMonth(cohortMonthStartDate);
+            const cohortLabel = format(cohortMonthStartDate, 'yyyy-MM');
+
+            logger.debug(`Analyzing cohort: ${cohortLabel}`);
+
+            // 1. Find users in the cohort
+            const cohortUsers = await User.find({
+                createdAt: { $gte: cohortMonthStartDate, $lte: cohortMonthEndDate }
+            }, '_id').lean(); // Get only IDs
+            
+            const cohortUserIds = cohortUsers.map(u => u._id);
+            const cohortSize = cohortUserIds.length;
+
+            if (cohortSize === 0) {
+                logger.debug(`Cohort ${cohortLabel} is empty. Skipping.`);
+                allCohortsData.push({ cohort: cohortLabel, size: 0, retention: Array(periodsToTrack).fill(0) });
+                continue;
+            }
+
+            const retentionRates = [];
+            // 2. Track activity for subsequent months
+            for (let monthIndex = 0; monthIndex < periodsToTrack; monthIndex++) {
+                const trackingMonthStartDate = startOfMonth(addMonths(cohortMonthStartDate, monthIndex + 1));
+                const trackingMonthEndDate = endOfMonth(trackingMonthStartDate);
+                
+                 // Stop tracking if the tracking month is beyond the analysis end date
+                 if (trackingMonthStartDate > analysisEndMonthStart) {
+                     retentionRates.push(null); // Indicate data not yet available
+                     continue;
+                 }
+
+                // Find users from the cohort who had a LOGIN event in the tracking month
+                const retainedUserCount = await ServiceUsageLog.distinct('userId', {
+                    userId: { $in: cohortUserIds },
+                    eventType: 'LOGIN', // Assuming this event type exists
+                    timestamp: { $gte: trackingMonthStartDate, $lte: trackingMonthEndDate }
+                });
+                
+                const retentionRate = cohortSize > 0 ? retainedUserCount.length / cohortSize : 0;
+                retentionRates.push(parseFloat(retentionRate.toFixed(4)));
+            }
+            
+            allCohortsData.push({
+                 cohort: cohortLabel,
+                 size: cohortSize,
+                 retention: retentionRates
+             });
+        }
+        
+        // Sort cohorts chronologically before returning
+        allCohortsData.sort((a, b) => a.cohort.localeCompare(b.cohort));
+
+        logger.info('Monthly login retention calculation complete.');
+        return {
+            cohorts: allCohortsData,
+            definition: {
+                type: 'Monthly Login Retention',
+                cohortMonthsAnalyzed: cohortMonths,
+                periodsTracked: periodsToTrack,
+                analysisEndDate: analysisEndDate.toISOString()
+            }
+        };
+    }
+    
     /**
      * Calculates user retention metrics based on a defined cohort and activity.
      *

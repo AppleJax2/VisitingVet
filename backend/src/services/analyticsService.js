@@ -396,6 +396,62 @@ class AnalyticsService {
         }
     }
 
+    /**
+     * Calculates user counts segmented by role.
+     * @returns {Promise<Array<{ segment: string, count: number }>>} Array of segment counts.
+     */
+    async getUserSegmentsByRole() {
+        logger.info('Calculating user segments by role');
+        if (!User) {
+            logger.error('User model not available for segmentation analysis.');
+            throw new Error('Segmentation Analysis Misconfiguration: User model not available.');
+        }
+        try {
+            const segmentation = await User.aggregate([
+                {
+                    $match: { 
+                        // Optional: Add filters like { isActive: true } if needed
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$role', // Group by the role field (assuming it holds role name or ID)
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                     // Optionally perform $lookup if role field is an ObjectId to get role name
+                     /*
+                     $lookup: {
+                         from: 'roles', // Assuming a 'roles' collection
+                         localField: '_id',
+                         foreignField: '_id',
+                         as: 'roleDetails'
+                     }
+                     */
+                },
+                 {
+                     $project: {
+                         _id: 0,
+                         // segment: { $ifNull: [ { $arrayElemAt: ['$roleDetails.name', 0] }, 'Unknown Role' ] }, // Use role name if lookup is done
+                         segment: { $ifNull: ['$_id', 'Unknown Role'] }, // Use role field directly if it stores the name
+                         count: 1
+                    }
+                 },
+                 { 
+                    $sort: { count: -1 } // Sort by count descending
+                 }
+            ]);
+
+            logger.info('User segments by role calculated', { count: segmentation.length });
+            return segmentation;
+
+        } catch (error) {
+            logger.error('Error calculating user segments by role:', error);
+            throw new Error('Failed to calculate user segments by role.');
+        }
+    }
+
     // Add other analytics methods as needed (e.g., retention, revenue, etc.)
 
 }

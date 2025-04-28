@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 const { getSecureDownloadUrl } = require('../services/documentService'); // Import S3 service
 const { logDocumentAccess } = require('./documentController'); // Import logging function
 const slaTrackingService = require('../services/slaTrackingService'); // Import SLA Service
+const webSocketService = require('../services/websocketService'); // Import WebSocket service
 
 // Helper function to log admin actions
 const logAdminAction = async (adminUserId, targetUserId, actionType, reason = '', details = {}) => {
@@ -26,6 +27,16 @@ const logAdminAction = async (adminUserId, targetUserId, actionType, reason = ''
     console.error('Error logging admin action:', error);
     // Decide if failure to log should block the action or just be logged
   }
+};
+
+// Helper function to emit verification count update
+const emitVerificationCountUpdate = async () => {
+    try {
+        const pendingCount = await VerificationRequest.countDocuments({ status: 'Pending' });
+        webSocketService.emitAnalyticsUpdate('verificationCount', { pending: pendingCount });
+    } catch (error) {
+        logger.error('Error fetching or emitting pending verification count:', error);
+    }
 };
 
 /**
@@ -246,104 +257,90 @@ exports.getPendingVerifications = async (req, res) => {
 /**
  * @desc    Approve a verification request
  * @route   PUT /api/admin/verifications/:requestId/approve
- * @access  Private/Admin
+ * @access  Private/Admin (Requires verifications:manage permission)
  */
 exports.approveVerification = async (req, res) => {
+    const { requestId } = req.params;
+    const adminUserId = req.user.id; // From auth middleware
+
     try {
-        const { requestId } = req.params;
-        const verificationRequest = await VerificationRequest.findById(requestId);
-
-        if (!verificationRequest || verificationRequest.status !== 'Pending') {
-            return res.status(404).json({ success: false, error: 'Pending verification request not found' });
+        const request = await VerificationRequest.findById(requestId);
+        if (!request) {
+            return res.status(404).json({ success: false, error: 'Verification request not found' });
+        }
+        if (request.status !== 'Pending') {
+            return res.status(400).json({ success: false, error: 'Request is not pending' });
         }
 
-        const user = await User.findById(verificationRequest.user);
-        if (!user) {
-            return res.status(404).json({ success: false, error: 'Associated user not found' });
-        }
+        // Update Verification Request
+        request.status = 'Approved';
+        request.reviewedBy = adminUserId;
+        request.reviewedAt = new Date();
+        await request.save();
 
-        // Update user status
-        user.isVerified = true;
-        user.verificationStatus = 'Approved';
-        await user.save();
-
-        // Update request status
-        verificationRequest.status = 'Approved';
-        verificationRequest.reviewedBy = req.user.id;
-        verificationRequest.reviewedAt = Date.now();
-        await verificationRequest.save();
-
-        // Update SLA status after saving the status change
-        await slaTrackingService.updateSLAStatusAndDuration(verificationRequest).catch(slaError => {
-            logger.error(`SLA update failed for approved request ${requestId}:`, slaError);
-            // Non-critical error, proceed with response
+        // Update associated User
+        await User.findByIdAndUpdate(request.user, {
+             isVerified: true, 
+             verificationStatus: 'Approved' 
+             // Optionally set user role if verification grants a specific role
         });
 
-        await logAdminAction(req.user.id, user._id, 'VerifyUser', 'Verification request approved');
+        logger.info(`Verification request ${requestId} approved by admin ${adminUserId}`);
+        res.status(200).json({ success: true, data: request });
+        
+        // Emit update AFTER successful response
+        await emitVerificationCountUpdate(); 
 
-        res.status(200).json({ success: true, message: 'Verification request approved successfully' });
     } catch (error) {
-        console.error('Error approving verification:', error);
-        res.status(500).json({ success: false, error: 'Server error' });
+        logger.error('Error approving verification request:', error);
+        res.status(500).json({ success: false, error: 'Server error approving request' });
     }
 };
 
 /**
  * @desc    Reject a verification request
  * @route   PUT /api/admin/verifications/:requestId/reject
- * @access  Private/Admin
+ * @access  Private/Admin (Requires verifications:manage permission)
  */
 exports.rejectVerification = async (req, res) => {
+     const { requestId } = req.params;
+     const { reason } = req.body;
+     const adminUserId = req.user.id;
+
+     if (!reason) {
+          return res.status(400).json({ success: false, error: 'Rejection reason is required' });
+     }
+
     try {
-        const { requestId } = req.params;
-        const { reason } = req.body;
-        const verificationRequest = await VerificationRequest.findById(requestId);
-
-        if (!verificationRequest || verificationRequest.status !== 'Pending') {
-            return res.status(404).json({ success: false, error: 'Pending verification request not found' });
+        const request = await VerificationRequest.findById(requestId);
+        if (!request) {
+            return res.status(404).json({ success: false, error: 'Verification request not found' });
+        }
+         if (request.status !== 'Pending') {
+            return res.status(400).json({ success: false, error: 'Request is not pending' });
         }
 
-        const user = await User.findById(verificationRequest.user);
-        if (!user) {
-            // Should ideally not happen, but handle defensively
-            verificationRequest.status = 'Rejected'; // Mark request as rejected even if user is gone
-            verificationRequest.notes = `Rejection reason: ${reason || 'No reason specified'}. User not found.`;
-            verificationRequest.reviewedBy = req.user.id;
-            verificationRequest.reviewedAt = Date.now();
-            await verificationRequest.save();
+        // Update Verification Request
+        request.status = 'Rejected';
+        request.notes = reason; // Store rejection reason in notes
+        request.reviewedBy = adminUserId;
+        request.reviewedAt = new Date();
+        await request.save();
 
-            // Update SLA status after saving the status change
-            await slaTrackingService.updateSLAStatusAndDuration(verificationRequest).catch(slaError => {
-                logger.error(`SLA update failed for rejected request (user not found case) ${requestId}:`, slaError);
-            });
-
-            return res.status(404).json({ success: false, error: 'Associated user not found, request marked rejected' });
-        }
-
-        // Update user status
-        user.isVerified = false;
-        user.verificationStatus = 'Rejected';
-        await user.save();
-
-        // Update request status
-        verificationRequest.status = 'Rejected';
-        verificationRequest.notes = `Rejection reason: ${reason || 'No reason specified'}`;
-        verificationRequest.reviewedBy = req.user.id;
-        verificationRequest.reviewedAt = Date.now();
-        await verificationRequest.save();
-
-        // Update SLA status after saving the status change
-        await slaTrackingService.updateSLAStatusAndDuration(verificationRequest).catch(slaError => {
-            logger.error(`SLA update failed for rejected request ${requestId}:`, slaError);
-             // Non-critical error, proceed with response
+        // Update associated User (set verification status, isVerified remains false)
+        await User.findByIdAndUpdate(request.user, {
+            verificationStatus: 'Rejected' 
         });
 
-        await logAdminAction(req.user.id, user._id, 'RejectVerification', reason || 'Verification request rejected');
+        logger.info(`Verification request ${requestId} rejected by admin ${adminUserId}. Reason: ${reason}`);
+        res.status(200).json({ success: true, data: request });
+        
+        // Emit update AFTER successful response
+        await emitVerificationCountUpdate();
 
-        res.status(200).json({ success: true, message: 'Verification request rejected successfully' });
     } catch (error) {
-        console.error('Error rejecting verification:', error);
-        res.status(500).json({ success: false, error: 'Server error' });
+        logger.error('Error rejecting verification request:', error);
+        res.status(500).json({ success: false, error: 'Server error rejecting request' });
     }
 };
 

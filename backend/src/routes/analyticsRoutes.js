@@ -38,6 +38,18 @@ router.get(
     AnalyticsController.handleGetServiceUsageMetrics // Placeholder handler
 );
 
+// GET /api/admin/analytics/retention
+router.get(
+    '/retention',
+    AnalyticsController.handleGetUserRetention
+);
+
+// GET /api/admin/analytics/segmentation/role
+router.get(
+    '/segmentation/role',
+    AnalyticsController.handleGetUserSegmentsByRole
+);
+
 // Add other analytics routes here...
 
 module.exports = router; 
