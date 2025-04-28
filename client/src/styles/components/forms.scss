@@ -30,7 +30,7 @@
   transition: $transition-base;
   
   &:focus {
-    border-color: $color-primary;
+    border-color: $color-primary-500;
     outline: 2px solid $color-accent-gold;
     outline-offset: 2px;
     box-shadow: 0 0 0 2px rgba($color-accent-gold, 0.5);
@@ -113,15 +113,15 @@ select.form-control {
   transition: $transition-base;
   
   &:focus {
-    border-color: $color-primary;
+    border-color: $color-primary-500;
     outline: 2px solid $color-accent-gold;
     outline-offset: 2px;
     box-shadow: 0 0 0 2px rgba($color-accent-gold, 0.5);
   }
   
   &:checked {
-    background-color: $color-primary;
-    border-color: $color-primary;
+    background-color: $color-primary-500;
+    border-color: $color-primary-500;
   }
   
   &[type="checkbox"] {

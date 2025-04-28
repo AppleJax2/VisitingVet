@@ -97,12 +97,12 @@
 
 // Card link
 .card-link {
-  color: $color-primary;
+  color: $color-primary-500;
   text-decoration: none;
   font-weight: $font-weight-medium;
   
   &:hover {
-    color: $color-primary-dark;
+    color: $color-primary-600;
     text-decoration: underline;
   }
   
@@ -247,8 +247,8 @@
 
 // Card color variants
 .card-primary {
-  background-color: $color-primary;
-  border-color: $color-primary;
+  background-color: $color-primary-500;
+  border-color: $color-primary-500;
   
   .card-header, .card-footer {
     background-color: rgba(0, 0, 0, 0.1);
@@ -270,8 +270,8 @@
 }
 
 .card-secondary {
-  background-color: $color-secondary;
-  border-color: $color-secondary;
+  background-color: $color-secondary-500;
+  border-color: $color-secondary-500;
   
   .card-header, .card-footer {
     background-color: rgba(0, 0, 0, 0.1);

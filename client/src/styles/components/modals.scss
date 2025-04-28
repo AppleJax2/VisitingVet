@@ -318,7 +318,7 @@
 // Color variants
 .modal-primary {
   .modal-header {
-    background-color: $color-primary;
+    background-color: $color-primary-500;
     color: $color-text-white;
     border-bottom-color: rgba($color-text-white, 0.2);
   }
@@ -334,7 +334,7 @@
 
 .modal-secondary {
   .modal-header {
-    background-color: $color-secondary;
+    background-color: $color-secondary-500;
     color: $color-text-white;
     border-bottom-color: rgba($color-text-white, 0.2);
   }
