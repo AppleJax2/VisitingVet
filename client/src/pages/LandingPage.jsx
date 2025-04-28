@@ -10,7 +10,7 @@ import './LandingPage.css';
 
 // Update image fallback URLs with veterinary-themed images
 const heroVetImage = "https://images.unsplash.com/photo-1581888227599-779811939961?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
-const smallAnimalImage = "https://images.unsplash.com/photo-1548767797-d8c844163c4c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+const smallAnimalImage = "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
 const equineImage = "https://images.unsplash.com/photo-1534307980202-7429ecd55b4b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
 const farmAnimalImage = "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
 const ctaBgImage = "https://images.unsplash.com/photo-1551730459-92db2a308d6a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
@@ -59,7 +59,7 @@ const LandingPage = () => {
                 <div className="hero-image-wrapper">
                   <img 
                     src={heroVetImage}
-                    alt="Mobile veterinarian with pet" 
+                    alt="Veterinarian making a house call with a dog and cat" 
                     className="img-fluid w-100 rounded-3 shadow-lg"
                     style={{ maxHeight: '450px', objectFit: 'cover' }}
                     loading="eager"
@@ -133,9 +133,9 @@ const LandingPage = () => {
                   <div className="position-relative service-image-container" style={{ height: '200px' }}>
                     <img 
                       src={service.image} 
-                      alt={service.title}
+                      alt={service.title + ' - ' + (service.title === 'Small Animal Care' ? 'Dog and cat' : service.title === 'Equine Services' ? 'Horse' : 'Farm animals')}
                       className="w-100 h-100" 
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'cover', aspectRatio: '4/3' }}
                       loading="lazy"
                     />
                     <div className="service-icon position-absolute">
@@ -247,7 +247,7 @@ const LandingPage = () => {
           
           <Carousel 
             fade
-            indicators={false}
+            indicators={true}
             interval={5000}
             className="testimonial-carousel py-3"
             prevIcon={<span aria-hidden="true" className="carousel-control-icon prev" />}
@@ -288,9 +288,10 @@ const LandingPage = () => {
                                 <div className="testimonial-image mb-3">
                                   <img 
                                     src={testimonial.image} 
-                                    alt={testimonial.name}
+                                    alt={testimonial.name + ' - testimonial'}
                                     className="w-100 h-100"
-                                    style={{ objectFit: 'cover' }}
+                                    style={{ objectFit: 'cover', aspectRatio: '1/1' }}
+                                    loading="lazy"
                                   />
                                 </div>
                                 <h5 className="text-white mb-1 fw-bold">{testimonial.name}</h5>
@@ -302,9 +303,10 @@ const LandingPage = () => {
                                 <div className="d-md-none d-flex align-items-center mb-4">
                                   <img 
                                     src={testimonial.image} 
-                                    alt={testimonial.name}
+                                    alt={testimonial.name + ' - testimonial'}
                                     className="rounded-circle me-3"
-                                    style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                                    style={{ width: '60px', height: '60px', objectFit: 'cover', aspectRatio: '1/1' }}
+                                    loading="lazy"
                                   />
                                   <div>
                                     <h5 className="mb-0 fw-bold">{testimonial.name}</h5>
