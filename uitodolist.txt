@@ -56,22 +56,22 @@ This list outlines the tasks required to implement the UI/UX enhancements identi
 
 ## Layout & Grid
 
-- [ ] Review Dashboard pages (`client/src/pages/Dashboard/*`) and ensure consistent application of grid and spacing between common elements like cards.
-- [ ] Define and document standard container width strategy (e.g., max-width, padding) potentially in `DESIGN-SYSTEM.md` or global styles.
+- [x] Review Dashboard pages (`client/src/pages/Dashboard/*`) and ensure consistent application of grid and spacing between common elements like cards.
+- [x] Define and document standard container width strategy (e.g., max-width, padding) potentially in `DESIGN-SYSTEM.md` or global styles.
 
 ## Responsiveness
 
-- [ ] Test application across standard breakpoints (xs, sm, md, lg, xl, xxl) and identify/fix layout issues, particularly around the tablet (md) breakpoint. (Requires manual testing).
-- [ ] Audit interactive elements (buttons, links, form controls) on mobile views and ensure they meet the 44x44px minimum touch target size. (Requires manual testing, includes Header toggle fix).
-- [ ] Consider implementing fluid typography scaling between breakpoints if desired for smoother text resizing (Requires investigation and potentially new SCSS mixins/logic).
+- [x] Test application across standard breakpoints (xs, sm, md, lg, xl, xxl) and identify/fix layout issues, particularly around the tablet (md) breakpoint. (Requires manual testing).
+- [x] Audit interactive elements (buttons, links, form controls) on mobile views and ensure they meet the 44x44px minimum touch target size. (Requires manual testing, includes Header toggle fix).
+- [x] Consider implementing fluid typography scaling between breakpoints if desired for smoother text resizing (Requires investigation and potentially new SCSS mixins/logic).
 
 ## Accessibility
 
-- [ ] Perform a full color contrast audit
-    - [ ] Landing Page Hero text (`client/src/pages/LandingPage.jsx` / `LandingPage.css`).
-    - [ ] Form element focus states (`client/src/styles/components/forms.scss`).
-    - [ ] Navigation link contrast (`client/src/components/Header.jsx`).
-    - [ ] Other text/background combinations failing WCAG AA (4.5:1 normal, 3:1 large/UI).
+- [x] Perform a full color contrast audit
+    - [x] Landing Page Hero text (`client/src/pages/LandingPage.jsx` / `LandingPage.css`).
+    - [x] Form element focus states (`client/src/styles/components/forms.scss`).
+    - [x] Navigation link contrast (`client/src/components/Header.jsx`).
+    - [x] Other text/background combinations failing WCAG AA (4.5:1 normal, 3:1 large/UI).
 - [x] Implement a consistent, highly visible focus indicator (e.g., 2px solid outline using a high-contrast color) for all interactive elements. Update base focus styles (`:focus`, `:focus-visible`) in `client/src/styles/main.scss` or component styles.
 - [x] Implement skip links (e.g., "Skip to main content") for keyboard users. Add to `App.jsx` or `Header.jsx`.
 - [x] Review ARIA roles and attributes on complex components (modals, dropdowns, custom controls) for correctness and completeness. (Requires manual testing and JSX review).

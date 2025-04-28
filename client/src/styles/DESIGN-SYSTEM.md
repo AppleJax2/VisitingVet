@@ -10,8 +10,9 @@ This document outlines the design system for VisitingVet's web application. It p
 4. [Components](#components)
 5. [Utilities](#utilities)
 6. [Breakpoints](#breakpoints)
-7. [Accessibility](#accessibility)
-8. [Best Practices](#best-practices)
+7. [Container Width Strategy](#container-width-strategy)
+8. [Accessibility](#accessibility)
+9. [Best Practices](#best-practices)
 
 ## Colors
 
@@ -184,6 +185,20 @@ Responsive design is built on these standard breakpoints:
 - **lg**: 992px
 - **xl**: 1200px
 - **xxl**: 1400px
+
+## Container Width Strategy
+
+To ensure content is visually balanced and readable across all screen sizes, we use a standard container width strategy:
+
+- **Max-width**: 1200px (matches the `xl` breakpoint)
+- **Horizontal padding**: 1rem (16px) on mobile, 2rem (32px) on tablet and up
+- **Centering**: All main containers are horizontally centered using `margin: 0 auto;`
+- **Full-width on mobile**: Containers expand to 100% width below the `md` breakpoint
+
+**Implementation:**
+- Use the `.container` class for main content wrappers
+- For custom layouts, apply `max-width: 1200px; margin: 0 auto; padding-left/right: 1rem/2rem` as appropriate
+- The Dashboard layout and all major pages should follow this strategy for consistency
 
 ## Accessibility
 
