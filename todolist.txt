@@ -120,26 +120,26 @@ According to the design document, the complete VisitingVet platform should inclu
    ~~- Add review display on provider profiles~~
    ~~- Implement review moderation for admins~~
 
-3. Complete medical record system
-   - Enhance pet profile with detailed medical history
-   - Create templates for common medical records
-   - Implement medical record privacy controls
-   - Add medical record sharing functionality
-   - Develop medical record search and filtering
+~~3. Complete medical record system~~
+   ~~- Enhance pet profile with detailed medical history~~
+   ~~- Create templates for common medical records~~
+   ~~- Implement medical record privacy controls~~
+   ~~- Add medical record sharing functionality~~
+   ~~- Develop medical record search and filtering~~
 
 ### Priority 2: Communication Enhancements
 4. Implement messaging system
-   - Create message data model
-   - Develop real-time messaging capabilities
-   - Add message notification integration
-   - Implement message history and search
-   - Create conversation UI for providers and pet owners
+   - [x] Create message data model
+   - [x] Develop real-time messaging capabilities
+   - [x] Add message notification integration
+   - [x] Implement message history and search
+   - [x] Create conversation UI for providers and pet owners
 
 5. Develop video consultation capabilities
-   - Evaluate and integrate video conferencing API
-   - Create appointment types for video consultations
-   - Implement video call UI components
-   - Add recording and documentation features
+   - [x] Evaluate and integrate video conferencing API
+   - [x] Create appointment types for video consultations
+   - [x] Implement video call UI components
+   - [ ] Add recording and documentation features
    - Create fallback options for technical issues
 
 ### Priority 3: Platform Enhancement

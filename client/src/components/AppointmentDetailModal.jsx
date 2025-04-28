@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Spinner, Alert, Row, Col, Badge, ListGroup } from 'react-bootstrap';
-import { CalendarEvent, Clock, GeoAlt, Person, Tag, CardText, CheckCircle, XCircle, ExclamationTriangle } from 'react-bootstrap-icons';
+import { Modal, Button, Spinner, Alert, Row, Col, Badge, ListGroup, Form } from 'react-bootstrap';
+import { CalendarEvent, Clock, GeoAlt, Person, Tag, CardText, CheckCircle, XCircle, ExclamationTriangle, CameraVideo } from 'react-bootstrap-icons';
 import { getAppointmentDetails, cancelAppointmentByPetOwner } from '../services/api';
 import { format } from 'date-fns';
-import theme from '../utils/theme';
+import VideoCallFrame from './Video/VideoCallFrame';
 
-function AppointmentDetailModal({ show, onHide, appointmentId, userRole, onUpdate }) {
+function AppointmentDetailModal({ show, onHide, appointmentId, userRole, currentUser, onUpdate }) {
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,6 +13,7 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, onUpdat
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showVideoCall, setShowVideoCall] = useState(false);
 
   useEffect(() => {
     const loadDetails = async () => {
@@ -22,6 +23,8 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, onUpdat
       setCancelError('');
       setShowCancelConfirm(false);
       setCancellationReason('');
+      setShowVideoCall(false);
+      setAppointment(null);
       try {
         const response = await getAppointmentDetails(appointmentId);
         if (response.success) {
@@ -39,6 +42,9 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, onUpdat
 
     if (show) {
       loadDetails();
+    }
+    if (!show) {
+      setShowVideoCall(false);
     }
   }, [appointmentId, show]);
 
@@ -83,6 +89,26 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, onUpdat
     appointment.status === 'Requested' || appointment.status === 'Confirmed'
   );
 
+  const canJoinCall = () => {
+    if (!appointment || appointment.deliveryMethod !== 'video' || appointment.status !== 'Confirmed') {
+      return false;
+    }
+    const now = new Date();
+    const startTime = new Date(appointment.appointmentTime);
+    const timeDiffMinutes = (startTime.getTime() - now.getTime()) / (1000 * 60);
+    const endTime = new Date(appointment.estimatedEndTime);
+    return timeDiffMinutes <= 15 && now < endTime;
+  };
+  
+  const handleJoinCallClick = () => {
+    setShowVideoCall(true);
+  };
+  
+  const handleCallLeft = () => {
+    console.log("Video call left event received in modal.");
+    setShowVideoCall(false);
+  };
+
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton>
@@ -90,81 +116,100 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, onUpdat
       </Modal.Header>
       <Modal.Body>
         {loading && <div className="text-center"><Spinner animation="border" /></div>}
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error && !loading && <Alert variant="danger">{error}</Alert>}
         
         {appointment && !loading && (
-          <>
-            <Row className="mb-3">
-              <Col md={8}>
-                <h4>{appointment.service?.name || 'Appointment'}</h4>
-                {userRole === 'PetOwner' && 
-                  <p className="text-muted mb-0">With: {appointment.providerProfile?.businessName || appointment.providerProfile?.user?.email || 'Provider'}</p>
-                }
-                {userRole !== 'PetOwner' && 
-                  <p className="text-muted mb-0">Client: {appointment.petOwner?.email || 'Client'}</p>
-                }
-              </Col>
-              <Col md={4} className="text-md-end">
-                {renderStatusBadge(appointment.status)}
-              </Col>
-            </Row>
+          showVideoCall && currentUser ? (
+            <div style={{ height: '60vh', position: 'relative' }}>
+              <VideoCallFrame 
+                roomName={appointment._id} 
+                userName={currentUser.name || 'User'}
+                onCallLeft={handleCallLeft}
+              />
+            </div>
+          ) : (
+            <>
+              <Row className="mb-3">
+                <Col md={8}>
+                  <h4>{appointment.service?.name || 'Appointment'}</h4>
+                  {userRole === 'PetOwner' && 
+                    <p className="text-muted mb-0">With: {appointment.providerProfile?.businessName || appointment.providerProfile?.user?.email || 'Provider'}</p>
+                  }
+                  {userRole !== 'PetOwner' && 
+                    <p className="text-muted mb-0">Client: {appointment.petOwner?.email || 'Client'}</p>
+                  }
+                </Col>
+                <Col md={4} className="text-md-end">
+                  {renderStatusBadge(appointment.status)}
+                </Col>
+              </Row>
 
-            <ListGroup variant="flush">
-              <ListGroup.Item><Person className="me-2"/> <strong>{userRole === 'PetOwner' ? 'Provider' : 'Client'}:</strong> {userRole === 'PetOwner' ? (appointment.providerProfile?.businessName || appointment.providerProfile?.user?.email) : appointment.petOwner?.email}</ListGroup.Item>
-              <ListGroup.Item><CalendarEvent className="me-2"/> <strong>Date:</strong> {format(new Date(appointment.appointmentTime), 'PPP')}</ListGroup.Item>
-              <ListGroup.Item><Clock className="me-2"/> <strong>Time:</strong> {format(new Date(appointment.appointmentTime), 'p')} (Estimated End: {format(new Date(appointment.estimatedEndTime), 'p')})</ListGroup.Item>
-              <ListGroup.Item><Tag className="me-2"/> <strong>Service:</strong> {appointment.service?.name} (${appointment.service?.price})</ListGroup.Item>
-              <ListGroup.Item><GeoAlt className="me-2"/> <strong>Location:</strong> {appointment.appointmentLocation || appointment.providerProfile?.serviceArea?.address || 'Provider Address'}</ListGroup.Item>
-              {appointment.notes && <ListGroup.Item><CardText className="me-2"/> <strong>Notes:</strong> {appointment.notes}</ListGroup.Item>}
-              
-              {(appointment.status.startsWith('Cancelled')) && (
-                <ListGroup.Item>
-                  <ExclamationTriangle className="me-2 text-danger"/> 
-                  <strong>Cancelled By:</strong> {appointment.cancelledBy || 'Unknown'} on {format(new Date(appointment.cancellationTime), 'Pp')}
-                  {appointment.cancellationReason && <div className="mt-1 ps-4 fst-italic">Reason: {appointment.cancellationReason}</div>}
-                </ListGroup.Item>
-              )}
-              {appointment.status === 'Completed' && (
-                <ListGroup.Item>
-                  <CheckCircle className="me-2 text-info"/> 
-                  <strong>Completion Notes:</strong> {appointment.completionNotes || 'N/A'}
-                  {appointment.followUpRecommended && <div className="mt-1 ps-4"><strong>Follow-up Recommended:</strong> {appointment.followUpNotes || 'Yes'}</div>}
-                </ListGroup.Item>
-              )}
-            </ListGroup>
+              <ListGroup variant="flush">
+                <ListGroup.Item><Person className="me-2"/> <strong>{userRole === 'PetOwner' ? 'Provider' : 'Client'}:</strong> {userRole === 'PetOwner' ? (appointment.providerProfile?.businessName || appointment.providerProfile?.user?.email) : appointment.petOwner?.email}</ListGroup.Item>
+                <ListGroup.Item><CalendarEvent className="me-2"/> <strong>Date:</strong> {format(new Date(appointment.appointmentTime), 'PPP')}</ListGroup.Item>
+                <ListGroup.Item><Clock className="me-2"/> <strong>Time:</strong> {format(new Date(appointment.appointmentTime), 'p')} (Estimated End: {format(new Date(appointment.estimatedEndTime), 'p')})</ListGroup.Item>
+                <ListGroup.Item><Tag className="me-2"/> <strong>Service:</strong> {appointment.service?.name} (${appointment.service?.price})</ListGroup.Item>
+                <ListGroup.Item><GeoAlt className="me-2"/> <strong>Location:</strong> {appointment.appointmentLocation || appointment.providerProfile?.serviceArea?.address || 'Provider Address'}</ListGroup.Item>
+                <ListGroup.Item><CameraVideo className="me-2"/> <strong>Delivery:</strong> {appointment.deliveryMethod === 'video' ? 'Video Call' : (appointment.deliveryMethod === 'phone' ? 'Phone Call' : 'In Person')}</ListGroup.Item>
+                {appointment.notes && <ListGroup.Item><CardText className="me-2"/> <strong>Notes:</strong> {appointment.notes}</ListGroup.Item>}
+                
+                {(appointment.status.startsWith('Cancelled')) && (
+                  <ListGroup.Item>
+                    <ExclamationTriangle className="me-2 text-danger"/> 
+                    <strong>Cancelled By:</strong> {appointment.cancelledBy || 'Unknown'} on {format(new Date(appointment.cancellationTime), 'Pp')}
+                    {appointment.cancellationReason && <div className="mt-1 ps-4 fst-italic">Reason: {appointment.cancellationReason}</div>}
+                  </ListGroup.Item>
+                )}
+                {appointment.status === 'Completed' && (
+                  <ListGroup.Item>
+                    <CheckCircle className="me-2 text-info"/> 
+                    <strong>Completion Notes:</strong> {appointment.completionNotes || 'N/A'}
+                    {appointment.followUpRecommended && <div className="mt-1 ps-4"><strong>Follow-up Recommended:</strong> {appointment.followUpNotes || 'Yes'}</div>}
+                  </ListGroup.Item>
+                )}
+              </ListGroup>
 
-            {showCancelConfirm && (
-              <div className="mt-3 p-3 border rounded bg-light">
-                <h5>Confirm Cancellation</h5>
-                <Form.Group className="mb-2">
-                  <Form.Label>Reason for cancellation (optional)</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={2}
-                    value={cancellationReason}
-                    onChange={(e) => setCancellationReason(e.target.value)}
-                    placeholder="Provide a reason..."
-                  />
-                </Form.Group>
-                {cancelError && <Alert variant="danger" size="sm">{cancelError}</Alert>}
-                <Button variant="danger" onClick={handleCancel} disabled={isCancelling} className="me-2">
-                  {isCancelling ? <Spinner size="sm"/> : 'Confirm Cancel'}
-                </Button>
-                <Button variant="secondary" onClick={() => setShowCancelConfirm(false)} disabled={isCancelling}>
-                  Keep Appointment
-                </Button>
-              </div>
-            )}
-          </>
+              {canJoinCall() && (
+                <div className="mt-3 text-center">
+                  <Button variant="success" size="lg" onClick={handleJoinCallClick}>
+                    <CameraVideo className="me-2"/> Join Video Call Now
+                  </Button>
+                </div>
+              )}
+
+              {showCancelConfirm && (
+                <div className="mt-3 p-3 border rounded bg-light">
+                  <h5>Confirm Cancellation</h5>
+                  <Form.Group className="mb-2">
+                    <Form.Label>Reason for cancellation (optional)</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      value={cancellationReason}
+                      onChange={(e) => setCancellationReason(e.target.value)}
+                      placeholder="Provide a reason..."
+                    />
+                  </Form.Group>
+                  {cancelError && <Alert variant="danger" size="sm">{cancelError}</Alert>}
+                  <Button variant="danger" onClick={handleCancel} disabled={isCancelling} className="me-2">
+                    {isCancelling ? <Spinner size="sm"/> : 'Confirm Cancel'}
+                  </Button>
+                  <Button variant="secondary" onClick={() => setShowCancelConfirm(false)} disabled={isCancelling}>
+                    Keep Appointment
+                  </Button>
+                </div>
+              )}
+            </>
+          )
         )}
       </Modal.Body>
       <Modal.Footer>
-        {canCancel && !showCancelConfirm && (
+        {canCancel && !showCancelConfirm && !showVideoCall && (
           <Button variant="outline-danger" onClick={() => setShowCancelConfirm(true)}>
             Cancel Appointment
           </Button>
         )}
-        <Button variant="secondary" onClick={onHide}>
+        <Button variant="secondary" onClick={onHide} disabled={showVideoCall}>
           Close
         </Button>
       </Modal.Footer>

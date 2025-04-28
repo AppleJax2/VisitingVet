@@ -1,0 +1,68 @@
+/* client/src/styles/VideoCallFrame.css */
+
+.video-call-container {
+    position: relative;
+    width: 100%;
+    height: 100%; /* Or desired height */
+    background-color: #222; /* Dark background while loading/error */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.call-frame-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.call-frame-wrapper.hidden {
+    display: none;
+}
+
+.video-loading-overlay,
+.video-error-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    z-index: 10;
+}
+
+.video-loading-overlay p {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+}
+
+.video-error-overlay .error-message-component {
+    /* Assuming ErrorMessage component has this class */
+    background-color: transparent; /* Make error component bg transparent */
+    color: #ffdddd;
+    border: 1px solid #ff8888;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.close-error-button {
+    margin-top: 1.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #dc3545;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.close-error-button:hover {
+    background-color: #c82333;
+} 

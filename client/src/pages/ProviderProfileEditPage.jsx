@@ -36,6 +36,13 @@ function ProviderProfileEditPage() {
     price: '',
     priceType: 'Flat',
     offeredLocation: 'InHome',
+    animalType: 'Small Animal',
+    deliveryMethod: 'in_person',
+    isSpecialtyService: false,
+    specialtyType: '',
+    hasDifferentPricing: false,
+    b2bPrice: '',
+    b2cPrice: '',
   });
   const [editingServiceId, setEditingServiceId] = useState(null);
 
@@ -138,8 +145,22 @@ function ProviderProfileEditPage() {
 
   // Handle service form changes
   const handleServiceChange = (e) => {
-    const { name, value } = e.target;
-    setServiceForm({ ...serviceForm, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setServiceForm(prev => ({
+       ...prev,
+       [name]: type === 'checkbox' ? checked : value 
+    }));
+    
+    // If changing hasDifferentPricing, clear the irrelevant price fields
+    if (name === 'hasDifferentPricing') {
+         setServiceForm(prev => ({
+             ...prev,
+             hasDifferentPricing: checked,
+             price: checked ? '' : prev.price, // Clear generic price if switching to different
+             b2bPrice: !checked ? '' : prev.b2bPrice, // Clear b2b if switching to generic
+             b2cPrice: !checked ? '' : prev.b2cPrice, // Clear b2c if switching to generic
+         }));
+    }
   };
 
   // Open service modal - for new service or editing existing
@@ -147,16 +168,23 @@ function ProviderProfileEditPage() {
     if (service) {
       // Editing existing service
       setServiceForm({
-        name: service.name,
-        description: service.description,
-        estimatedDurationMinutes: service.estimatedDurationMinutes,
-        price: service.price,
-        priceType: service.priceType,
-        offeredLocation: service.offeredLocation,
+        name: service.name || '',
+        description: service.description || '',
+        estimatedDurationMinutes: service.estimatedDurationMinutes || '',
+        price: service.price !== undefined ? service.price : '', // Handle generic price
+        priceType: service.priceType || 'Flat',
+        offeredLocation: service.offeredLocation || 'InHome',
+        animalType: service.animalType || 'Small Animal',
+        deliveryMethod: service.deliveryMethod || 'in_person',
+        isSpecialtyService: service.isSpecialtyService || false,
+        specialtyType: service.specialtyType || '',
+        hasDifferentPricing: service.hasDifferentPricing || false,
+        b2bPrice: service.b2bPrice !== undefined ? service.b2bPrice : '',
+        b2cPrice: service.b2cPrice !== undefined ? service.b2cPrice : '',
       });
       setEditingServiceId(service._id);
     } else {
-      // New service
+      // New service - Reset to defaults
       setServiceForm({
         name: '',
         description: '',
@@ -164,6 +192,13 @@ function ProviderProfileEditPage() {
         price: '',
         priceType: 'Flat',
         offeredLocation: 'InHome',
+        animalType: 'Small Animal', 
+        deliveryMethod: 'in_person', 
+        isSpecialtyService: false, 
+        specialtyType: '', 
+        hasDifferentPricing: false, 
+        b2bPrice: '', 
+        b2cPrice: '', 
       });
       setEditingServiceId(null);
     }
@@ -176,28 +211,41 @@ function ProviderProfileEditPage() {
     setError('');
     
     try {
+      // Prepare data, converting numbers and handling pricing logic
       const serviceData = {
         ...serviceForm,
-        estimatedDurationMinutes: Number(serviceForm.estimatedDurationMinutes),
-        price: Number(serviceForm.price),
+        estimatedDurationMinutes: Number(serviceForm.estimatedDurationMinutes) || 0,
+        // Conditionally include price fields based on hasDifferentPricing
+        price: !serviceForm.hasDifferentPricing ? (Number(serviceForm.price) || 0) : undefined,
+        b2bPrice: serviceForm.hasDifferentPricing ? (Number(serviceForm.b2bPrice) || 0) : undefined,
+        b2cPrice: serviceForm.hasDifferentPricing ? (Number(serviceForm.b2cPrice) || 0) : undefined,
       };
+
+      // Remove undefined price fields to avoid sending them
+      if (serviceData.price === undefined) delete serviceData.price;
+      if (serviceData.b2bPrice === undefined) delete serviceData.b2bPrice;
+      if (serviceData.b2cPrice === undefined) delete serviceData.b2cPrice;
+      
+      // Ensure specialtyType is only sent if isSpecialtyService is true
+      if (!serviceData.isSpecialtyService) {
+           serviceData.specialtyType = ''; // Or delete serviceData.specialtyType;
+      }
 
       let response;
       if (editingServiceId) {
-        // Update existing service
         response = await updateService(editingServiceId, serviceData);
       } else {
-        // Create new service
         response = await createService(serviceData);
       }
 
       if (response && response.success) {
         setShowServiceModal(false);
-        // Refresh profile to get updated services
         fetchProfile();
       }
     } catch (err) {
-      setError(`Failed to ${editingServiceId ? 'update' : 'create'} service. Please try again.`);
+      console.error("Service submit error:", err);
+      const errorMsg = err.response?.data?.error || err.message || `Failed to ${editingServiceId ? 'update' : 'create'} service.`;
+      setError(errorMsg);
     }
   };
 
@@ -455,95 +503,153 @@ function ProviderProfileEditPage() {
       </Tabs>
       
       {/* Service Modal */}
-      <Modal show={showServiceModal} onHide={() => setShowServiceModal(false)}>
+      <Modal show={showServiceModal} onHide={() => setShowServiceModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>{editingServiceId ? 'Edit Service' : 'Add New Service'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {error && <Alert variant="danger">{error}</Alert>} 
           <Form onSubmit={handleServiceSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>Service Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                value={serviceForm.name}
-                onChange={handleServiceChange}
-                required
-                placeholder="e.g., Wellness Exam, Vaccination, etc."
-              />
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
+            <Row>
+                <Col md={6}>
+                    <Form.Group className="mb-3" controlId="serviceName">
+                      <Form.Label>Service Name</Form.Label>
+                      <Form.Control type="text" name="name" value={serviceForm.name} onChange={handleServiceChange} required />
+                    </Form.Group>
+                </Col>
+                <Col md={6}>
+                    <Form.Group className="mb-3" controlId="animalType">
+                      <Form.Label>Animal Type</Form.Label>
+                      <Form.Select name="animalType" value={serviceForm.animalType} onChange={handleServiceChange} required>
+                        <option value="Small Animal">Small Animal</option>
+                        <option value="Large Animal">Large Animal</option>
+                        <option value="Exotic">Exotic</option>
+                        <option value="Avian">Avian</option>
+                        <option value="Equine">Equine</option>
+                        <option value="Farm Animal">Farm Animal</option>
+                        <option value="Other">Other</option>
+                      </Form.Select>
+                    </Form.Group>
+                </Col>
+            </Row>
+            <Form.Group className="mb-3" controlId="serviceDescription">
               <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="description"
-                value={serviceForm.description}
-                onChange={handleServiceChange}
-                required
-                placeholder="Describe what this service includes..."
-              />
+              <Form.Control as="textarea" rows={3} name="description" value={serviceForm.description} onChange={handleServiceChange} required />
             </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Estimated Duration (minutes)</Form.Label>
-              <Form.Control
-                type="number"
-                name="estimatedDurationMinutes"
-                value={serviceForm.estimatedDurationMinutes}
-                onChange={handleServiceChange}
-                required
-                min="1"
-              />
+            <Row>
+              <Col md={4}>
+                <Form.Group className="mb-3" controlId="estimatedDuration">
+                  <Form.Label>Est. Duration (minutes)</Form.Label>
+                  <Form.Control type="number" name="estimatedDurationMinutes" value={serviceForm.estimatedDurationMinutes} onChange={handleServiceChange} required min="1" />
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                 <Form.Group className="mb-3" controlId="deliveryMethod">
+                    <Form.Label>Delivery Method</Form.Label>
+                    <Form.Select name="deliveryMethod" value={serviceForm.deliveryMethod} onChange={handleServiceChange} required>
+                        <option value="in_person">In Person</option>
+                        <option value="video">Video Call</option>
+                        <option value="phone">Phone Call</option>
+                    </Form.Select>
+                 </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group className="mb-3" controlId="offeredLocation">
+                  <Form.Label>Offered Location</Form.Label>
+                  <Form.Select name="offeredLocation" value={serviceForm.offeredLocation} onChange={handleServiceChange} required>
+                    <option value="InHome">In Home</option>
+                    <option value="InClinic">In Clinic</option>
+                    <option value="Both">Both</option>
+                    <option value="Farm">Farm</option>
+                    <option value="Ranch">Ranch</option>
+                    <option value="Stable">Stable</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <hr />
+            <h5>Pricing</h5>
+            <Form.Group className="mb-3" controlId="hasDifferentPricing">
+                 <Form.Check 
+                     type="switch"
+                     label="Use different pricing for B2B (Clinics) and B2C (Pet Owners)"
+                     name="hasDifferentPricing"
+                     checked={serviceForm.hasDifferentPricing}
+                     onChange={handleServiceChange}
+                 />
             </Form.Group>
+
+            <Row>
+                <Col md={6}>
+                    {!serviceForm.hasDifferentPricing && (
+                        <Form.Group className="mb-3" controlId="servicePrice">
+                          <Form.Label>Price ($)</Form.Label>
+                          <Form.Control type="number" name="price" value={serviceForm.price} onChange={handleServiceChange} required={!serviceForm.hasDifferentPricing} min="0" step="0.01" />
+                        </Form.Group>
+                    )}
+                     {serviceForm.hasDifferentPricing && (
+                        <Form.Group className="mb-3" controlId="b2bPrice">
+                          <Form.Label>B2B Price ($)</Form.Label>
+                          <Form.Control type="number" name="b2bPrice" value={serviceForm.b2bPrice} onChange={handleServiceChange} required={serviceForm.hasDifferentPricing} min="0" step="0.01" />
+                        </Form.Group>
+                    )}
+                </Col>
+                <Col md={6}>
+                    {!serviceForm.hasDifferentPricing && (
+                        <Form.Group className="mb-3" controlId="priceType">
+                          <Form.Label>Price Type</Form.Label>
+                          <Form.Select name="priceType" value={serviceForm.priceType} onChange={handleServiceChange} required={!serviceForm.hasDifferentPricing}>
+                            <option value="Flat">Flat</option>
+                            <option value="Hourly">Hourly</option>
+                            <option value="Range">Range</option>
+                            <option value="Contact">Contact for Price</option>
+                          </Form.Select>
+                        </Form.Group>
+                    )}
+                    {serviceForm.hasDifferentPricing && (
+                         <Form.Group className="mb-3" controlId="b2cPrice">
+                           <Form.Label>B2C Price ($)</Form.Label>
+                           <Form.Control type="number" name="b2cPrice" value={serviceForm.b2cPrice} onChange={handleServiceChange} required={serviceForm.hasDifferentPricing} min="0" step="0.01" />
+                         </Form.Group>
+                     )}
+                </Col>
+            </Row>
             
-            <Form.Group className="mb-3">
-              <Form.Label>Price ($)</Form.Label>
-              <Form.Control
-                type="number"
-                name="price"
-                value={serviceForm.price}
-                onChange={handleServiceChange}
-                required
-                min="0"
-                step="0.01"
-              />
+             <hr />
+             <h5>Specialty Service (Optional)</h5>
+             <Form.Group className="mb-3" controlId="isSpecialtyService">
+                 <Form.Check 
+                     type="switch"
+                     label="This is a specialized service (e.g., requires referral)"
+                     name="isSpecialtyService"
+                     checked={serviceForm.isSpecialtyService}
+                     onChange={handleServiceChange}
+                 />
             </Form.Group>
+            {serviceForm.isSpecialtyService && (
+                 <Form.Group className="mb-3" controlId="specialtyType">
+                   <Form.Label>Specialty Type/Name</Form.Label>
+                   <Form.Control 
+                       type="text" 
+                       name="specialtyType" 
+                       value={serviceForm.specialtyType} 
+                       onChange={handleServiceChange} 
+                       placeholder="e.g., Cardiology, Advanced Imaging" 
+                       required={serviceForm.isSpecialtyService}
+                   />
+                 </Form.Group>
+            )}
             
-            <Form.Group className="mb-3">
-              <Form.Label>Price Type</Form.Label>
-              <Form.Select
-                name="priceType"
-                value={serviceForm.priceType}
-                onChange={handleServiceChange}
-              >
-                <option value="Flat">Flat Fee</option>
-                <option value="Hourly">Hourly Rate</option>
-                <option value="Range">Price Range</option>
-              </Form.Select>
-            </Form.Group>
-            
-            <Form.Group className="mb-3">
-              <Form.Label>Service Location</Form.Label>
-              <Form.Select
-                name="offeredLocation"
-                value={serviceForm.offeredLocation}
-                onChange={handleServiceChange}
-              >
-                <option value="InHome">In-Home Only</option>
-                <option value="InClinic">In-Clinic Only</option>
-                <option value="Both">Both In-Home and In-Clinic</option>
-              </Form.Select>
-            </Form.Group>
-            
+             {/* TODO: Add UI for managing customFields if needed */}
+
             <div className="d-flex justify-content-end">
-              <Button variant="secondary" className="me-2" onClick={() => setShowServiceModal(false)}>
-                Cancel
-              </Button>
-              <Button variant="primary" type="submit">
-                {editingServiceId ? 'Update Service' : 'Add Service'}
-              </Button>
+                <Button variant="secondary" onClick={() => setShowServiceModal(false)} className="me-2">
+                  Cancel
+                </Button>
+                <Button variant="primary" type="submit">
+                  {editingServiceId ? 'Update Service' : 'Add Service'}
+                </Button>
             </div>
           </Form>
         </Modal.Body>

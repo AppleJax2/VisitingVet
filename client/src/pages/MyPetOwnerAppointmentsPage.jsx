@@ -4,6 +4,8 @@ import { Container, Row, Col, Card, Table, Spinner, Alert, Badge, Button, Modal,
 import { getMyPetOwnerAppointments, cancelAppointmentByPetOwner, checkAuthStatus } from '../services/api';
 import { format } from 'date-fns';
 import AppointmentDetailModal from '../components/AppointmentDetailModal';
+import { useAuth } from '../contexts/AuthContext';
+import VideoCallFrame from '../components/Video/VideoCallFrame';
 
 const statusVariants = {
   Requested: 'warning',
@@ -29,6 +31,8 @@ const MyPetOwnerAppointmentsPage = () => {
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [cancellationReason, setCancellationReason] = useState('');
   const [cancellingAppointment, setCancellingAppointment] = useState(false);
+
+  const { user } = useAuth();
 
   useEffect(() => {
     const verifyUserAndFetchData = async () => {
@@ -124,24 +128,43 @@ const MyPetOwnerAppointmentsPage = () => {
   };
 
   // Handle opening details modal
-  const handleViewDetails = (appointmentId) => {
+  const handleShowDetails = (appointmentId) => {
     setSelectedAppointmentId(appointmentId);
     setShowDetailModal(true);
   };
   
   // Handle closing details modal
-  const handleCloseDetailModal = () => {
-      setSelectedAppointmentId(null);
-      setShowDetailModal(false);
-      // Potentially refetch appointments if status might have changed via modal action
-      // fetchAppointments(); 
+  const handleModalClose = () => {
+    setSelectedAppointmentId(null);
+    setShowDetailModal(false);
   };
   
   // Handler for when the detail modal updates an appointment (e.g., cancellation)
-  const handleAppointmentUpdate = (updatedAppointment) => {
-      setAppointments(appointments.map(app => 
-        app._id === updatedAppointment._id ? updatedAppointment : app
-      ));
+  const handleAppointmentUpdate = () => {
+    fetchAppointments();
+    handleModalClose();
+  };
+
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
+    try {
+      return format(new Date(dateTimeString), 'Pp'); // e.g., 09/15/2024, 2:30 PM
+    } catch (e) {
+      return 'Invalid Date';
+    }
+  };
+  
+  // Determine if the join button should be enabled (e.g., within 15 mins of start time)
+  const canJoinCall = (appointment) => {
+      if (!appointment || appointment.deliveryMethod !== 'video' || appointment.status !== 'Confirmed') {
+          return false;
+      }
+      const now = new Date();
+      const startTime = new Date(appointment.appointmentTime);
+      const timeDiffMinutes = (startTime - now) / (1000 * 60);
+      // Allow joining 15 minutes before and until the estimated end time
+      const endTime = new Date(appointment.estimatedEndTime);
+      return timeDiffMinutes <= 15 && now < endTime;
   };
 
   return (
@@ -223,7 +246,7 @@ const MyPetOwnerAppointmentsPage = () => {
                                 variant="outline-primary"
                                 size="sm"
                                 className="me-2"
-                                onClick={() => handleViewDetails(appointment._id)}
+                                onClick={() => handleShowDetails(appointment._id)}
                               >
                                 View Details
                               </Button>
@@ -280,7 +303,7 @@ const MyPetOwnerAppointmentsPage = () => {
                               <Button
                                 variant="outline-primary"
                                 size="sm"
-                                onClick={() => handleViewDetails(appointment._id)}
+                                onClick={() => handleShowDetails(appointment._id)}
                               >
                                 View Details
                               </Button>
@@ -340,15 +363,17 @@ const MyPetOwnerAppointmentsPage = () => {
       </Modal>
       
       {/* Appointment Detail Modal */}
-      {selectedAppointmentId && (
+      {showDetailModal && selectedAppointmentId && (
         <AppointmentDetailModal 
             show={showDetailModal}
-            onHide={handleCloseDetailModal}
+            handleClose={handleModalClose}
             appointmentId={selectedAppointmentId}
             userRole={currentUserRole}
-            onUpdate={handleAppointmentUpdate} // Pass update handler
+            onUpdate={handleAppointmentUpdate}
+            currentUser={user}
         />
       )}
+
     </Container>
   );
 };

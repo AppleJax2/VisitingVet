@@ -618,4 +618,20 @@ export const startConversation = async (recipientId) => {
   }
 };
 
+// ---------------- Video Conferencing API ----------------
+
+/**
+ * Get a meeting token and room URL for a Daily video call
+ * @param {string} roomName - The desired room name (e.g., derived from appointment ID)
+ */
+export const getVideoToken = async (roomName) => {
+  try {
+    const response = await api.post('/video/token', { roomName });
+    return response.data; // Should return { success: true, token: string, roomUrl: string }
+  } catch (error) {
+    console.error('Get video token error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to get video token');
+  }
+};
+
 export default api; 
