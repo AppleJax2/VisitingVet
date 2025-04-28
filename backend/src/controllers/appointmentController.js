@@ -112,6 +112,14 @@ exports.requestAppointment = async (req, res) => {
       });
     }
     
+    // Get the delivery method from the service
+    const deliveryMethod = service.deliveryMethod;
+    if (!deliveryMethod) {
+        // This shouldn't happen if the model has a required field with default
+        console.error(`Service ${serviceId} is missing a delivery method.`);
+        return res.status(500).json({ success: false, error: 'Service configuration error.' });
+    }
+
     // Check if user is a PetOwner
     const user = await User.findById(req.user.id);
     if (user.role !== 'PetOwner') {
@@ -172,17 +180,21 @@ exports.requestAppointment = async (req, res) => {
     }
     
     // Create the appointment
-    const appointment = await Appointment.create({
+    const appointmentData = {
       petOwner: req.user.id,
       providerProfile: providerProfileId,
       service: serviceId,
+      deliveryMethod: deliveryMethod,
       appointmentTime: requestedTime,
       estimatedEndTime,
       notes: notes || '',
       status: 'Requested',
       animalDetails: animalDetails || {},
-      customFieldResponses: customFieldResponses || []
-    });
+      customFieldResponses: customFieldResponses || [],
+      paymentStatus: service.price > 0 ? 'Pending' : 'NotApplicable'
+    };
+
+    const appointment = await Appointment.create(appointmentData);
 
     // Send notifications
     await notificationService.sendAppointmentNotification({

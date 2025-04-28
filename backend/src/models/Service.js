@@ -58,6 +58,12 @@ const serviceSchema = new mongoose.Schema({
     enum: ['Small Animal', 'Large Animal', 'Exotic', 'Avian', 'Equine', 'Farm Animal', 'Other'],
     required: [true, 'Please specify the animal type for this service'],
   },
+  deliveryMethod: {
+    type: String,
+    enum: ['in_person', 'video', 'phone'],
+    default: 'in_person',
+    required: [true, 'Please specify the delivery method for this service'],
+  },
   isSpecialtyService: {
     type: Boolean,
     default: false,

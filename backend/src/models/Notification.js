@@ -18,7 +18,7 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ['appointment_request', 'appointment_update', 'appointment_reminder', 
-           'system_message', 'profile_update', 'payment'],
+           'system_message', 'profile_update', 'payment', 'new_message'],
     required: true,
   },
   isRead: {
@@ -31,7 +31,7 @@ const notificationSchema = new mongoose.Schema({
   },
   referenceModel: {
     type: String,
-    enum: ['Appointment', 'User', 'VisitingVetProfile', 'Service'],
+    enum: ['Appointment', 'User', 'VisitingVetProfile', 'Service', 'Conversation'],
   },
   actionUrl: {
     type: String,

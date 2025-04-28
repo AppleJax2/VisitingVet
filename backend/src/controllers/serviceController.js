@@ -23,10 +23,14 @@ const createService = async (req, res) => {
       price,
       priceType, 
       offeredLocation,
+      animalType,
+      deliveryMethod,
+      isSpecialtyService,
+      specialtyType,
     } = req.body;
 
     // Create the service linked to the profile
-    const service = await Service.create({
+    const serviceData = {
       profile: profile._id,
       name,
       description,
@@ -34,7 +38,32 @@ const createService = async (req, res) => {
       price,
       priceType,
       offeredLocation,
-    });
+      animalType,
+      deliveryMethod,
+      isSpecialtyService,
+      specialtyType,
+    };
+    
+    // Conditionally set pricing based on hasDifferentPricing if provided
+    if (req.body.hasDifferentPricing !== undefined) {
+      serviceData.hasDifferentPricing = req.body.hasDifferentPricing;
+      if (req.body.hasDifferentPricing) {
+        serviceData.b2bPrice = req.body.b2bPrice;
+        serviceData.b2cPrice = req.body.b2cPrice;
+        // Clear the generic price if different pricing is used
+        delete serviceData.price;
+      } else {
+        serviceData.price = req.body.price;
+        delete serviceData.b2bPrice;
+        delete serviceData.b2cPrice;
+      }
+    }
+    
+    if (req.body.customFields) {
+        serviceData.customFields = req.body.customFields;
+    }
+
+    const service = await Service.create(serviceData);
 
     res.status(201).json({
       success: true,
@@ -90,19 +119,45 @@ const updateService = async (req, res) => {
       price,
       priceType,
       offeredLocation,
+      animalType,
+      deliveryMethod,
+      isSpecialtyService,
+      specialtyType,
     } = req.body;
+
+    // Build update object selectively based on provided fields
+    const updateData = {};
+    const allowedFields = [
+        'name', 'description', 'estimatedDurationMinutes', 'price', 'priceType', 
+        'offeredLocation', 'animalType', 'deliveryMethod', 'isSpecialtyService', 
+        'specialtyType', 'hasDifferentPricing', 'b2bPrice', 'b2cPrice', 'customFields'
+    ];
+
+    allowedFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+            updateData[field] = req.body[field];
+        }
+    });
+
+    // Handle pricing logic for updates too
+    if (updateData.hasDifferentPricing !== undefined) {
+      if (updateData.hasDifferentPricing) {
+        updateData.price = undefined; // Ensure generic price is removed/ignored
+      } else {
+        updateData.b2bPrice = undefined; 
+        updateData.b2cPrice = undefined;
+      }
+    } else if (updateData.price !== undefined && service.hasDifferentPricing) {
+        // If updating generic price but service used different pricing, switch back
+        updateData.hasDifferentPricing = false;
+        updateData.b2bPrice = undefined;
+        updateData.b2cPrice = undefined;
+    }
 
     // Update the service
     const updatedService = await Service.findByIdAndUpdate(
       req.params.serviceId,
-      {
-        name,
-        description,
-        estimatedDurationMinutes,
-        price,
-        priceType,
-        offeredLocation,
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 

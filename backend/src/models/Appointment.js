@@ -16,6 +16,11 @@ const appointmentSchema = new mongoose.Schema({
     ref: 'Service',
     required: [true, 'Service is required'],
   },
+  deliveryMethod: {
+    type: String,
+    enum: ['in_person', 'video', 'phone'],
+    required: [true, 'Delivery method must be specified for the appointment'],
+  },
   appointmentTime: {
     type: Date,
     required: [true, 'Appointment time is required'],

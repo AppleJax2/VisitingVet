@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require('http'); // Required for Socket.IO
+const { Server } = require("socket.io"); // Import Socket.IO Server
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -17,6 +19,9 @@ const adminRoutes = require('./src/routes/adminRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const paymentRoutes = require('./src/routes/paymentRoutes');
 const reviewRoutes = require('./src/routes/reviewRoutes');
+const conversationRoutes = require('./src/routes/conversationRoutes'); // Import conversation routes
+const videoRoutes = require('./src/routes/videoRoutes'); // Import video routes
+const configureSocket = require('./src/config/socket'); // Import socket configuration logic
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -25,6 +30,29 @@ dotenv.config({ path: './.env' });
 connectDB();
 
 const app = express();
+const server = http.createServer(app); // Create HTTP server from Express app
+
+// Configure CORS options (allow frontend URL)
+const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:5173'];
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests) or from allowed origins
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true, // Allow cookies/auth headers
+};
+
+// Setup Socket.IO Server
+const io = new Server(server, {
+  cors: corsOptions // Apply CORS options to Socket.IO
+});
+
+// Apply CORS middleware to Express app (might be redundant if Socket.IO handles it? Check docs)
+app.use(cors(corsOptions));
 
 // IMPORTANT: Stripe webhook needs raw body, so define it BEFORE express.json()
 // We need to mount the webhook route separately here.
@@ -47,14 +75,6 @@ app.use(express.json());
 // Cookie parser
 app.use(cookieParser());
 
-// Enable CORS - Configure for production client URL
-const corsOptions = {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173', // Allow dev server or deployed client
-    credentials: true, // Allow cookies to be sent
-};
-app.use(cors(corsOptions));
-
-
 // Mount routers
 app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
@@ -70,6 +90,11 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/conversations', conversationRoutes); // Mount conversation routes
+app.use('/api/video', videoRoutes); // Mount video routes
+
+// Configure Socket.IO event handlers
+configureSocket(io);
 
 // Basic route for testing
 app.get('/', (req, res) => {
@@ -78,7 +103,8 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(
+// Start the server using the http server instance, not the express app
+server.listen(
   PORT,
   console.log(
     `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
