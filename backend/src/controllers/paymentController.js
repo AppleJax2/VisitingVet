@@ -629,8 +629,34 @@ exports.getProviderPaymentHistory = asyncHandler(async (req, res, next) => {
  * @access  Private (Admin)
  */
 exports.getAdminPaymentHistory = asyncHandler(async (req, res, next) => {
-    // TODO: Add pagination, filtering (by user, provider, status, date range)
-    const payments = await Payment.find({}) // Find all
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20; // Default limit 20
+    const skip = (page - 1) * limit;
+
+    // Build filter query object
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.userId) filter.userId = req.query.userId;
+    if (req.query.providerId) filter.providerId = req.query.providerId;
+    if (req.query.startDate || req.query.endDate) {
+        filter.createdAt = {};
+        if (req.query.startDate) {
+            filter.createdAt.$gte = new Date(req.query.startDate);
+        }
+        if (req.query.endDate) {
+            // Adjust endDate to include the whole day
+            const endDate = new Date(req.query.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            filter.createdAt.$lte = endDate;
+        }
+    }
+    // Add more filters if needed (e.g., amount range, currency)
+
+    // Get total count matching filter
+    const total = await Payment.countDocuments(filter);
+
+    // Fetch filtered and paginated payments
+    const payments = await Payment.find(filter) 
         .populate({ path: 'userId', select: 'name email role' }) // Payer (PetOwner/Clinic)
         .populate({ path: 'providerId', select: 'name email' }) // Provider
         .populate({
@@ -638,7 +664,9 @@ exports.getAdminPaymentHistory = asyncHandler(async (req, res, next) => {
             select: 'appointmentTime status serviceId',
             populate: { path: 'serviceId', select: 'name' }
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
 
      // Format data
     const formattedPayments = payments.map(p => ({
@@ -646,7 +674,7 @@ exports.getAdminPaymentHistory = asyncHandler(async (req, res, next) => {
         paymentDate: p.createdAt,
         payerName: p.userId?.name,
         payerEmail: p.userId?.email,
-        payerRole: p.userId?.role,
+        payerRole: p.userId?.role?.name || p.userId?.role, // Handle populated role object or direct role string
         providerName: p.providerId?.name,
         providerEmail: p.providerId?.email,
         totalAmount: p.amount / 100,
@@ -660,7 +688,18 @@ exports.getAdminPaymentHistory = asyncHandler(async (req, res, next) => {
         destinationAccountId: p.stripeDestinationAccountId,
     }));
 
-    res.status(200).json({ success: true, count: formattedPayments.length, data: formattedPayments }); // Add pagination info later
+    res.status(200).json({
+        success: true,
+        count: payments.length, // Count on current page
+        pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+        },
+        data: formattedPayments
+    });
 });
 
-// TODO: Add controller for initiating refunds (Admin/Provider role) 
+// TODO: Add controller for initiating refunds (Admin/Provider role)
+// TODO: Add filtering/pagination to getProviderPaymentHistory and getPetOwnerPaymentHistory if required 
