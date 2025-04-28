@@ -48,6 +48,13 @@ import UserProfilePage from './pages/UserProfilePage'; // For Pet Owner profile/
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
+// Import Payment Pages
+import PaymentPage from './pages/PaymentPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage'; // Assume this page exists or will be created
+// Import Stripe Connect Return/Refresh Pages
+import StripeConnectReturnPage from './pages/StripeConnectReturnPage';
+import StripeConnectRefreshPage from './pages/StripeConnectRefreshPage';
+
 // Protected route component with role check using context
 const PrivateRoute = ({ allowedRoles }) => {
   const { user, loading } = useAuth();
@@ -104,6 +111,13 @@ function AppRoutes() {
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/services" element={<ServicesPage />} />
           
+          {/* Payment Routes - Public access needed for Stripe redirect */}
+          <Route path="/pay/appointment/:appointmentId" element={<PaymentPage />} /> 
+          <Route path="/appointment/:appointmentId/payment-success" element={<PaymentSuccessPage />} />
+          {/* Stripe Connect Return URLs - Should be accessible without strict login state sometimes */}
+          <Route path="/stripe/connect/return" element={<StripeConnectReturnPage />} />
+          <Route path="/stripe/connect/refresh" element={<StripeConnectRefreshPage />} />
+
           {/* Logged-in User Routes (Dashboard is role-specific) */}
           <Route element={<PrivateRoute allowedRoles={['PetOwner', 'MVSProvider', 'Clinic', 'Admin']} />}>
             <Route path="/dashboard" element={<DashboardPage />} /> 
