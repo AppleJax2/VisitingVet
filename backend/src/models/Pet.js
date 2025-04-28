@@ -1,5 +1,59 @@
 const mongoose = require('mongoose');
 
+// Define sub-schema for medical record entries
+const medicalRecordEntrySchema = new mongoose.Schema({
+    recordType: {
+        type: String,
+        required: true,
+        enum: [ // Expand as needed
+            'Vaccination',
+            'Procedure',
+            'Condition',
+            'Allergy',
+            'Observation', 
+            'LabResult', 
+            'Prescription', 
+            'Note'
+        ],
+        index: true,
+    },
+    date: {
+        type: Date,
+        required: true,
+        default: Date.now,
+        index: true,
+    },
+    title: { // e.g., "Rabies Vaccination", "Annual Checkup Note"
+        type: String,
+        trim: true,
+        required: [true, 'Please provide a title or summary for the record'],
+        maxlength: [150, 'Title cannot exceed 150 characters']
+    },
+    details: { // Flexible field for different record types
+        type: mongoose.Schema.Types.Mixed, // Store structured data (object) or plain text
+        required: true
+    },
+    documentUrl: { // For uploaded files (lab results, etc.)
+        type: String,
+        trim: true,
+    },
+    enteredBy: { // User who created the record (Provider/Owner/Clinic)
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    visibility: {
+        type: String,
+        enum: ['OwnerOnly', 'AllSharedProviders', 'SpecificProviders'], // Adjust as needed
+        default: 'AllSharedProviders', // Default visibility for provider entries?
+        required: true,
+    },
+    // sharedWith: [{ // Only relevant if visibility is SpecificProviders
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'User',
+    // }],
+}, { _id: true, timestamps: true }); // Ensure subdocuments get timestamps and _id
+
 const petSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -22,18 +76,16 @@ const petSchema = new mongoose.Schema({
   },
   breed: {
     type: String,
-    required: [true, 'Pet breed is required'],
+    // required: [true, 'Pet breed is required'], // Make optional?
     trim: true,
     maxlength: [50, 'Breed cannot exceed 50 characters']
   },
-  age: {
-    type: Number,
-    required: [true, 'Pet age is required'],
-    min: [0, 'Age cannot be negative'],
-    max: [50, 'Please enter a realistic age'] // Adjust max age as needed
+  dateOfBirth: {
+    type: Date,
+    // required: [true, 'Pet date of birth is required'],
   },
-  // Optional fields - Add more as needed
-  gender: {
+  // Removed 'age' field, calculate from dateOfBirth if needed
+  sex: {
     type: String,
     enum: ['Male', 'Female', 'Unknown'],
     default: 'Unknown'
@@ -56,10 +108,18 @@ const petSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
-  medicalHistory: {
-    type: String, // Could be more structured (e.g., array of objects)
-    default: ''
+  // Detailed Medical Information
+  allergies: {
+    type: [String],
+    default: [],
   },
+  existingConditions: {
+      type: [String], // Simple list of chronic conditions
+      default: [],
+  },
+  // Removed simple medicalHistory string, replaced by structured records
+  medicalRecords: [medicalRecordEntrySchema], // Array of structured records
+
   lastCheckup: {
       type: Date,
   }
@@ -67,6 +127,33 @@ const petSchema = new mongoose.Schema({
 }, {
   timestamps: true // Adds createdAt and updatedAt fields automatically
 });
+
+// Optional: Add virtual for age calculation
+petSchema.virtual('calculatedAge').get(function() {
+  if (!this.dateOfBirth) return null;
+  const today = new Date();
+  const birthDate = new Date(this.dateOfBirth);
+  let ageYears = today.getFullYear() - birthDate.getFullYear();
+  let ageMonths = today.getMonth() - birthDate.getMonth();
+  if (ageMonths < 0 || (ageMonths === 0 && today.getDate() < birthDate.getDate())) {
+    ageYears--;
+    ageMonths += 12;
+  }
+  // Return a string like "3 years, 4 months" or just months if less than a year
+  if (ageYears > 0) {
+      return `${ageYears} year${ageYears > 1 ? 's' : ''}${ageMonths > 0 ? `, ${ageMonths} month${ageMonths > 1 ? 's' : ''}` : ''}`;
+  } else if (ageMonths > 0) {
+       return `${ageMonths} month${ageMonths > 1 ? 's' : ''}`;
+  } else {
+      // Calculate days if less than a month?
+      const ageDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+      return `${ageDays} day${ageDays !== 1 ? 's' : ''}`;
+  }
+});
+
+// Ensure virtual fields are included when converting to JSON/Object
+petSchema.set('toJSON', { virtuals: true });
+petSchema.set('toObject', { virtuals: true });
 
 // Ensure a user cannot have two pets with the same name (optional, adjust as needed)
 // petSchema.index({ owner: 1, name: 1 }, { unique: true });

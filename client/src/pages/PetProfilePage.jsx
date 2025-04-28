@@ -3,17 +3,20 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Spinner, Alert, Button, Image, ListGroup, Badge } from 'react-bootstrap';
 import { PencilSquare, ArrowLeft } from 'react-bootstrap-icons';
 import { fetchPetById } from '../services/api';
+import api from '../services/api';
 import theme from '../utils/theme';
-import PetEditModal from '../components/PetEditModal'; // Import the modal
+import PetEditModal from '../components/PetEditModal';
+import MedicalRecordList from '../components/Pets/MedicalRecordList';
+import { useAuth } from '../contexts/AuthContext';
+import { format } from 'date-fns';
 
 function PetProfilePage() {
   const { petId } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // State for Edit Modal
   const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
@@ -33,7 +36,6 @@ function PetProfilePage() {
             setError('Pet not found.');
         } else if (err.response?.status === 403) {
             setError('You are not authorized to view this pet.');
-            // Consider redirecting or showing a restricted message
         } else {
             setError(err.message || 'An error occurred while fetching pet details.');
         }
@@ -47,15 +49,34 @@ function PetProfilePage() {
     }
   }, [petId]);
 
-  // Handler for showing edit modal
   const handleShowEditModal = () => setShowEditModal(true);
-  const handleHideEditModal = () => setShowEditModal(false);
+  const handleHideEditModal = () => setLoading(false);
   
-  // Handler for when modal successfully updates pet
-  const handlePetUpdate = (updatedPetData) => {
-      setPet(updatedPetData); // Update the state on this page
-      // Optionally, show a success message
+  const handlePetUpdate = async () => {
+      setShowEditModal(false);
+      setLoading(true);
+      try {
+        const response = await fetchPetById(petId);
+        if (response.success) {
+          setPet(response.pet);
+        } else {
+          setError(response.error || 'Failed to reload pet data after update.');
+        }
+      } catch (err) {
+           setError(err.message || 'An error occurred while reloading pet data.');
+      } finally {
+           setLoading(false);
+      }
   };
+
+  const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            return format(new Date(dateString), 'PPP');
+        } catch {
+            return 'Invalid Date';
+        }
+   };
 
   const styles = {
     pageHeader: {
@@ -76,6 +97,7 @@ function PetProfilePage() {
       border: 'none',
       boxShadow: theme.shadows.md,
       overflow: 'hidden',
+      marginBottom: '30px',
     },
     profileImage: {
       width: '150px',
@@ -109,15 +131,21 @@ function PetProfilePage() {
     listGroupItem: {
       border: 'none',
       padding: '10px 0',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
     },
     label: {
         fontWeight: '500',
         color: theme.colors.text.primary,
         marginRight: '10px',
+    },
+    value: {
+        color: theme.colors.text.secondary,
     }
   };
 
-  if (loading) {
+  if (loading && !showEditModal) {
     return <Container className="text-center py-5"><Spinner animation="border" style={{color: theme.colors.primary.main}} /></Container>;
   }
 
@@ -145,9 +173,11 @@ function PetProfilePage() {
         <Link to="/my-pets" style={styles.backButton}>
           <ArrowLeft size={20} className="me-2" /> Back to My Pets
         </Link>
-        <Button variant="outline-primary" onClick={handleShowEditModal}> 
-          <PencilSquare className="me-2" /> Edit Pet
-        </Button>
+        {currentUser?._id === pet.owner && (
+             <Button variant="outline-primary" onClick={handleShowEditModal}> 
+                <PencilSquare className="me-2" /> Edit Pet
+            </Button>
+        )}
       </div>
 
       <Card style={styles.profileCard}>
@@ -157,35 +187,43 @@ function PetProfilePage() {
             style={styles.profileImage} 
           />
           <h2 style={styles.petName}>{pet.name}</h2>
-          <p style={styles.petBreed}>{pet.breed} ({pet.species})</p>
+          <p style={styles.petBreed}>{pet.breed || 'N/A'} ({pet.species})</p>
 
           <Row>
             <Col md={6}>
               <h5 style={styles.sectionTitle}>Basic Information</h5>
               <ListGroup variant="flush">
-                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Age:</span> {pet.age} years old</ListGroup.Item>
-                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Gender:</span> {pet.gender || 'N/A'}</ListGroup.Item>
-                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Weight:</span> {pet.weight ? `${pet.weight} ${pet.weightUnit}` : 'N/A'}</ListGroup.Item>
-                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Microchip ID:</span> {pet.microchipId || 'N/A'}</ListGroup.Item>
+                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Age:</span> <span style={styles.value}>{pet.calculatedAge || 'N/A'}</span></ListGroup.Item>
+                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Date of Birth:</span> <span style={styles.value}>{formatDate(pet.dateOfBirth)}</span></ListGroup.Item>
+                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Sex:</span> <span style={styles.value}>{pet.sex || 'N/A'}</span></ListGroup.Item>
+                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Weight:</span> <span style={styles.value}>{pet.weight ? `${pet.weight} ${pet.weightUnit}` : 'N/A'}</span></ListGroup.Item>
+                <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Microchip ID:</span> <span style={styles.value}>{pet.microchipId || 'N/A'}</span></ListGroup.Item>
               </ListGroup>
             </Col>
             <Col md={6}>
-              <h5 style={styles.sectionTitle}>Health & History</h5>
+              <h5 style={styles.sectionTitle}>Known Health Info</h5>
               <ListGroup variant="flush">
-                 <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Last Checkup:</span> {pet.lastCheckup ? new Date(pet.lastCheckup).toLocaleDateString() : 'No record'}</ListGroup.Item>
-                 <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Medical History:</span> {pet.medicalHistory || 'No significant history recorded.'}</ListGroup.Item>
-                 {/* Add more fields like Vaccinations, Allergies here */}
+                 <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Allergies:</span> 
+                    <span style={styles.value}>{pet.allergies?.length > 0 ? pet.allergies.join(', ') : 'None recorded'}</span>
+                 </ListGroup.Item>
+                 <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Existing Conditions:</span> 
+                    <span style={styles.value}>{pet.existingConditions?.length > 0 ? pet.existingConditions.join(', ') : 'None recorded'}</span>
+                 </ListGroup.Item>
+                  <ListGroup.Item style={styles.listGroupItem}><span style={styles.label}>Last Checkup:</span> <span style={styles.value}>{formatDate(pet.lastCheckup)}</span></ListGroup.Item>
               </ListGroup>
             </Col>
           </Row>
 
-          {/* TODO: Section for related appointments or reminders? */}
-
         </Card.Body>
       </Card>
 
-      {/* Render Edit Modal */}
-      {pet && (
+      <MedicalRecordList 
+        petId={petId} 
+        petOwnerId={pet.owner}
+        currentUser={currentUser}
+      />
+
+      {pet && showEditModal && (
           <PetEditModal 
               show={showEditModal} 
               onHide={handleHideEditModal} 

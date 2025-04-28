@@ -112,13 +112,13 @@ According to the design document, the complete VisitingVet platform should inclu
    ~~- Add billing management for providers~~
    ~~- Create payment history views~~
 
-2. Develop review and rating system
-   - Create review data model
-   - Implement API endpoints for submitting/retrieving reviews
-   - Add review UI components for leaving reviews
-   - Develop provider rating calculation
-   - Add review display on provider profiles
-   - Implement review moderation for admins
+~~2. Develop review and rating system~~
+   ~~- Create review data model~~
+   ~~- Implement API endpoints for submitting/retrieving reviews~~
+   ~~- Add review UI components for leaving reviews~~
+   ~~- Develop provider rating calculation~~
+   ~~- Add review display on provider profiles~~
+   ~~- Implement review moderation for admins~~
 
 3. Complete medical record system
    - Enhance pet profile with detailed medical history
