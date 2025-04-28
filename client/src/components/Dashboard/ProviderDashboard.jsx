@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { 
   Calendar3, Clock, GeoAlt, Cash, Star, 
   PeopleFill, Check2Circle, XCircle, Eye, 
-  BarChart, Download, Wallet2, BellFill 
+  BarChart, Download, Wallet2, BellFill, FileEarmarkText 
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
@@ -611,6 +611,27 @@ const ProviderDashboard = ({ user }) => {
                 }}
               >
                 <Download className="me-2" /> Install Now
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Quick Actions */}
+      <Row className="mb-4">
+        <Col md={12}>
+          <Card className="dashboard-card">
+            <Card.Body>
+              <Card.Title>Service Requests</Card.Title>
+              <Card.Text>
+                View and respond to clinic service requests.
+              </Card.Text>
+              <Button 
+                variant="primary" 
+                as={Link} 
+                to="/dashboard/provider/service-requests"
+              >
+                View Requests
               </Button>
             </Card.Body>
           </Card>

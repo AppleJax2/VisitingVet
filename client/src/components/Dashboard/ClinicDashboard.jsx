@@ -5,7 +5,7 @@ import {
   Calendar3, Clock, GeoAlt, Cash, Star, 
   PeopleFill, Check2Circle, XCircle, Eye, 
   Building, Download, Wallet2, BellFill,
-  PencilSquare, PlusCircle, BarChartFill
+  PencilSquare, PlusCircle, BarChartFill, FileEarmarkText
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
@@ -601,6 +601,30 @@ const ClinicDashboard = ({ user }) => {
               >
                 <Download className="me-2" /> Install Now
               </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Quick Actions Section */}
+      <Row className="mt-4">
+        <Col md={12}>
+          <Card className="border-0 shadow-sm">
+            <Card.Header className="bg-white">
+              <h5 style={styles.sectionTitle} className="mb-0">Quick Actions</h5>
+            </Card.Header>
+            <Card.Body>
+              <div className="dashboard-quick-actions">
+                <Button 
+                  variant="outline-primary" 
+                  className="quick-action-button"
+                  as={Link} 
+                  to="/dashboard/clinic/service-requests"
+                >
+                  <FileEarmarkText size={24} />
+                  <span>Specialist Referrals</span>
+                </Button>
+              </div>
             </Card.Body>
           </Card>
         </Col>
