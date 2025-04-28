@@ -144,7 +144,7 @@ const Header = () => {
             {/* Add Blog Link if implemented later */}
             {/* <NavLink to="/blog" className="mx-lg-1">Blog</NavLink> */}
             
-            {loading ? (
+            {!loading && isAuthenticated ? (
               <div className="d-flex align-items-center">
                 <NotificationBell />
                 
@@ -296,7 +296,7 @@ const Header = () => {
                   </Dropdown.Menu>
                 </Dropdown>
               </div>
-            ) : (
+            ) : !loading && !isAuthenticated ? (
               <div className="d-flex align-items-center">
                 <Button 
                   as={Link} 
@@ -334,6 +334,10 @@ const Header = () => {
                 >
                   Register
                 </Button>
+              </div>
+            ) : (
+              <div style={{ minWidth: '150px' }}>
+                {/* You could put a spinner or skeleton loader here */}
               </div>
             )}
           </Nav>
