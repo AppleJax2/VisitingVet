@@ -102,4 +102,4 @@
 - [x] Perform final cross-browser testing
 - [x] Validate all user flows work with new Bootstrap styling
 - [x] Create git commits with all Bootstrap template changes
-- [ ] Deploy updated Bootstrap implementation to staging environment 
+- [x] Deploy updated Bootstrap implementation to staging environment 
