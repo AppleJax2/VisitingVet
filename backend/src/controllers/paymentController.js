@@ -6,6 +6,9 @@ const User = require('../models/User');
 const Service = require('../models/Service');
 const ErrorResponse = require('../utils/errorResponse');
 const VisitingVetProfile = require('../models/VisitingVetProfile');
+const config = require('../config/config');
+const { PLATFORM_FEE_PERCENTAGE } = require('../config/constants');
+const notificationService = require('../services/notificationService');
 
 /**
  * @desc    Create a Stripe Payment Intent for an appointment
@@ -67,12 +70,10 @@ exports.createPaymentIntent = asyncHandler(async (req, res, next) => {
   // --- Calculate Amounts --- 
   const totalAmount = Math.round(appointment.serviceId.price * 100); // Price in cents
   const currency = 'usd'; 
-  // TODO: Define platform fee calculation (e.g., percentage or fixed amount)
-  const platformFeePercentage = 0.10; // Example: 10% platform fee
-  const applicationFeeAmount = Math.round(totalAmount * platformFeePercentage);
+  const applicationFeeAmount = Math.round(totalAmount * PLATFORM_FEE_PERCENTAGE);
 
-  if (applicationFeeAmount >= totalAmount) {
-      console.error(`Platform fee (${applicationFeeAmount}) is greater than or equal to total amount (${totalAmount}). Check calculation.`);
+  if (applicationFeeAmount >= totalAmount || applicationFeeAmount < 0) {
+      console.error(`Invalid Platform fee (${applicationFeeAmount}) calculated for total amount (${totalAmount}). Check constant.`);
       return next(new ErrorResponse('Internal error calculating payment amounts', 500));
   }
 
@@ -144,7 +145,6 @@ exports.createPaymentIntent = asyncHandler(async (req, res, next) => {
     // CRITICAL: Try to cancel the Payment Intent if DB save fails?
     try {
         await stripe.paymentIntents.cancel(paymentIntent.id);
-        console.log(`Successfully cancelled Stripe Payment Intent ${paymentIntent.id} due to DB error.`);
     } catch (cancelErr) {
         console.error(`CRITICAL Error: Failed to cancel Stripe Payment Intent ${paymentIntent.id} after DB error:`, cancelErr);
         // Log this for immediate manual intervention
@@ -201,38 +201,54 @@ exports.handleStripeWebhook = asyncHandler(async (req, res, next) => {
   }
 
   // Handle non-Connect events (existing payment intent logic)
+  let userIdToNotify = null;
+  let providerIdToNotify = null;
+  let notificationType = null;
+  let notificationData = {};
+  
+  // Extract relevant IDs from metadata if possible (especially for failures)
+  const metadata = event.data.object.metadata;
+  if (metadata) {
+      userIdToNotify = metadata.userId;
+      providerIdToNotify = metadata.providerUserId;
+      notificationData.appointmentId = metadata.appointmentId;
+      notificationData.serviceId = metadata.serviceId;
+      // Add more relevant data if needed
+  }
+  
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntentSucceeded = event.data.object;
-      console.log('PaymentIntent was successful:', paymentIntentSucceeded.id);
       await updatePaymentStatus(paymentIntentSucceeded.id, 'succeeded', paymentIntentSucceeded);
-      // TODO: Fulfill the purchase (e.g., update appointment status, notify provider)
       break;
     case 'payment_intent.payment_failed':
       const paymentIntentFailed = event.data.object;
-      console.log('PaymentIntent failed:', paymentIntentFailed.id);
       await updatePaymentStatus(paymentIntentFailed.id, 'failed', paymentIntentFailed);
-      // TODO: Notify the user about the failure
+      // Notify the user about the failure
+      if (userIdToNotify) {
+           await notificationService.createNotification(userIdToNotify, 'payment_failed', {
+              appointmentId: notificationData.appointmentId,
+              reason: paymentIntentFailed.last_payment_error?.message || 'Unknown reason',
+              amount: paymentIntentFailed.amount / 100, // Convert to dollars
+              currency: paymentIntentFailed.currency,
+           });
+      }
       break;
     case 'payment_intent.canceled':
       const paymentIntentCanceled = event.data.object;
-      console.log('PaymentIntent canceled:', paymentIntentCanceled.id);
       await updatePaymentStatus(paymentIntentCanceled.id, 'canceled', paymentIntentCanceled);
       break;
     case 'payment_intent.processing':
         const paymentIntentProcessing = event.data.object;
-        console.log('PaymentIntent processing:', paymentIntentProcessing.id);
         await updatePaymentStatus(paymentIntentProcessing.id, 'processing', paymentIntentProcessing);
         break;
     case 'payment_intent.requires_action':
         const paymentIntentRequiresAction = event.data.object;
-        console.log('PaymentIntent requires action:', paymentIntentRequiresAction.id);
         await updatePaymentStatus(paymentIntentRequiresAction.id, 'requires_action', paymentIntentRequiresAction);
         break;
     // Handle other event types as needed (e.g., refunds, disputes)
     case 'charge.refunded':
       const chargeRefunded = event.data.object;
-      console.log('Charge refunded:', chargeRefunded.id, 'Amount:', chargeRefunded.amount_refunded);
       await updatePaymentStatusOnRefund(chargeRefunded.payment_intent, 'refunded', chargeRefunded);
       break;
 
@@ -289,8 +305,24 @@ const updatePaymentStatus = async (paymentIntentId, newStatus, paymentIntentData
         await Appointment.findByIdAndUpdate(payment.appointmentId, { paymentStatus: 'Paid' }); 
         console.log(`Marked appointment ${payment.appointmentId} as Paid.`);
         
-        // TODO: Notify provider about payment confirmation
-        // TODO: Notify pet owner about payment success
+        // Notify provider about payment confirmation
+        if (payment.providerId) {
+            await notificationService.createNotification(payment.providerId, 'payment_received', {
+                appointmentId: payment.appointmentId,
+                amount: payment.amount / 100,
+                currency: payment.currency,
+                clientUserId: payment.userId,
+            });
+        }
+        // Notify pet owner about payment success
+        if (payment.userId) {
+             await notificationService.createNotification(payment.userId, 'payment_success', {
+                appointmentId: payment.appointmentId,
+                amount: payment.amount / 100,
+                currency: payment.currency,
+                providerId: payment.providerId, 
+            });
+        }
     }
     // Add other post-action triggers (e.g., notifications on failure)
 
@@ -328,7 +360,30 @@ const updatePaymentStatusOnRefund = async (paymentIntentId, newStatus, chargeDat
         // Update appointment status (e.g., back to 'Pending Payment' or 'Refunded')
         await Appointment.findByIdAndUpdate(payment.appointmentId, { paymentStatus: 'Refunded' }); 
         console.log(`Marked appointment ${payment.appointmentId} as Refunded.`);
-        // TODO: Notify relevant parties about the refund
+        
+        // Notify relevant parties about the refund
+        const refundAmount = chargeData.amount_refunded / 100;
+        const currency = chargeData.currency;
+        const appointmentId = payment.appointmentId;
+
+        // Notify provider
+        if (payment.providerId) {
+             await notificationService.createNotification(payment.providerId, 'payment_refunded', {
+                appointmentId: appointmentId,
+                refundAmount: refundAmount,
+                currency: currency,
+                clientUserId: payment.userId,
+             });
+        }
+        // Notify pet owner
+        if (payment.userId) {
+             await notificationService.createNotification(payment.userId, 'payment_refunded', {
+                appointmentId: appointmentId,
+                refundAmount: refundAmount,
+                currency: currency,
+                providerId: payment.providerId, 
+             });
+        }
 
     } catch (error) {
         console.error(`Error updating payment status on refund for PaymentIntent ID: ${paymentIntentId}:`, error);

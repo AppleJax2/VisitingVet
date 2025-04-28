@@ -39,11 +39,9 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, current
           
           if (appt.status === 'Completed' && appt.deliveryMethod === 'video') {
               try {
-                  console.log(`Fetching recordings for room: ${appt._id}`);
                   const recordingResponse = await getRecordingsForRoom(appt._id);
                   if (recordingResponse.success) {
                       setRecordings(recordingResponse.data || []);
-                      console.log(`Found ${recordingResponse.count} recordings.`);
                   } else {
                       console.warn('Failed to fetch recordings:', recordingResponse.error);
                       setRecordingError('Could not retrieve recordings for this appointment.');
@@ -130,14 +128,12 @@ function AppointmentDetailModal({ show, onHide, appointmentId, userRole, current
   };
   
   const handleCallLeft = () => {
-    console.log("Video call left event received in modal.");
     setShowVideoCall(false);
   };
 
   const handleViewRecording = async (recordingId) => {
       setRecordingError('');
       try {
-          console.log(`Getting access link for recording: ${recordingId}`);
           const response = await getRecordingAccessLink(recordingId);
           if (response.success && response.accessLink) {
               window.open(response.accessLink, '_blank', 'noopener,noreferrer');

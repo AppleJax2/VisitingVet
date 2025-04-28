@@ -80,19 +80,19 @@ const ServicesPage = () => {
       icon: '💉', // Using emoji
       title: 'Preventative Care',
       description: 'Proactive health management including vaccinations, parasite control (flea, tick, heartworm), nutritional counseling, and routine health screenings to keep your animals healthy and prevent future issues.',
-      link: '/search-providers?specialtyServices=Preventative', // Example link, adjust as needed
+      link: '/search-providers?specialtyServices=Preventative',
     },
     {
       icon: '🚑', // Using emoji
       title: 'Emergency Services',
       description: 'Urgent care availability for critical situations. Connect with providers offering emergency response for injuries, acute illnesses, and other immediate veterinary needs outside of regular hours (subject to provider availability).',
-      link: '/search-providers?specialtyServices=Emergency', // Example link, adjust as needed
+      link: '/search-providers?specialtyServices=Emergency',
     },
     {
       icon: '🔬', // Using emoji
       title: 'Diagnostics & Lab Work',
       description: 'Mobile diagnostic capabilities including sample collection for blood work, urinalysis, fecal exams, and coordination with labs for comprehensive testing to aid in accurate diagnosis and treatment planning.',
-      link: '/search-providers?specialtyServices=Diagnostics', // Example link, adjust as needed
+      link: '/search-providers?specialtyServices=Diagnostics',
     },
   ];
 

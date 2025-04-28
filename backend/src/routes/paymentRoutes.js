@@ -37,9 +37,6 @@ router.get('/my-history', protect, authorize(ROLES.PetOwner), getPetOwnerPayment
 router.get('/provider-history', protect, authorize(ROLES.MVSProvider), getProviderPaymentHistory);
 router.get('/admin-history', protect, authorize(ROLES.Admin), getAdminPaymentHistory);
 
-// TODO: Add routes for fetching payment history, initiating refunds etc.
-// Example:
-// router.get('/history', protect, getPaymentHistory); // Needs controller implementation
-// router.post('/:paymentIntentId/refund', protect, authorize(ROLES.Admin, ROLES.MVSProvider), initiateRefund); // Needs controller implementation
+// Note: Refund initiation and advanced history filtering handled by TODOs in paymentController.js
 
 module.exports = router; 

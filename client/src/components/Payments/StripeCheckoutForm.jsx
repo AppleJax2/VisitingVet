@@ -166,9 +166,7 @@ const StripeCheckoutWrapper = ({ appointmentId }) => {
             try {
                 setLoading(true);
                 setError(null);
-                console.log(`Fetching client secret for appointment: ${appointmentId}`);
                 const { data } = await api.post('/payments/create-intent', { appointmentId });
-                console.log('Received client secret:', data.clientSecret);
                 setClientSecret(data.clientSecret);
             } catch (err) {
                 console.error("Error fetching client secret:", err);
