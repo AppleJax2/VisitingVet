@@ -1,6 +1,7 @@
 const axios = require('axios');
 const asyncHandler = require('../middleware/asyncHandler');
 const ErrorResponse = require('../utils/errorResponse');
+const usageTrackingService = require('../services/usageTrackingService');
 
 const DAILY_API_KEY = process.env.DAILY_API_KEY;
 const DAILY_API_URL = process.env.DAILY_API_URL || 'https://api.daily.co/v1';
@@ -88,6 +89,18 @@ exports.createVideoToken = asyncHandler(async (req, res, next) => {
             const roomUrl = `https://${DAILY_DOMAIN}.daily.co/${roomName}`;
 
             console.log(`Generated Daily token for user ${userId} in room ${roomName}`);
+
+            // Log video session start (token generation is a good proxy)
+            usageTrackingService.logUsage(
+                'VIDEO_SESSION_START',
+                userId,
+                {
+                    roomName: roomName,
+                    roomUrl: roomUrl,
+                    // Add any other relevant details, e.g., appointmentId if roomName is based on it
+                }
+            );
+
             res.status(200).json({ success: true, token: token, roomUrl: roomUrl });
 
         } else {

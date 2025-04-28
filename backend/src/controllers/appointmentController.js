@@ -4,6 +4,7 @@ const Service = require('../models/Service');
 const Availability = require('../models/Availability');
 const User = require('../models/User');
 const notificationService = require('../utils/notificationService');
+const usageTrackingService = require('../services/usageTrackingService');
 
 // Helper function to check if the requested time is within provider's availability
 const isTimeWithinAvailability = (availability, requestedDate, serviceDuration) => {
@@ -73,6 +74,7 @@ exports.requestAppointment = async (req, res) => {
   try {
     const { providerProfileId, serviceId, appointmentTime, notes, animalDetails, customFieldResponses } = req.body;
     const requestedTime = new Date(appointmentTime);
+    const ownerUserId = req.user.id;
     
     // Validate required fields
     if (!providerProfileId || !serviceId || !appointmentTime) {
@@ -195,6 +197,18 @@ exports.requestAppointment = async (req, res) => {
     };
 
     const appointment = await Appointment.create(appointmentData);
+
+    // Log service usage *after* successful creation
+    usageTrackingService.logUsage(
+      'APPOINTMENT_CREATED',
+      ownerUserId,
+      { 
+        appointmentId: appointment._id.toString(),
+        providerId: providerProfileId,
+        serviceId: serviceId,
+        deliveryMethod: deliveryMethod
+      }
+    );
 
     // Send notifications
     await notificationService.sendAppointmentNotification({

@@ -47,8 +47,29 @@ class AnalyticsController {
     }
 
      async handleGetServiceUsageMetrics(req, res) {
-        // Implementation for service usage metrics
-        res.status(501).json({ message: 'Service usage metrics endpoint not implemented yet.'});
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            logger.warn('Invalid input for service usage metrics endpoint', { errors: errors.array() });
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+            const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date(new Date().setDate(endDate.getDate() - 30));
+
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
+                logger.warn('Invalid date range provided for service usage metrics', { startDate: req.query.startDate, endDate: req.query.endDate });
+                return res.status(400).json({ message: 'Invalid date range. Ensure startDate is before endDate and dates are valid ISO 8601 format.' });
+            }
+
+            logger.info(`Request received for service usage metrics: ${startDate.toISOString()} to ${endDate.toISOString()}`);
+            const metrics = await AnalyticsService.getServiceUsageMetrics(startDate, endDate);
+            res.status(200).json(metrics);
+
+        } catch (error) {
+            logger.error(`Error handling getServiceUsageMetrics request: ${error.message}`, { error: error.stack });
+            res.status(500).json({ message: 'Internal server error while fetching service usage metrics.' });
+        }
     }
 }
 

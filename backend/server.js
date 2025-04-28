@@ -25,6 +25,9 @@ const configureSocket = require('./src/config/socket'); // Import socket configu
 const sanitizeInputs = require('./src/middleware/inputSanitizer'); // Import the sanitizer middleware
 const { adminApiLimiter } = require('./src/middleware/rateLimiter'); // Import the rate limiter
 
+// Import Services
+const usageTrackingService = require('./src/services/usageTrackingService'); // Import Usage Tracking Service
+
 // Load env vars
 dotenv.config({ path: './.env' });
 
@@ -55,6 +58,11 @@ const io = new Server(server, {
 
 // Apply CORS middleware to Express app (might be redundant if Socket.IO handles it? Check docs)
 app.use(cors(corsOptions));
+
+// Apply API usage logging middleware *before* other middleware like JSON parsing if possible,
+// but after CORS to ensure origin checks pass.
+// Place it early to catch as many requests as possible.
+app.use(usageTrackingService.logApiCallMiddleware);
 
 // IMPORTANT: Stripe webhook needs raw body, so define it BEFORE express.json()
 // We need to mount the webhook route separately here.

@@ -3,6 +3,8 @@ const logger = require('../utils/logger');
 // const UserRepository = require('../repositories/userRepository');
 // const VerificationRepository = require('../repositories/verificationRepository');
 // const AppointmentRepository = require('../repositories/appointmentRepository');
+const ServiceUsageLog = require('../models/ServiceUsageLog'); // Import the usage log model
+const mongoose = require('mongoose'); // Needed for aggregation pipeline
 
 /**
  * Service responsible for calculating and aggregating various
@@ -105,25 +107,96 @@ class AnalyticsService {
     async getServiceUsageMetrics(startDate, endDate) {
         logger.info('Calculating service usage metrics', { startDate, endDate });
         try {
-            // --- Placeholder Logic --- //
-            // Query relevant repositories (Appointments, Chats, VideoCalls etc.)
-            // const appointmentsBooked = await this.appointmentRepository.countBooked(startDate, endDate);
-            // const videoCallsCompleted = await VideoCallRepository.countCompleted(startDate, endDate);
-            // const messagesSent = await ChatMessageRepository.countSent(startDate, endDate);
+            const matchStage = {
+                $match: {
+                    timestamp: {
+                        $gte: startDate,
+                        $lte: endDate
+                    }
+                }
+            };
 
-            // Simulate data
-            const simulatedAppointments = Math.floor(Math.random() * 200) + 100;
-            const simulatedVideoCalls = Math.floor(simulatedAppointments * (Math.random() * 0.3 + 0.6)); // 60-90% of appointments
-            const simulatedMessages = Math.floor(Math.random() * 1000) + 500;
+            // Aggregation pipeline to count occurrences of key event types
+            const pipeline = [
+                matchStage,
+                {
+                    $group: {
+                        _id: '$eventType',
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0, // Exclude the default _id field
+                        eventType: '$_id',
+                        count: 1
+                    }
+                }
+            ];
 
+            // Execute the aggregation
+            const usageCounts = await ServiceUsageLog.aggregate(pipeline);
+
+            // Aggregate API call details (e.g., top endpoints, average duration)
+            const apiCallPipeline = [
+                 matchStage,
+                 {
+                    $match: { eventType: 'API_CALL' }
+                 },
+                 {
+                    $group: {
+                        _id: '$details.path', // Group by API path
+                        count: { $sum: 1 },
+                        avgDurationMs: { $avg: '$details.durationMs' },
+                        // Could add counts per status code, method, etc.
+                    }
+                 },
+                 {
+                    $sort: { count: -1 } // Sort by most frequent
+                 },
+                 {
+                    $limit: 10 // Limit to top 10 endpoints
+                 },
+                  {
+                    $project: {
+                        _id: 0,
+                        path: '$_id',
+                        count: 1,
+                        avgDurationMs: { $round: ['$avgDurationMs', 2] } // Round average duration
+                    }
+                 }
+            ];
+
+            const topEndpoints = await ServiceUsageLog.aggregate(apiCallPipeline);
+
+            // Format the results into a structured object
             const metrics = {
-                appointmentsBooked: simulatedAppointments,
-                videoCallsCompleted: simulatedVideoCalls,
-                messagesSent: simulatedMessages, // Example metric
+                totalEvents: usageCounts.reduce((sum, item) => sum + item.count, 0),
+                eventsByType: {},
+                topApiEndpoints: topEndpoints,
                 period: { start: startDate.toISOString(), end: endDate.toISOString() }
             };
-            logger.info('Service usage metrics calculated (simulated)', metrics);
+
+            usageCounts.forEach(item => {
+                metrics.eventsByType[item.eventType] = item.count;
+            });
+
+            // Ensure primary tracked metrics are present, even if count is 0
+            const primaryEventTypes = ['API_CALL', 'APPOINTMENT_CREATED', 'VIDEO_SESSION_START'];
+            primaryEventTypes.forEach(type => {
+                if (!metrics.eventsByType[type]) {
+                    metrics.eventsByType[type] = 0;
+                }
+            });
+
+            logger.info('Service usage metrics calculated', { 
+                totalEvents: metrics.totalEvents,
+                apiCalls: metrics.eventsByType['API_CALL'],
+                appointments: metrics.eventsByType['APPOINTMENT_CREATED'],
+                videoStarts: metrics.eventsByType['VIDEO_SESSION_START']
+             });
             return metrics;
+
         } catch (error) {
             logger.error('Error calculating service usage metrics:', error);
             throw new Error('Failed to calculate service usage metrics.');
