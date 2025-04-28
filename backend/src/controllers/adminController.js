@@ -345,39 +345,49 @@ exports.rejectVerification = async (req, res) => {
 };
 
 /**
- * @desc    Get admin action logs (paginated)
- * @route   GET /api/admin/logs
- * @access  Private/Admin
+ * @desc    Get action logs with filtering and pagination
+ * @route   GET /api/v1/admin/logs
+ * @access  Private (Admin with logs:read permission)
  */
 exports.getActionLogs = async (req, res) => {
-    try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 50;
-      const filter = {}; // Add filters later (by admin, by target user, by action type)
-  
-      const logs = await AdminActionLog.find(filter)
-        .populate('adminUser', 'name email')
-        .populate('targetUser', 'name email')
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .sort({ createdAt: -1 });
-  
-      const total = await AdminActionLog.countDocuments(filter);
-  
-      res.status(200).json({
-        success: true,
-        data: logs,
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit),
-        },
-      });
-    } catch (error) {
-      console.error('Error getting admin action logs:', error);
-      res.status(500).json({ success: false, error: 'Server error' });
+    const page = parseInt(req.query.page, 10) || 1;
+    // Adjust default limit, maybe higher for dedicated log page
+    const limit = parseInt(req.query.limit, 10) || (req.query.recent ? 5 : 50); // Smaller limit if ?recent=true
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (req.query.level) filter.level = req.query.level; // Filter by level (e.g., 'INFO', 'WARN', 'ERROR')
+    if (req.query.userId) filter.userId = req.query.userId;
+    if (req.query.action) filter.action = { $regex: req.query.action, $options: 'i' }; // Case-insensitive search for action
+    if (req.query.startDate || req.query.endDate) {
+        filter.timestamp = {};
+        if (req.query.startDate) filter.timestamp.$gte = new Date(req.query.startDate);
+        if (req.query.endDate) {
+            const endDate = new Date(req.query.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            filter.timestamp.$lte = endDate;
+        }
     }
+
+    const total = await AdminActionLog.countDocuments(filter);
+    const logs = await AdminActionLog.find(filter)
+        .populate('adminUser', 'name email') // Populate user info if userId is present
+        .populate('targetUser', 'name email')
+        .sort({ timestamp: -1 }) // Sort by newest first
+        .skip(skip)
+        .limit(limit);
+
+    res.status(200).json({
+        success: true,
+        count: logs.length,
+        pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+        },
+        data: logs
+    });
 };
 
 /**

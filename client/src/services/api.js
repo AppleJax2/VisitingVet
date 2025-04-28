@@ -757,14 +757,17 @@ export const adminDeleteRole = async (roleId) => {
   }
 };
 
-export const adminCreateUpdateProfile = async (userId, profileData) => {
+/**
+ * Get summary statistics for the Admin Dashboard
+ * @returns {Promise<Object>} Response with stats data
+ */
+export const adminGetDashboardStats = async () => {
   try {
-    // Use PUT to update the profile for a specific user ID
-    const response = await api.put(`/admin/users/${userId}/profile`, profileData);
-    return response.data; // Assuming backend confirms success/returns updated profile
+    const response = await api.get('/admin/stats/dashboard'); // Assuming this endpoint exists
+    return response.data; // Expects { success: true, data: { totalUsers, pendingVerifications, ... } }
   } catch (error) {
-    console.error(`Admin update profile for user ${userId} error:`, error.response?.data || error.message);
-    throw error.response?.data || new Error('Failed to update profile via admin');
+    console.error('Admin get dashboard stats error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch dashboard statistics');
   }
 };
 
@@ -1106,3 +1109,14 @@ export const uploadPetImage = async (petId, imageFile) => {
 
 // --- Vaccination Records --- 
 // ... other functions ... 
+
+export const adminCreateUpdateProfile = async (userId, profileData) => {
+  try {
+    // Use PUT to update the profile for a specific user ID
+    const response = await api.put(`/admin/users/${userId}/profile`, profileData);
+    return response.data; // Assuming backend confirms success/returns updated profile
+  } catch (error) {
+    console.error(`Admin update profile for user ${userId} error:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update profile via admin');
+  }
+}; 
