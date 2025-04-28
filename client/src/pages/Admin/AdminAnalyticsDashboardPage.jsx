@@ -232,42 +232,101 @@ function AdminAnalyticsDashboardPage() {
 
             {error && <ErrorMessage message={error} />} {/* Render Bootstrap alert */}
 
-            {/* Row 1: Key Metrics - Titles may need adjustment based on comparison period */}
-            {/* For simplicity, keeping titles general for now */}
-            <div className="row mb-3 gy-3">
-                 {/* Metric Cards - Rendering remains the same for now */}
-                 {/* TODO: Adapt metric card values if backend returns array data */}
-                <div className="col-12 col-sm-6 col-lg-3">
-                    <MetricCard title="New Users" value={userGrowthData?.newUsers} loading={loading} /> 
-                </div>
-                <div className="col-12 col-sm-6 col-lg-3">
-                    <MetricCard title="Total Users" value={userGrowthData?.totalUsers} loading={loading} /> 
-                </div>
-                <div className="col-12 col-sm-6 col-lg-3">
-                    <MetricCard title="Verification Approval Rate" value={verificationData?.approvalRate !== undefined ? `${(verificationData.approvalRate * 100).toFixed(1)}%` : null} loading={loading} /> 
-                </div>
-                <div className="col-12 col-sm-6 col-lg-3">
-                    <MetricCard title="API Calls" value={usageData?.eventsByType?.API_CALL} loading={loading} /> 
-                </div>
-            </div>
+            {/* Display Key Metrics */}
+            <Row>
+                {loading ? (
+                    <Col><p>Loading key metrics...</p></Col>
+                ) : error ? (
+                    <Col><Alert variant="danger">{error}</Alert></Col>
+                ) : (
+                    <Col md={3}>
+                        <Card className="text-center mb-3">
+                            <Card.Body>
+                                <Card.Title>New Users</Card.Title>
+                                <h3 className={`fw-bold text-${userGrowthData?.newUsers >= 0 ? 'success' : 'danger'}`}>{userGrowthData?.newUsers}</h3>
+                                {userGrowthData?.newUsers !== undefined && (
+                                    <small className={`text-${userGrowthData.newUsers >= 0 ? 'success' : 'danger'}`}>
+                                        {userGrowthData.newUsers >= 0 ? '▲' : '▼'} {userGrowthData.newUsers.toFixed(1)}% {comparisonPeriod}
+                                    </small>
+                                )}
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                )}
+                <Col md={3}>
+                    <Card className="text-center mb-3">
+                        <Card.Body>
+                            <Card.Title>Total Users</Card.Title>
+                            <h3 className={`fw-bold text-${userGrowthData?.totalUsers >= 0 ? 'success' : 'danger'}`}>{userGrowthData?.totalUsers}</h3>
+                            {userGrowthData?.totalUsers !== undefined && (
+                                <small className={`text-${userGrowthData.totalUsers >= 0 ? 'success' : 'danger'}`}>
+                                    {userGrowthData.totalUsers >= 0 ? '▲' : '▼'} {userGrowthData.totalUsers.toFixed(1)}% {comparisonPeriod}
+                                </small>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={3}>
+                    <Card className="text-center mb-3">
+                        <Card.Body>
+                            <Card.Title>Verification Approval Rate</Card.Title>
+                            <h3 className={`fw-bold text-${verificationData?.approvalRate !== undefined ? verificationData.approvalRate >= 0 ? 'success' : 'danger' : 'muted'}`}>
+                                {verificationData?.approvalRate !== undefined ? `${(verificationData.approvalRate * 100).toFixed(1)}%` : 'N/A'}
+                            </h3>
+                            {verificationData?.approvalRate !== undefined && (
+                                <small className={`text-${verificationData.approvalRate >= 0 ? 'success' : 'danger'}`}>
+                                    {verificationData.approvalRate >= 0 ? '▲' : '▼'} {(verificationData.approvalRate * 100).toFixed(1)}% {comparisonPeriod}
+                                </small>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={3}>
+                    <Card className="text-center mb-3">
+                        <Card.Body>
+                            <Card.Title>API Calls</Card.Title>
+                            <h3 className={`fw-bold text-${usageData?.eventsByType?.API_CALL >= 0 ? 'success' : 'danger'}`}>{usageData?.eventsByType?.API_CALL}</h3>
+                            {usageData?.eventsByType?.API_CALL !== undefined && (
+                                <small className={`text-${usageData.eventsByType.API_CALL >= 0 ? 'success' : 'danger'}`}>
+                                    {usageData.eventsByType.API_CALL >= 0 ? '▲' : '▼'} {usageData.eventsByType.API_CALL.toFixed(1)} {comparisonPeriod}
+                                </small>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
 
-            {/* Row 2: Charts */}
-            {/* TODO: Charts need adaptation to handle array data for comparison periods */}
-            <div className="row mb-3 gy-3">
-                <div className="col-12 col-lg-6">
-                    {/* UserGrowthChart likely needs update to handle array data */}
-                    <UserGrowthChart data={userGrowthData} loading={loading} error={error ? { message: error } : null} />
-                </div>
-                <div className="col-12 col-lg-6">
-                     {/* VerificationMetricsChart needs update to handle array data */}
-                     {/* Example: Pass verificationData.results if period is not 'total' */}
-                    <VerificationMetricsChart
-                        data={verificationData} // This needs adjustment based on API response structure
-                        loading={loading}
-                        error={error ? { message: error } : null}
-                    />
-                </div>
-            </div>
+            {/* Display Charts */}
+            <Row>
+                <Col md={6} className="mb-3">
+                    <Card>
+                        <Card.Header>Verification Rate</Card.Header>
+                        <Card.Body>
+                            {loading ? <LoadingSpinner/> : error ? <Alert variant="danger">{error}</Alert> : 
+                                <VerificationMetricsChart
+                                    data={verificationData}
+                                    loading={loading}
+                                    error={error ? { message: error } : null}
+                                />
+                            }
+                        </Card.Body>
+                    </Card>
+                </Col>
+                 <Col md={6} className="mb-3">
+                    <Card>
+                        <Card.Header>User Growth</Card.Header>
+                        <Card.Body>
+                            {loading ? <LoadingSpinner/> : error ? <Alert variant="danger">{error}</Alert> : 
+                                <UserGrowthChart
+                                    data={userGrowthData}
+                                    loading={loading}
+                                    error={error ? { message: error } : null}
+                                />
+                            }
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
 
             {/* Row 3: More Charts/Data (Service Usage, Segmentation) */}
             <div className="row gy-3">

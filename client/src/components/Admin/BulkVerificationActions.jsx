@@ -37,7 +37,6 @@ const BulkVerificationActions = ({ selectedIds, onActionComplete }) => {
             // Simulate API call
             new Promise(async (resolve, reject) => {
                 try {
-                    console.log(`${actionVerb} ${selectedIds.length} verifications:`, selectedIds);
                     // const response = await actionApi(selectedIds);
                     // Simulate success/failure
                     await new Promise(res => setTimeout(res, 1500)); // Simulate network delay

@@ -81,8 +81,7 @@ function AdminEditProfilePage() {
       } else {
         // Handle case where profile doesn't exist yet for this provider user
         // Fetch user email separately if needed for display, or handle gracefully
-        console.log('Profile not found, initializing empty form for user:', userId);
-         setError('Provider profile not found. You can create one here.');
+        setError('Provider profile not found. You can create one here.');
          // Optionally fetch user details to display email even without profile
       }
     } catch (err) {
