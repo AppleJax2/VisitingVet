@@ -1,0 +1,158 @@
+/* 
+ * VisitingVet Design System
+ * A comprehensive collection of design tokens and variables
+ * Based on the nature-inspired warm color palette
+ */
+
+// ==========================================================================
+// COLORS 
+// ==========================================================================
+
+// Brand colors
+$color-primary: #577E46; // Sage Green
+$color-primary-light: #6B9256;
+$color-primary-dark: #3D5D2F;
+
+$color-secondary: #AC510A; // Warm Terracotta
+$color-secondary-light: #C76420;
+$color-secondary-dark: #7F3C06;
+
+// Accent colors
+$color-accent-gold: #EDB75A;
+$color-accent-dark-green: #124438;
+$color-accent-light-green: #A8B99F;
+
+// Functional colors
+$color-success: #388E3C;
+$color-info: #0288D1;
+$color-warning: #F9A825;
+$color-danger: #D32F2F;
+
+// Background colors
+$color-background-light: #F6E6BB; // Cream
+$color-background-white: #FFFFFF;
+$color-background-tan: #F0DCA0;
+$color-background-dark: #124438; // Deep Forest Green
+
+// Text colors
+$color-text-primary: #333333;
+$color-text-secondary: #555555;
+$color-text-light: #777777;
+$color-text-white: #FFFFFF;
+
+// Neutral colors
+$color-neutral-100: #f8f9fa;
+$color-neutral-200: #e9ecef;
+$color-neutral-300: #dee2e6;
+$color-neutral-400: #ced4da;
+$color-neutral-500: #adb5bd;
+$color-neutral-600: #6c757d;
+$color-neutral-700: #495057;
+$color-neutral-800: #343a40;
+$color-neutral-900: #212529;
+
+// ==========================================================================
+// TYPOGRAPHY
+// ==========================================================================
+
+// Font families
+$font-family-heading: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+$font-family-body: "'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+$font-family-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+// Font sizes
+$font-size-xs: 0.75rem;    // 12px
+$font-size-sm: 0.875rem;   // 14px
+$font-size-base: 1rem;     // 16px
+$font-size-md: 1.125rem;   // 18px
+$font-size-lg: 1.25rem;    // 20px
+$font-size-xl: 1.5rem;     // 24px
+$font-size-2xl: 1.875rem;  // 30px
+$font-size-3xl: 2.25rem;   // 36px
+$font-size-4xl: 3rem;      // 48px
+$font-size-5xl: 3.75rem;   // 60px
+
+// Font weights
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Line heights
+$line-height-tight: 1.25;
+$line-height-base: 1.5;
+$line-height-loose: 1.75;
+
+// ==========================================================================
+// SPACING
+// ==========================================================================
+
+$spacing-base: 1rem; // 16px
+
+$spacing-0: 0;
+$spacing-1: $spacing-base * 0.25;  // 4px
+$spacing-2: $spacing-base * 0.5;   // 8px
+$spacing-3: $spacing-base * 0.75;  // 12px
+$spacing-4: $spacing-base;         // 16px
+$spacing-5: $spacing-base * 1.5;   // 24px
+$spacing-6: $spacing-base * 2;     // 32px
+$spacing-7: $spacing-base * 2.5;   // 40px
+$spacing-8: $spacing-base * 3;     // 48px
+$spacing-9: $spacing-base * 4;     // 64px
+$spacing-10: $spacing-base * 5;    // 80px
+
+// ==========================================================================
+// BORDERS & SHADOWS
+// ==========================================================================
+
+$border-radius-sm: 3px;
+$border-radius-md: 6px;
+$border-radius-lg: 12px;
+$border-radius-xl: 24px;
+$border-radius-circle: 50%;
+$border-radius-pill: 9999px;
+
+$border-width-thin: 1px;
+$border-width-medium: 2px;
+$border-width-thick: 4px;
+
+// ==========================================================================
+// SHADOWS
+// ==========================================================================
+
+$shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+$shadow-md: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+$shadow-lg: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+$shadow-xl: 0 20px 25px rgba(0,0,0,0.1), 0 10px 10px rgba(0,0,0,0.04);
+
+// ==========================================================================
+// BREAKPOINTS
+// ==========================================================================
+
+$breakpoint-xs: 0;
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+$breakpoint-xxl: 1400px;
+
+// ==========================================================================
+// TRANSITIONS
+// ==========================================================================
+
+$transition-base: all 0.2s ease-in-out;
+$transition-fast: all 0.15s ease-in-out;
+$transition-slow: all 0.3s ease-in-out;
+
+// ==========================================================================
+// Z-INDEX
+// ==========================================================================
+
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070; 

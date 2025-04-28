@@ -1,0 +1,405 @@
+/* 
+ * VisitingVet Modal Components
+ * Standardized modal styling based on our design system
+ */
+
+@import "../design-system";
+
+// Modal backdrop
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: $z-index-modal-backdrop;
+  width: 100vw;
+  height: 100vh;
+  background-color: $color-text-primary;
+  
+  &.fade {
+    opacity: 0;
+    transition: $transition-base;
+  }
+  
+  &.show {
+    opacity: 0.5;
+  }
+}
+
+// Modal container
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: $z-index-modal;
+  display: none;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  outline: 0;
+  
+  &.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: translateY(-50px);
+  }
+  
+  &.show .modal-dialog {
+    transform: none;
+  }
+}
+
+// Modal dialog
+.modal-dialog {
+  position: relative;
+  width: auto;
+  margin: $spacing-5 auto;
+  pointer-events: none;
+  
+  // Modal centered
+  &.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - #{$spacing-10});
+  }
+  
+  // Modal scrollable
+  &.modal-dialog-scrollable {
+    height: calc(100% - #{$spacing-10});
+    
+    .modal-content {
+      max-height: 100%;
+      overflow: hidden;
+    }
+    
+    .modal-body {
+      overflow-y: auto;
+    }
+  }
+}
+
+// Modal content
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  pointer-events: auto;
+  background-color: $color-background-white;
+  background-clip: padding-box;
+  border: $border-width-thin solid rgba($color-text-primary, 0.2);
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-lg;
+  outline: 0;
+}
+
+// Modal header
+.modal-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-4 $spacing-4;
+  border-bottom: $border-width-thin solid $color-neutral-300;
+  border-top-left-radius: calc(#{$border-radius-lg} - 1px);
+  border-top-right-radius: calc(#{$border-radius-lg} - 1px);
+  
+  .modal-title {
+    margin-bottom: 0;
+    line-height: $line-height-base;
+    font-weight: $font-weight-semibold;
+    font-family: $font-family-heading;
+  }
+  
+  .btn-close {
+    padding: calc(#{$spacing-4} * 0.25);
+    margin: calc(-#{$spacing-4} * 0.25) calc(-#{$spacing-4} * 0.25) calc(-#{$spacing-4} * 0.25) auto;
+  }
+}
+
+// Modal body
+.modal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: $spacing-4;
+}
+
+// Modal footer
+.modal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  padding: $spacing-3 $spacing-4;
+  border-top: $border-width-thin solid $color-neutral-300;
+  border-bottom-right-radius: calc(#{$border-radius-lg} - 1px);
+  border-bottom-left-radius: calc(#{$border-radius-lg} - 1px);
+  
+  > * {
+    margin: $spacing-1;
+  }
+}
+
+// Modal sizes
+.modal-sm {
+  max-width: 300px;
+}
+
+.modal-md {
+  max-width: 500px;
+}
+
+.modal-lg {
+  max-width: 800px;
+}
+
+.modal-xl {
+  max-width: 1140px;
+}
+
+// Media queries for modal sizing
+@media (min-width: $breakpoint-sm) {
+  .modal-dialog {
+    max-width: 500px;
+    margin: $spacing-7 auto;
+  }
+  
+  .modal-dialog-scrollable {
+    height: calc(100% - #{$spacing-14});
+  }
+  
+  .modal-dialog-centered {
+    min-height: calc(100% - #{$spacing-14});
+  }
+  
+  .modal-content {
+    box-shadow: $shadow-lg;
+  }
+  
+  .modal-sm {
+    max-width: 300px;
+  }
+}
+
+@media (min-width: $breakpoint-lg) {
+  .modal-lg,
+  .modal-xl {
+    max-width: 800px;
+  }
+}
+
+@media (min-width: $breakpoint-xl) {
+  .modal-xl {
+    max-width: 1140px;
+  }
+}
+
+// Modal fullscreen
+.modal-fullscreen {
+  width: 100vw;
+  max-width: none;
+  height: 100%;
+  margin: 0;
+  
+  .modal-content {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    border-radius: 0;
+  }
+  
+  .modal-body {
+    overflow-y: auto;
+  }
+}
+
+// Modal fullscreen breakpoint variants
+// Instead of using complex mappings, define each separately
+.modal-fullscreen-sm-down {
+  @media (max-width: $breakpoint-sm - 0.02) {
+    width: 100vw;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    
+    .modal-content {
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+    }
+    
+    .modal-header,
+    .modal-footer {
+      border-radius: 0;
+    }
+    
+    .modal-body {
+      overflow-y: auto;
+    }
+  }
+}
+
+.modal-fullscreen-md-down {
+  @media (max-width: $breakpoint-md - 0.02) {
+    width: 100vw;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    
+    .modal-content {
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+    }
+    
+    .modal-header,
+    .modal-footer {
+      border-radius: 0;
+    }
+    
+    .modal-body {
+      overflow-y: auto;
+    }
+  }
+}
+
+.modal-fullscreen-lg-down {
+  @media (max-width: $breakpoint-lg - 0.02) {
+    width: 100vw;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    
+    .modal-content {
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+    }
+    
+    .modal-header,
+    .modal-footer {
+      border-radius: 0;
+    }
+    
+    .modal-body {
+      overflow-y: auto;
+    }
+  }
+}
+
+.modal-fullscreen-xl-down {
+  @media (max-width: $breakpoint-xl - 0.02) {
+    width: 100vw;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    
+    .modal-content {
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+    }
+    
+    .modal-header,
+    .modal-footer {
+      border-radius: 0;
+    }
+    
+    .modal-body {
+      overflow-y: auto;
+    }
+  }
+}
+
+// Color variants
+.modal-primary {
+  .modal-header {
+    background-color: $color-primary;
+    color: $color-text-white;
+    border-bottom-color: rgba($color-text-white, 0.2);
+  }
+  
+  .modal-title {
+    color: $color-text-white;
+  }
+  
+  .btn-close {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.modal-secondary {
+  .modal-header {
+    background-color: $color-secondary;
+    color: $color-text-white;
+    border-bottom-color: rgba($color-text-white, 0.2);
+  }
+  
+  .modal-title {
+    color: $color-text-white;
+  }
+  
+  .btn-close {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.modal-success {
+  .modal-header {
+    background-color: $color-success;
+    color: $color-text-white;
+    border-bottom-color: rgba($color-text-white, 0.2);
+  }
+  
+  .modal-title {
+    color: $color-text-white;
+  }
+  
+  .btn-close {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.modal-danger {
+  .modal-header {
+    background-color: $color-danger;
+    color: $color-text-white;
+    border-bottom-color: rgba($color-text-white, 0.2);
+  }
+  
+  .modal-title {
+    color: $color-text-white;
+  }
+  
+  .btn-close {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.modal-warning {
+  .modal-header {
+    background-color: $color-warning;
+    color: $color-text-primary;
+    border-bottom-color: rgba($color-text-primary, 0.2);
+  }
+}
+
+.modal-info {
+  .modal-header {
+    background-color: $color-info;
+    color: $color-text-white;
+    border-bottom-color: rgba($color-text-white, 0.2);
+  }
+  
+  .modal-title {
+    color: $color-text-white;
+  }
+  
+  .btn-close {
+    filter: brightness(0) invert(1);
+  }
+} 

@@ -59,5 +59,73 @@
 
 // 6. Add additional custom code here
 
+// Import VisitingVet utility classes
+@import "utility-classes";
+
+// Import component specific styles
+@import "components/buttons";
+@import "components/forms";
+@import "components/cards";
+@import "components/modals";
+
+// Expose CSS variables from our design tokens
+:root {
+  // Colors
+  --color-primary: #{$color-primary};
+  --color-primary-light: #{$color-primary-light};
+  --color-primary-dark: #{$color-primary-dark};
+  --color-secondary: #{$color-secondary};
+  --color-secondary-light: #{$color-secondary-light};
+  --color-secondary-dark: #{$color-secondary-dark};
+  
+  --color-accent-gold: #{$color-accent-gold};
+  --color-accent-dark-green: #{$color-accent-dark-green};
+  --color-accent-light-green: #{$color-accent-light-green};
+  
+  --color-success: #{$color-success};
+  --color-info: #{$color-info};
+  --color-warning: #{$color-warning};
+  --color-danger: #{$color-danger};
+  
+  --color-background-light: #{$color-background-light};
+  --color-background-white: #{$color-background-white};
+  --color-background-tan: #{$color-background-tan};
+  --color-background-dark: #{$color-background-dark};
+  
+  --color-text-primary: #{$color-text-primary};
+  --color-text-secondary: #{$color-text-secondary};
+  --color-text-light: #{$color-text-light};
+  --color-text-white: #{$color-text-white};
+  
+  // Spacing 
+  @each $i, $spacing in (
+    0: $spacing-0,
+    1: $spacing-1,
+    2: $spacing-2,
+    3: $spacing-3,
+    4: $spacing-4,
+    5: $spacing-5,
+    6: $spacing-6,
+    7: $spacing-7,
+    8: $spacing-8,
+    9: $spacing-9,
+    10: $spacing-10
+  ) {
+    --spacing-#{$i}: #{$spacing};
+  }
+  
+  // Shadows
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
+  
+  // Border radius
+  --border-radius-sm: #{$border-radius-sm};
+  --border-radius-md: #{$border-radius-md};
+  --border-radius-lg: #{$border-radius-lg};
+  --border-radius-xl: #{$border-radius-xl};
+}
+
 // Placeholder for custom react-big-calendar Bootstrap theme
 // @import "vendor/react-big-calendar-bootstrap"; 

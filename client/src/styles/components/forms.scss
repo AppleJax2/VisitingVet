@@ -1,0 +1,317 @@
+/* 
+ * VisitingVet Form Components
+ * Standardized form styling based on our design system
+ */
+
+@import "../design-system";
+
+// Form label styles
+.form-label {
+  display: block;
+  margin-bottom: $spacing-1;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+// Base input styles
+.form-control {
+  display: block;
+  width: 100%;
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-base;
+  font-family: $font-family-body;
+  line-height: $line-height-base;
+  color: $color-text-primary;
+  background-color: $color-background-white;
+  background-clip: padding-box;
+  border: $border-width-thin solid $color-neutral-400;
+  border-radius: $border-radius-md;
+  transition: $transition-base;
+  
+  &:focus {
+    border-color: $color-primary;
+    outline: 0;
+    box-shadow: 0 0 0 3px transparentize($color-primary, 0.8);
+  }
+  
+  &::placeholder {
+    color: $color-text-light;
+    opacity: 0.7;
+  }
+  
+  &:disabled, &.disabled {
+    background-color: $color-neutral-200;
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  &.is-invalid {
+    border-color: $color-danger;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px transparentize($color-danger, 0.8);
+    }
+  }
+  
+  &.is-valid {
+    border-color: $color-success;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px transparentize($color-success, 0.8);
+    }
+  }
+}
+
+// Input sizes
+.form-control-lg {
+  font-size: $font-size-lg;
+  padding: $spacing-3 $spacing-4;
+}
+
+.form-control-sm {
+  font-size: $font-size-sm;
+  padding: $spacing-1 $spacing-2;
+}
+
+// Textarea
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+// Select
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $spacing-3 center;
+  background-size: 16px 12px;
+  padding-right: $spacing-8;
+}
+
+// Checkboxes and radios
+.form-check {
+  display: block;
+  min-height: $spacing-5;
+  padding-left: $spacing-5;
+  margin-bottom: $spacing-2;
+}
+
+.form-check-input {
+  width: $spacing-4;
+  height: $spacing-4;
+  margin-top: $spacing-1;
+  margin-left: -$spacing-5;
+  background-color: $color-background-white;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: $border-width-thin solid $color-neutral-400;
+  appearance: none;
+  transition: $transition-base;
+  
+  &:focus {
+    border-color: $color-primary;
+    outline: 0;
+    box-shadow: 0 0 0 3px transparentize($color-primary, 0.8);
+  }
+  
+  &:checked {
+    background-color: $color-primary;
+    border-color: $color-primary;
+  }
+  
+  &[type="checkbox"] {
+    border-radius: $border-radius-sm;
+    
+    &:checked {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3 6-6'/%3E%3C/svg%3E");
+    }
+  }
+  
+  &[type="radio"] {
+    border-radius: $border-radius-circle;
+    
+    &:checked {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4' fill='%23fff'/%3E%3C/svg%3E");
+    }
+  }
+  
+  &:disabled {
+    pointer-events: none;
+    filter: none;
+    opacity: 0.5;
+  }
+}
+
+.form-check-label {
+  color: $color-text-primary;
+  cursor: pointer;
+}
+
+// Switch
+.form-switch {
+  padding-left: $spacing-9;
+  
+  .form-check-input {
+    width: $spacing-8;
+    margin-left: -$spacing-9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='3' fill='rgba(0, 0, 0, 0.25)'/%3E%3C/svg%3E");
+    background-position: left center;
+    border-radius: $spacing-4;
+    transition: background-position .15s ease-in-out;
+    
+    &:focus {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='3' fill='rgba(0, 0, 0, 0.25)'/%3E%3C/svg%3E");
+    }
+    
+    &:checked {
+      background-position: right center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='3' fill='%23fff'/%3E%3C/svg%3E");
+    }
+  }
+}
+
+// Form text helper
+.form-text {
+  margin-top: $spacing-1;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+// Input groups
+.input-group {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  width: 100%;
+  
+  > .form-control {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+  }
+  
+  > .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: $spacing-2 $spacing-3;
+    font-size: $font-size-base;
+    font-weight: $font-weight-normal;
+    line-height: $line-height-base;
+    color: $color-text-secondary;
+    text-align: center;
+    white-space: nowrap;
+    background-color: $color-neutral-200;
+    border: $border-width-thin solid $color-neutral-400;
+  }
+  
+  &:not(.has-validation) > :not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  
+  &:not(.has-validation) > :not(:first-child) {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+// Validation messages
+.invalid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: $spacing-1;
+  font-size: $font-size-sm;
+  color: $color-danger;
+}
+
+.valid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: $spacing-1;
+  font-size: $font-size-sm;
+  color: $color-success;
+}
+
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+  border-color: $color-danger;
+  padding-right: calc(1.5em + #{$spacing-5});
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(.375em + #{$spacing-1}) center;
+  background-size: calc(.75em + #{$spacing-2}) calc(.75em + #{$spacing-2});
+  
+  &:focus {
+    border-color: $color-danger;
+    box-shadow: 0 0 0 3px transparentize($color-danger, 0.8);
+  }
+  
+  ~ .invalid-feedback {
+    display: block;
+  }
+}
+
+.was-validated .form-control:valid,
+.form-control.is-valid {
+  border-color: $color-success;
+  padding-right: calc(1.5em + #{$spacing-5});
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(.375em + #{$spacing-1}) center;
+  background-size: calc(.75em + #{$spacing-2}) calc(.75em + #{$spacing-2});
+  
+  &:focus {
+    border-color: $color-success;
+    box-shadow: 0 0 0 3px transparentize($color-success, 0.8);
+  }
+  
+  ~ .valid-feedback {
+    display: block;
+  }
+}
+
+// Form floating labels
+.form-floating {
+  position: relative;
+  
+  > .form-control {
+    height: calc(#{$spacing-9} + 2px);
+    padding: $spacing-4 $spacing-3;
+  }
+  
+  > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding: $spacing-4 $spacing-3;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: opacity .1s ease-in-out, transform .1s ease-in-out;
+    color: $color-text-light;
+  }
+  
+  > .form-control {
+    &::placeholder {
+      color: transparent;
+    }
+    
+    &:focus, &:not(:placeholder-shown) {
+      padding-top: calc(#{$spacing-4} + #{$spacing-2});
+      padding-bottom: calc(#{$spacing-4} - #{$spacing-2});
+    }
+    
+    &:focus ~ label,
+    &:not(:placeholder-shown) ~ label {
+      opacity: .65;
+      transform: scale(.85) translateY(-#{$spacing-2}) translateX(.15rem);
+    }
+  }
+} 

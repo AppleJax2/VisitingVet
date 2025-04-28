@@ -1,0 +1,195 @@
+/* 
+ * VisitingVet Button Components
+ * Standardized button styling based on our design system
+ */
+
+@import "../design-system";
+
+// Base button styles
+.btn {
+  font-family: $font-family-body;
+  font-weight: $font-weight-medium;
+  padding: $spacing-2 $spacing-4;
+  border-radius: $border-radius-md;
+  transition: $transition-base;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: $line-height-tight;
+  
+  // Focus styles
+  &:focus, &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px transparentize($color-primary, 0.7);
+  }
+  
+  // Icon spacing 
+  svg {
+    margin-right: $spacing-2;
+    
+    &:only-child {
+      margin-right: 0;
+    }
+  }
+}
+
+// Primary button
+.btn-primary {
+  background-color: $color-primary;
+  border-color: $color-primary;
+  color: $color-text-white;
+  
+  &:hover, &:active {
+    background-color: $color-primary-dark;
+    border-color: $color-primary-dark;
+  }
+  
+  &:disabled, &.disabled {
+    background-color: transparentize($color-primary, 0.4);
+    border-color: transparent;
+  }
+}
+
+// Secondary button
+.btn-secondary {
+  background-color: $color-secondary;
+  border-color: $color-secondary;
+  color: $color-text-white;
+  
+  &:hover, &:active {
+    background-color: $color-secondary-dark;
+    border-color: $color-secondary-dark;
+  }
+  
+  &:disabled, &.disabled {
+    background-color: transparentize($color-secondary, 0.4);
+    border-color: transparent;
+  }
+}
+
+// Outline primary button
+.btn-outline-primary {
+  background-color: transparent;
+  border-color: $color-primary;
+  color: $color-primary;
+  
+  &:hover, &:active {
+    background-color: $color-primary;
+    color: $color-text-white;
+  }
+  
+  &:disabled, &.disabled {
+    color: transparentize($color-primary, 0.4);
+    border-color: transparentize($color-primary, 0.4);
+    background-color: transparent;
+  }
+}
+
+// Outline secondary button
+.btn-outline-secondary {
+  background-color: transparent;
+  border-color: $color-secondary;
+  color: $color-secondary;
+  
+  &:hover, &:active {
+    background-color: $color-secondary;
+    color: $color-text-white;
+  }
+  
+  &:disabled, &.disabled {
+    color: transparentize($color-secondary, 0.4);
+    border-color: transparentize($color-secondary, 0.4);
+    background-color: transparent;
+  }
+}
+
+// Text buttons (no background or border)
+.btn-text {
+  background-color: transparent;
+  border-color: transparent;
+  color: $color-primary;
+  padding: $spacing-1 $spacing-2;
+  
+  &:hover, &:active {
+    background-color: transparentize($color-primary, 0.9);
+    text-decoration: none;
+  }
+  
+  &:disabled, &.disabled {
+    color: transparentize($color-primary, 0.4);
+  }
+}
+
+// Secondary text button
+.btn-text-secondary {
+  @extend .btn-text;
+  color: $color-secondary;
+  
+  &:hover, &:active {
+    background-color: transparentize($color-secondary, 0.9);
+  }
+  
+  &:disabled, &.disabled {
+    color: transparentize($color-secondary, 0.4);
+  }
+}
+
+// Button sizes
+.btn-lg {
+  padding: $spacing-3 $spacing-5;
+  font-size: $font-size-lg;
+}
+
+.btn-sm {
+  padding: $spacing-1 $spacing-3;
+  font-size: $font-size-sm;
+}
+
+.btn-xs {
+  padding: $spacing-1 $spacing-2;
+  font-size: $font-size-xs;
+}
+
+// Icon-only buttons
+.btn-icon {
+  padding: $spacing-2;
+  border-radius: $border-radius-circle;
+  
+  svg {
+    margin-right: 0;
+  }
+  
+  &.btn-sm {
+    padding: $spacing-1;
+  }
+  
+  &.btn-lg {
+    padding: $spacing-3;
+  }
+}
+
+// Button group styles
+.btn-group {
+  display: inline-flex;
+  
+  .btn {
+    border-radius: 0;
+    
+    &:first-child {
+      border-top-left-radius: $border-radius-md;
+      border-bottom-left-radius: $border-radius-md;
+    }
+    
+    &:last-child {
+      border-top-right-radius: $border-radius-md;
+      border-bottom-right-radius: $border-radius-md;
+    }
+  }
+}
+
+// Block buttons
+.btn-block {
+  display: flex;
+  width: 100%;
+} 

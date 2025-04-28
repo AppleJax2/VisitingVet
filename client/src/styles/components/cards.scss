@@ -1,0 +1,319 @@
+/* 
+ * VisitingVet Card Components
+ * Standardized card styling based on our design system
+ */
+
+@import "../design-system";
+
+// Base card style
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: $color-background-white;
+  background-clip: border-box;
+  border: $border-width-thin solid $color-neutral-300;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+  transition: $transition-base;
+  overflow: hidden;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+}
+
+// Card header
+.card-header {
+  padding: $spacing-4;
+  margin-bottom: 0;
+  background-color: rgba($color-neutral-100, 0.5);
+  border-bottom: $border-width-thin solid $color-neutral-300;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  &:first-child {
+    border-top-left-radius: calc(#{$border-radius-lg} - 1px);
+    border-top-right-radius: calc(#{$border-radius-lg} - 1px);
+  }
+  
+  .card-title {
+    margin-bottom: 0;
+  }
+}
+
+// Card body
+.card-body {
+  flex: 1 1 auto;
+  padding: $spacing-4;
+}
+
+// Card footer
+.card-footer {
+  padding: $spacing-4;
+  background-color: rgba($color-neutral-100, 0.5);
+  border-top: $border-width-thin solid $color-neutral-300;
+  
+  &:last-child {
+    border-bottom-right-radius: calc(#{$border-radius-lg} - 1px);
+    border-bottom-left-radius: calc(#{$border-radius-lg} - 1px);
+  }
+}
+
+// Card title
+.card-title {
+  margin-bottom: $spacing-3;
+  font-weight: $font-weight-semibold;
+  font-family: $font-family-heading;
+  color: $color-text-primary;
+  font-size: $font-size-lg;
+}
+
+// Card subtitle
+.card-subtitle {
+  margin-top: -$spacing-2;
+  margin-bottom: $spacing-3;
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+}
+
+// Card text
+.card-text {
+  margin-bottom: $spacing-3;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Card link
+.card-link {
+  color: $color-primary;
+  text-decoration: none;
+  font-weight: $font-weight-medium;
+  
+  &:hover {
+    color: $color-primary-dark;
+    text-decoration: underline;
+  }
+  
+  + .card-link {
+    margin-left: $spacing-3;
+  }
+}
+
+// Card image
+.card-img-top {
+  width: 100%;
+  object-fit: cover;
+  border-top-left-radius: calc(#{$border-radius-lg} - 1px);
+  border-top-right-radius: calc(#{$border-radius-lg} - 1px);
+}
+
+.card-img-bottom {
+  width: 100%;
+  object-fit: cover;
+  border-bottom-right-radius: calc(#{$border-radius-lg} - 1px);
+  border-bottom-left-radius: calc(#{$border-radius-lg} - 1px);
+}
+
+.card-img {
+  width: 100%;
+  object-fit: cover;
+  border-radius: calc(#{$border-radius-lg} - 1px);
+}
+
+// Card with overlay
+.card-img-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: $spacing-4;
+  border-radius: calc(#{$border-radius-lg} - 1px);
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  
+  .card-title, .card-subtitle, .card-text {
+    color: $color-text-white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+}
+
+// Card group
+.card-group {
+  display: flex;
+  flex-direction: column;
+  
+  @media (min-width: $breakpoint-md) {
+    flex-flow: row wrap;
+    
+    > .card {
+      flex: 1 0 0%;
+      margin-bottom: 0;
+      
+      + .card {
+        margin-left: 0;
+        border-left: 0;
+      }
+      
+      &:not(:last-child) {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+      
+      &:not(:first-child) {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+    }
+  }
+}
+
+// Card deck
+.card-deck {
+  display: flex;
+  flex-direction: column;
+  
+  @media (min-width: $breakpoint-md) {
+    flex-flow: row wrap;
+    margin-right: -$spacing-3;
+    margin-left: -$spacing-3;
+    
+    .card {
+      flex: 1 0 0%;
+      margin-right: $spacing-3;
+      margin-bottom: $spacing-3;
+      margin-left: $spacing-3;
+    }
+  }
+}
+
+// Card columns
+.card-columns {
+  @media (min-width: $breakpoint-md) {
+    column-count: 3;
+    column-gap: $spacing-4;
+    orphans: 1;
+    widows: 1;
+    
+    .card {
+      display: inline-block;
+      width: 100%;
+      margin-bottom: $spacing-4;
+    }
+  }
+}
+
+// Horizontal card
+.card-horizontal {
+  flex-direction: row;
+  
+  .card-img-left {
+    width: 33%;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: calc(#{$border-radius-lg} - 1px);
+    border-bottom-left-radius: calc(#{$border-radius-lg} - 1px);
+    object-fit: cover;
+  }
+  
+  .card-body {
+    flex: 1;
+  }
+  
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    
+    .card-img-left {
+      width: 100%;
+      border-top-right-radius: calc(#{$border-radius-lg} - 1px);
+      border-bottom-left-radius: 0;
+    }
+  }
+}
+
+// Card color variants
+.card-primary {
+  background-color: $color-primary;
+  border-color: $color-primary;
+  
+  .card-header, .card-footer {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .card-title, .card-subtitle, .card-text {
+    color: $color-text-white;
+  }
+  
+  .card-link {
+    color: $color-text-white;
+    text-decoration: underline;
+    
+    &:hover {
+      color: $color-background-light;
+    }
+  }
+}
+
+.card-secondary {
+  background-color: $color-secondary;
+  border-color: $color-secondary;
+  
+  .card-header, .card-footer {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .card-title, .card-subtitle, .card-text {
+    color: $color-text-white;
+  }
+  
+  .card-link {
+    color: $color-text-white;
+    text-decoration: underline;
+    
+    &:hover {
+      color: $color-background-light;
+    }
+  }
+}
+
+.card-light {
+  background-color: $color-background-light;
+  border-color: $color-neutral-300;
+  
+  .card-header, .card-footer {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.card-dark {
+  background-color: $color-background-dark;
+  border-color: $color-background-dark;
+  
+  .card-header, .card-footer {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .card-title, .card-subtitle, .card-text {
+    color: $color-text-white;
+  }
+  
+  .card-link {
+    color: $color-accent-gold;
+    
+    &:hover {
+      color: lighten($color-accent-gold, 10%);
+    }
+  }
+} 
