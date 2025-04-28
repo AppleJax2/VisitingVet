@@ -1,11 +1,11 @@
 # Landing Page Polish To-Do List
 
 ## Typography & Fonts
-- [ ] Replace all font families with Ranade throughout the site
-- [ ] Adjust heading font weights to complement Ranade's characteristics
-- [ ] Ensure consistent line heights across all text elements
-- [ ] Optimize font sizes for better readability on all devices
-- [ ] Update font variables in the CSS root
+- [x] Replace all font families with Ranade throughout the site
+- [x] Adjust heading font weights to complement Ranade's characteristics
+- [x] Ensure consistent line heights across all text elements
+- [x] Optimize font sizes for better readability on all devices
+- [x] Update font variables in the CSS root
 
 ## Color & Contrast Improvements
 - [ ] Enhance contrast between text and background colors
