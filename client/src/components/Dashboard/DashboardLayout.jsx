@@ -296,8 +296,14 @@ const DashboardLayout = ({ children }) => {
   const navItems = getNavItems();
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+    try {
+      await logout();
+      // No need to navigate manually, as the logout function now handles redirection
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // If logout fails in any way, force redirect to login
+      window.location.href = '/login';
+    }
   };
 
   // Reusable Sidebar Content Component

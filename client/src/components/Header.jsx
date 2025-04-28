@@ -8,11 +8,13 @@ import {
   Bell, 
   ChevronDown 
 } from 'react-bootstrap-icons';
-import { checkAuthStatus, logout } from '../services/api';
+import { checkAuthStatus } from '../services/api';
 import NotificationBell from './NotificationBell';
 import theme from '../utils/theme';
+import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
+  const { user: authUser, loading: authLoading, logout: authLogout } = useAuth();
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -38,47 +40,58 @@ const Header = () => {
   }, []);
   
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const data = await checkAuthStatus();
-        if (data && data.success) {
-          setUser(data.user);
-          setIsAuthenticated(true);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      } catch (err) {
+    // If we have a user from AuthContext, use that instead
+    if (!authLoading) {
+      if (authUser) {
+        setUser(authUser);
+        setIsAuthenticated(true);
+        setLoading(false);
+      } else {
+        // Fall back to the old implementation for compatibility
+        checkAuth();
+      }
+    }
+  }, [authUser, authLoading]);
+
+  const checkAuth = async () => {
+    try {
+      const data = await checkAuthStatus();
+      if (data && data.success) {
+        setUser(data.user);
+        setIsAuthenticated(true);
+      } else {
         setUser(null);
         setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
       }
-    };
-
-    checkAuth();
-  }, [location.pathname]);
+    } catch (err) {
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const handleLogout = async () => {
     try {
-      await logout();
-      setUser(null);
-      setIsAuthenticated(false);
-      
-      // Clear any stored tokens or session information
-      localStorage.removeItem('user');
-      sessionStorage.removeItem('user');
-      
-      navigate('/login');
+      // Use the AuthContext logout if available
+      if (authLogout) {
+        await authLogout();
+      } else {
+        // This block should never execute if auth context is properly set up
+        console.error('AuthContext logout not available, cannot log out properly');
+      }
     } catch (err) {
       console.error('Logout failed', err);
       
-      // Still clear state and storage even if API call fails
+      // Clear state and storage even if API call fails
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('user');
       sessionStorage.removeItem('user');
-      navigate('/login');
+      document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
+      // Force navigation to login
+      window.location.href = '/login';
     }
   };
 

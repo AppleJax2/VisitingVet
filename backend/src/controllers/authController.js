@@ -136,7 +136,16 @@ const logoutUser = (req, res) => {
     path: '/', // Explicitly set path, assuming it was default '/' when set
   };
 
-  res.cookie('jwt', '', options); // Set cookie value to empty string
+  // Clear the JWT cookie with empty string
+  res.cookie('jwt', '', options);
+  
+  // Also try clearing with null value for some browsers
+  res.cookie('jwt', null, options);
+  
+  // Additional measure to ensure cookie is deleted
+  res.clearCookie('jwt', options);
+  
+  // Return success response
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 

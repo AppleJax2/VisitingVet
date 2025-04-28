@@ -80,10 +80,20 @@ export const AuthProvider = ({ children }) => {
       // Log error but proceed with clearing user state
       console.error('Logout API call failed, clearing session locally:', error);
     } finally {
+      // Clear user state
       setUser(null);
+      
+      // Clear any stored tokens or user data in local/session storage
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
+      
+      // Clear any other stored auth tokens
+      document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
       setLoading(false);
-      // Optionally redirect here or let the component handle it
-      // window.location.href = '/login'; 
+      
+      // Force redirect to login page
+      window.location.href = '/login';
     }
   };
 

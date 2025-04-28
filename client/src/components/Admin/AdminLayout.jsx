@@ -6,11 +6,12 @@ import {
     ClipboardDataFill, GearFill, BoxArrowRight, List
 } from 'react-bootstrap-icons';
 import theme from '../../utils/theme';
-import { logout } from '../../services/api'; // Assuming logout API function exists
+import { useAuth } from '../../contexts/AuthContext';
 
 const AdminLayout = () => {
     const navigate = useNavigate();
     const [showOffcanvas, setShowOffcanvas] = useState(false);
+    const { logout } = useAuth();
 
     const handleOffcanvasClose = () => setShowOffcanvas(false);
     const handleOffcanvasShow = () => setShowOffcanvas(true);
@@ -18,10 +19,11 @@ const AdminLayout = () => {
     const handleLogout = async () => {
         try {
             await logout();
-            navigate('/login');
+            // No need to navigate, the logout function handles redirection
         } catch (error) {
             console.error('Admin logout failed:', error);
-            // Optionally show an error message to the admin
+            // If logout fails, force redirect to login
+            window.location.href = '/login';
         }
     };
 
