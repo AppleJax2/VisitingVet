@@ -12,13 +12,12 @@ const {
   rejectVerification,
   getActionLogs
 } = require('../controllers/adminController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { adminProtect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// All routes below are protected and require Admin role
-router.use(protect);
-router.use(authorize('Admin')); // Use existing authorize middleware
+// All routes below are protected and require Admin access with strict session timeout
+router.use(adminProtect);
 
 // User Management Routes
 router.post('/users/create', adminCreateUser);

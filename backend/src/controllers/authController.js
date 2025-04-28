@@ -1,36 +1,60 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 // Utility function to generate JWT
-const generateToken = (id) => {
+const generateToken = (id, expiresIn = process.env.JWT_EXPIRES_IN) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn,
   });
 };
 
-// Utility to send token via HTTP-Only cookie
-const sendTokenResponse = (user, statusCode, res) => {
-  const token = generateToken(user._id);
+// Utility to generate a secure refresh token
+const generateRefreshToken = () => {
+  return crypto.randomBytes(64).toString('hex');
+};
 
-  const options = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000 // days to milliseconds
-    ),
+// Utility to send tokens via HTTP-Only cookies
+const sendTokenResponse = async (user, statusCode, res) => {
+  const accessToken = generateToken(user._id, process.env.JWT_EXPIRES_IN || '15m');
+  const refreshToken = generateRefreshToken();
+
+  // Store refresh token in DB
+  user.refreshToken = refreshToken;
+  await user.save();
+
+  // Hardened cookie options
+  const isProduction = process.env.NODE_ENV === 'production';
+  const cookieDomain = isProduction ? process.env.COOKIE_DOMAIN || undefined : undefined;
+
+  const accessOptions = {
+    expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', // Use None for cross-site in prod, Lax otherwise
+    secure: isProduction,
+    sameSite: 'Strict', // Max CSRF protection
+    domain: cookieDomain,
+  };
+  const refreshOptions = {
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'Strict',
+    path: '/api/auth/refresh',
+    domain: cookieDomain,
   };
 
   // Remove password from output
   const userOutput = { ...user._doc };
   delete userOutput.password;
+  delete userOutput.refreshToken;
 
   res
     .status(statusCode)
-    .cookie('jwt', token, options)
+    .cookie('jwt', accessToken, accessOptions)
+    .cookie('refreshToken', refreshToken, refreshOptions)
     .json({
       success: true,
-      user: userOutput, // Send user data back (excluding password)
+      user: userOutput,
     });
 };
 
@@ -102,21 +126,27 @@ const loginUser = async (req, res, next) => {
     }
 
     // Check for user
-    const user = await User.findOne({ email }).select('+password'); // Explicitly select password
+    const user = await User.findOne({ email }).select('+password +refreshToken');
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' }); // Generic message
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Check if password matches
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' }); // Generic message
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    sendTokenResponse(user, 200, res);
+    // Set admin session properties if the user is an admin
+    if (user.role === 'Admin') {
+      user.isAdmin = true;
+      user.sessionTimeoutMinutes = 15; // Stricter timeout for admin users (15 minutes)
+      await user.save();
+    }
 
+    await sendTokenResponse(user, 200, res);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error during login' });
@@ -127,24 +157,24 @@ const loginUser = async (req, res, next) => {
 // @route   POST /api/auth/logout
 // @access  Private (requires user to be logged in)
 const logoutUser = (req, res) => {
-  // Options must match those used in sendTokenResponse for clearing to work reliably
+  // Hardened cookie options for clearing
+  const isProduction = process.env.NODE_ENV === 'production';
+  const cookieDomain = isProduction ? process.env.COOKIE_DOMAIN || undefined : undefined;
   const options = {
     expires: new Date(0), // Set expiry date to the past
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-    path: '/', // Explicitly set path, assuming it was default '/' when set
+    secure: isProduction,
+    sameSite: 'Strict',
+    path: '/',
+    domain: cookieDomain,
   };
 
-  // Clear the JWT cookie with empty string
+  // Clear the JWT and refreshToken cookies
   res.cookie('jwt', '', options);
-  
-  // Also try clearing with null value for some browsers
-  res.cookie('jwt', null, options);
-  
-  // Additional measure to ensure cookie is deleted
+  res.cookie('refreshToken', '', { ...options, path: '/api/auth/refresh' });
   res.clearCookie('jwt', options);
-  
+  res.clearCookie('refreshToken', { ...options, path: '/api/auth/refresh' });
+
   // Return success response
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
@@ -160,9 +190,32 @@ const getMe = async (req, res, next) => {
   res.status(200).json({ success: true, user: req.user });
 };
 
+// @desc    Rotate JWT using refresh token
+// @route   POST /api/auth/refresh
+// @access  Public
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.cookies;
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'No refresh token provided' });
+  }
+  try {
+    // Find user with this refresh token
+    const user = await User.findOne({ refreshToken });
+    if (!user) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+    // Issue new access token and refresh token
+    await sendTokenResponse(user, 200, res);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Could not rotate token' });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   getMe,
+  refreshToken,
 }; 

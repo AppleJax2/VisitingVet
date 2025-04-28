@@ -85,6 +85,26 @@ const userSchema = new mongoose.Schema({
     sparse: true, // Allow null/undefined values without enforcing uniqueness
   },
 
+  // Refresh token for JWT rotation
+  refreshToken: {
+    type: String,
+    select: false, // Never return by default
+  },
+
+  // Admin session management fields
+  lastActivity: {
+    type: Date,
+    default: Date.now,
+  },
+  sessionTimeoutMinutes: {
+    type: Number,
+    default: 30, // Default timeout of 30 minutes for regular users
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false, // Flag to identify admin users for special session handling
+  },
+
   // Add other fields common to all users later if needed
   // Specific role details might be in separate linked collections or embedded
 }, { timestamps: true });
