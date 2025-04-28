@@ -19,7 +19,6 @@ function PetEditModal({ show, onHide, pet, onUpdate }) {
         gender: pet.gender || 'Unknown',
         weight: pet.weight || '',
         weightUnit: pet.weightUnit || 'lbs',
-        profileImage: pet.profileImage || '',
         microchipId: pet.microchipId || '',
         medicalHistory: pet.medicalHistory || '',
         lastCheckup: pet.lastCheckup ? new Date(pet.lastCheckup).toISOString().split('T')[0] : '',
@@ -264,19 +263,6 @@ function PetEditModal({ show, onHide, pet, onUpdate }) {
               </Col>
             </Row>
 
-            <Form.Group className="mb-3" controlId="editPetProfileImage">
-              <Form.Label className="fw-semibold">Profile Image URL</Form.Label>
-              <Form.Control
-                type="text"
-                name="profileImage"
-                value={formData.profileImage}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-                className="form-control shadow-sm"
-              />
-              {/* TODO: Implement actual image upload later */}
-            </Form.Group>
-            
             <Form.Group className="mb-3" controlId="editPetMicrochipId">
               <Form.Label className="fw-semibold">Microchip ID</Form.Label>
               <Form.Control

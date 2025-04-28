@@ -49,8 +49,12 @@
 // ==========================================================================
 
 // Text colors
-.text-primary { color: $color-primary; }
-.text-secondary { color: $color-secondary; }
+.text-primary { color: $color-primary-500; }
+.text-primary-light { color: $color-primary-300; }
+.text-primary-dark { color: $color-primary-600; }
+.text-secondary { color: $color-secondary-500; }
+.text-secondary-light { color: $color-secondary-300; }
+.text-secondary-dark { color: $color-secondary-600; }
 .text-white { color: $color-text-white; }
 .text-dark { color: $color-text-primary; }
 .text-muted { color: $color-text-secondary; }
@@ -61,10 +65,12 @@
 .text-info { color: $color-info; }
 
 // Background colors
-.bg-primary { background-color: $color-primary; }
-.bg-primary-light { background-color: $color-primary-light; }
-.bg-primary-dark { background-color: $color-primary-dark; }
-.bg-secondary { background-color: $color-secondary; }
+.bg-primary { background-color: $color-primary-500; }
+.bg-primary-light { background-color: $color-primary-300; }
+.bg-primary-dark { background-color: $color-primary-600; }
+.bg-secondary { background-color: $color-secondary-500; }
+.bg-secondary-light { background-color: $color-secondary-300; }
+.bg-secondary-dark { background-color: $color-secondary-600; }
 .bg-white { background-color: $color-background-white; }
 .bg-light { background-color: $color-background-light; }
 .bg-tan { background-color: $color-background-tan; }
@@ -150,8 +156,12 @@
 .border-thick { border-width: $border-width-thick; }
 
 // Border colors
-.border-primary { border-color: $color-primary; }
-.border-secondary { border-color: $color-secondary; }
+.border-primary { border-color: $color-primary-500; }
+.border-primary-light { border-color: $color-primary-300; }
+.border-primary-dark { border-color: $color-primary-600; }
+.border-secondary { border-color: $color-secondary-500; }
+.border-secondary-light { border-color: $color-secondary-300; }
+.border-secondary-dark { border-color: $color-secondary-600; }
 .border-light { border-color: $color-background-light; }
 .border-dark { border-color: $color-background-dark; }
 .border-white { border-color: $color-background-white; }

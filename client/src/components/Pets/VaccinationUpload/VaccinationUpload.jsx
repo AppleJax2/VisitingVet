@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-// import api from '../../../services/api'; // Assuming API service module
-import { useDropzone } from 'react-dropzone'; // Example library for drag-n-drop
+import api from '../../../services/api'; // Assuming API service module - Uncommented
+import { useDropzone } from 'react-dropzone'; // Library for drag-n-drop
 import './VaccinationUpload.css'; // Add basic styling
 
 // Assume petId is passed as a prop
@@ -20,7 +20,7 @@ const VaccinationUpload = ({ petId, onUploadSuccess }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    // --- File Upload Handling (using react-dropzone example) ---
+    // --- File Upload Handling (using react-dropzone) ---
     const onDrop = useCallback(acceptedFiles => {
         // Basic validation (e.g., file type, size)
         const validatedFiles = acceptedFiles.map(file => Object.assign(file, {
@@ -36,9 +36,9 @@ const VaccinationUpload = ({ petId, onUploadSuccess }) => {
           'image/jpeg': ['.jpg', '.jpeg'],
           'image/png': ['.png'],
           'application/pdf': ['.pdf'] 
-        }, // Example accepted types
-        maxFiles: 5, // Example limit
-        // maxSize: 5 * 1024 * 1024, // Example 5MB limit
+        }, // Accepted file types
+        maxFiles: 5, // Max number of files
+        maxSize: 5 * 1024 * 1024, // 5MB limit per file
     });
 
     const removeFile = (fileName) => {
@@ -83,27 +83,26 @@ const VaccinationUpload = ({ petId, onUploadSuccess }) => {
         });
 
         try {
-            console.log('[Pet Upload] Submitting vaccination record...');
-            // const response = await api.post('/vaccinations', submissionData, {
-            //     headers: {
-            //         'Content-Type': 'multipart/form-data',
-            //     },
-            // });
+            // Make the actual API call
+            const response = await api.post('/vaccinations', submissionData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 800));
-            console.log('[Pet Upload] Simulated upload successful.');
-            // const simulatedResponse = { data: { message: 'Record submitted successfully!', record: { _id: 'newRecId', ...formData } } };
-
-            setSuccessMessage('Vaccination record submitted successfully! It will be reviewed shortly.');
+            setSuccessMessage(response.data.message || 'Vaccination record submitted successfully! It will be reviewed shortly.');
             setFormData({ vaccineType: '', administrationDate: '', expirationDate: '' }); // Clear form
             setFiles([]); // Clear files
             // Clean up preview URLs
             files.forEach(file => URL.revokeObjectURL(file.preview)); 
 
             if (onUploadSuccess) {
-                // onUploadSuccess(simulatedResponse.data.record); // Pass back new record info if needed
-                 onUploadSuccess();
+                // Pass back new record info if available in response and needed
+                if (response.data.record) {
+                    onUploadSuccess(response.data.record);
+                } else {
+                    onUploadSuccess(); // Indicate success even if no record data returned
+                }
             }
 
         } catch (err) {

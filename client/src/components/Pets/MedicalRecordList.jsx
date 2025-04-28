@@ -21,12 +21,19 @@ function MedicalRecordList({ petId, petOwnerId, currentUser }) {
     const [isDeleting, setIsDeleting] = useState(null); // Track deleting record ID
 
     const fetchRecords = async () => {
+        if (!petId) return;
         setIsLoading(true);
         setError(null);
         try {
-            // TODO: Pass filters to backend when implemented there
-            const { data } = await api.get(`/pets/${petId}/medical-records`);
+            // Pass filters as query parameters
+            const params = {};
+            if (filters.recordType) params.recordType = filters.recordType;
+            if (filters.searchTerm) params.searchTerm = filters.searchTerm;
+            
+            const { data } = await api.get(`/pets/${petId}/medical-records`, { params }); // Pass params here
+            
             if (data.success) {
+                // Assuming backend now returns filtered and sorted data if needed
                 setRecords(data.data || []);
             } else {
                 throw new Error(data.message || 'Failed to fetch medical records');
@@ -42,25 +49,14 @@ function MedicalRecordList({ petId, petOwnerId, currentUser }) {
     };
 
     useEffect(() => {
-        if(petId) fetchRecords();
-    }, [petId]);
+        if (petId) fetchRecords();
+        // Re-fetch when filters change, add debounce later if needed for searchTerm
+    }, [petId, filters.recordType, filters.searchTerm]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
     };
-
-    // Client-side filtering for now
-    const filteredRecords = records.filter(record => {
-        const typeMatch = filters.recordType ? record.recordType === filters.recordType : true;
-        const termMatch = filters.searchTerm ? 
-            (record.title?.toLowerCase().includes(filters.searchTerm.toLowerCase()) || 
-             (typeof record.details === 'string' && record.details?.toLowerCase().includes(filters.searchTerm.toLowerCase())) ||
-             (typeof record.details?.notes === 'string' && record.details?.notes?.toLowerCase().includes(filters.searchTerm.toLowerCase())) // Example for object details
-            )
-            : true;
-        return typeMatch && termMatch;
-    });
 
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -163,12 +159,13 @@ function MedicalRecordList({ petId, petOwnerId, currentUser }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredRecords.length === 0 ? (
+                            {/* Use records directly, as filtering is done backend */}
+                            {records.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="text-center">No matching medical records found.</td>
                                 </tr>
                             ) : (
-                                filteredRecords.map(record => (
+                                records.map(record => (
                                     <tr key={record._id}>
                                         <td>{formatDate(record.date)}</td>
                                         <td><Badge bg="secondary">{record.recordType}</Badge></td>

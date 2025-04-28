@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import api from '../../../services/api'; // Assuming API service module
+import api from '../../../services/api'; // Assuming API service module - Uncommented
 import './VaccinationDashboard.css'; // Add basic styling
 
 // Placeholder components (or integrate directly)
@@ -14,40 +14,34 @@ const VaccinationDashboard = ({ pet }) => {
     const [reminders, setReminders] = useState([]);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('history'); // 'history', 'upload', 'certificates'
+    const [isLoading, setIsLoading] = useState(true); // Added loading state for dashboard data
 
     const fetchDashboardData = async () => {
         if (!pet?._id) return;
+        setIsLoading(true); // Added loading state for dashboard data
         setError(null);
         try {
-            console.log(`[Pet Dashboard] Fetching summary data for pet: ${pet._id}`);
-            // Example: Fetch summary status directly from Pet model 
-            // const petResponse = await api.get(`/pets/${pet._id}/summary`);
-            // setSummaryStatus(petResponse.data.latestVerificationStatusSummary || 'Unknown');
-            // setHasPending(petResponse.data.hasPendingVerification || false);
-
-            // Or calculate based on fetched records (more work client-side)
-
-            // Simulate fetching summary
-            await new Promise(resolve => setTimeout(resolve, 200));
-            const simulatedSummary = 'Up-to-date'; // or 'Needs Attention', 'Pending'
-            const simulatedPending = false;
-            setSummaryStatus(simulatedSummary);
-            setHasPending(simulatedPending);
+            // Fetch summary data
+            const summaryResponse = await api.get(`/pets/${pet._id}/vaccination-summary`); // Assumed endpoint
+            if (summaryResponse.data) {
+                 setSummaryStatus(summaryResponse.data.status || 'Unknown');
+                 setHasPending(summaryResponse.data.hasPending || false);
+            } else {
+                 setSummaryStatus('Unknown');
+                 setHasPending(false);
+            }
 
             // Fetch reminders (e.g., upcoming expirations)
-            // const reminderResponse = await api.get(`/pets/${pet._id}/reminders`); 
-            // setReminders(reminderResponse.data.reminders || []);
-            const simulatedReminders = [
-                { type: 'upcoming_expiry', vaccine: 'Rabies', daysLeft: 25, date: new Date(2024, 9, 26) },
-            ];
-            setReminders(simulatedReminders);
-            console.log(`[Pet Dashboard] Fetched simulated summary for pet: ${pet._id}`);
+            const reminderResponse = await api.get(`/pets/${pet._id}/reminders`); // Assumed endpoint
+            setReminders(reminderResponse.data?.reminders || []);
 
         } catch (err) {
             console.error(`[Pet Dashboard] Error fetching dashboard data for pet ${pet._id}:`, err);
-            setError('Failed to load dashboard summary. Please try again.');
+            setError(err.response?.data?.message || 'Failed to load dashboard summary. Please try again.');
             setSummaryStatus('Error');
-        } 
+        } finally {
+            setIsLoading(false); // Added loading state update
+        }
     };
 
     useEffect(() => {
@@ -66,7 +60,6 @@ const VaccinationDashboard = ({ pet }) => {
 
     // Callback for when upload is successful to potentially refresh history/summary
     const handleUploadSuccess = () => {
-        console.log('[Pet Dashboard] Upload successful, refreshing data...');
         fetchDashboardData(); // Refetch summary
         // Potentially switch tab or update history component directly
         setActiveTab('history'); 
@@ -78,21 +71,25 @@ const VaccinationDashboard = ({ pet }) => {
 
             {error && <div className="error-message">{error}</div>}
 
-            {/* Summary Section */} 
-            <div className={`summary-section ${getStatusIndicatorClass(summaryStatus)}`}>
-                <h3>Overall Status: <span className="status-text">{summaryStatus}</span></h3>
-                {hasPending && <p className="pending-indicator">One or more records are pending review.</p>}
-                {reminders.length > 0 && (
-                    <div className="reminders">
-                        <h4>Reminders:</h4>
-                        <ul>
-                            {reminders.map((r, index) => (
-                                <li key={index}>{r.vaccine} expires in {r.daysLeft} days ({new Date(r.date).toLocaleDateString()})</li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-            </div>
+            {/* Summary Section - Added loading state check */}
+            {isLoading ? (
+                <div className="summary-section status-unknown"><p>Loading summary...</p></div>
+            ) : (
+                 <div className={`summary-section ${getStatusIndicatorClass(summaryStatus)}`}>
+                    <h3>Overall Status: <span className="status-text">{summaryStatus}</span></h3>
+                    {hasPending && <p className="pending-indicator">One or more records are pending review.</p>}
+                    {reminders.length > 0 && (
+                        <div className="reminders">
+                            <h4>Reminders:</h4>
+                            <ul>
+                                {reminders.map((r, index) => (
+                                    <li key={r._id || index}>{r.message || `Reminder for ${r.type}`}</li> // Adjust based on reminder structure
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Tab Navigation */} 
             <div className="dashboard-tabs">

@@ -47,12 +47,12 @@ function AddPetPage() {
 
       // Call the actual API function
       const result = await addPet(dataToSend); 
-      console.log('Pet added:', result);
       
       setSuccess(`Pet "${petData.name}" added successfully!`);
       // Optionally reset form or navigate away
       // setPetData({ name: '', species: '', breed: '', age: '' }); 
-      navigate('/dashboard'); // Navigate back to dashboard after success
+      // Redirect to the My Pets page specifically
+      navigate('/my-pets', { state: { successMessage: `Pet "${petData.name}" added successfully!` } }); 
 
     } catch (err) {
       console.error('Error adding pet:', err);

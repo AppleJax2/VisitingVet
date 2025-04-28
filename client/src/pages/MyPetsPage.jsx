@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { PlusCircle, PencilSquare, Trash, Eye } from 'react-bootstrap-icons';
 import { fetchUserPets, deletePet } from '../services/api'; // Assuming deletePet exists
 import theme from '../utils/theme';
 import PetEditModal from '../components/PetEditModal'; // Import the modal
 import PetCard from '../components/PetCard'; // Import the new PetCard component
-// import PetDetailModal from '../components/PetDetailModal'; // Future component for viewing details
 
 function MyPetsPage() {
   const [pets, setPets] = useState([]);
@@ -15,14 +14,23 @@ function MyPetsPage() {
   const [deleteError, setDeleteError] = useState('');
   const [deleteSuccess, setDeleteSuccess] = useState('');
   const navigate = useNavigate();
+  const location = useLocation(); // Get location object
+
+  // State for general success messages (e.g., from add/edit)
+  const [successMessage, setSuccessMessage] = useState('');
 
   // State for Modals
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
-  // TODO: State for Detail Modal
-  // const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
+    // Check for success message from navigation state
+    if (location.state?.successMessage) {
+      setSuccessMessage(location.state.successMessage);
+      // Clear the state so the message doesn't reappear on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+
     const loadPets = async () => {
       setLoading(true);
       setError('');
@@ -42,7 +50,7 @@ function MyPetsPage() {
       }
     };
     loadPets();
-  }, []);
+  }, [location.state, location.pathname, navigate]); // Add dependencies
 
   const handleDelete = async (petId, petName) => {
     if (!window.confirm(`Are you sure you want to delete ${petName}? This action cannot be undone.`)) {
@@ -78,19 +86,13 @@ function MyPetsPage() {
 
   const handlePetUpdate = (updatedPet) => {
     setPets(pets.map(p => p._id === updatedPet._id ? updatedPet : p));
-    // Optionally show a success message here
+    setSuccessMessage(`Pet "${updatedPet.name}" updated successfully!`); // Show success message on update
   };
 
   // Handler for viewing pet profile (navigation)
   const handleViewPet = (pet) => {
     navigate(`/pet/${pet._id}`);
   };
-
-  // TODO: Handlers for Detail Modal
-  // const handleViewDetails = (pet) => {
-  //   setSelectedPet(pet);
-  //   setShowDetailModal(true);
-  // };
 
   const styles = {
     pageTitle: {
@@ -136,6 +138,9 @@ function MyPetsPage() {
         </Col>
       </Row>
 
+      {/* Display general success message */}
+      {successMessage && <Alert variant="success" dismissible onClose={() => setSuccessMessage('')}>{successMessage}</Alert>}
+      
       {error && <Alert variant="danger">{error}</Alert>}
       {deleteError && <Alert variant="danger" dismissible onClose={() => setDeleteError('')}>{deleteError}</Alert>}
       {deleteSuccess && <Alert variant="success" dismissible onClose={() => setDeleteSuccess('')}>{deleteSuccess}</Alert>}
@@ -175,15 +180,6 @@ function MyPetsPage() {
           onUpdate={handlePetUpdate}
         />
       )}
-
-      {/* TODO: Render Detail Modal */}
-      {/* {selectedPet && showDetailModal && (
-        <PetDetailModal 
-          show={showDetailModal} 
-          onHide={() => setShowDetailModal(false)} 
-          pet={selectedPet} 
-        />
-      )} */}
     </Container>
   );
 }

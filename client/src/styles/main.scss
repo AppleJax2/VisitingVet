@@ -70,28 +70,42 @@
 
 // Expose CSS variables from our design tokens
 :root {
-  // Colors
-  --color-primary: #{$color-primary};
-  --color-primary-light: #{$color-primary-light};
-  --color-primary-dark: #{$color-primary-dark};
-  --color-secondary: #{$color-secondary};
-  --color-secondary-light: #{$color-secondary-light};
-  --color-secondary-dark: #{$color-secondary-dark};
+  // Colors - Primary Scale
+  --color-primary-50: #{$color-primary-50};
+  --color-primary-100: #{$color-primary-100};
+  --color-primary-200: #{$color-primary-200};
+  --color-primary-300: #{$color-primary-300};
+  --color-primary-400: #{$color-primary-400};
+  --color-primary-500: #{$color-primary-500};
+  --color-primary-600: #{$color-primary-600};
+
+  // Colors - Secondary Scale
+  --color-secondary-50: #{$color-secondary-50};
+  --color-secondary-100: #{$color-secondary-100};
+  --color-secondary-200: #{$color-secondary-200};
+  --color-secondary-300: #{$color-secondary-300};
+  --color-secondary-400: #{$color-secondary-400};
+  --color-secondary-500: #{$color-secondary-500};
+  --color-secondary-600: #{$color-secondary-600};
   
+  // Accent Colors
   --color-accent-gold: #{$color-accent-gold};
   --color-accent-dark-green: #{$color-accent-dark-green};
   --color-accent-light-green: #{$color-accent-light-green};
   
+  // Functional Colors
   --color-success: #{$color-success};
   --color-info: #{$color-info};
   --color-warning: #{$color-warning};
   --color-danger: #{$color-danger};
   
+  // Background Colors
   --color-background-light: #{$color-background-light};
   --color-background-white: #{$color-background-white};
   --color-background-tan: #{$color-background-tan};
   --color-background-dark: #{$color-background-dark};
   
+  // Text Colors
   --color-text-primary: #{$color-text-primary};
   --color-text-secondary: #{$color-text-secondary};
   --color-text-light: #{$color-text-light};

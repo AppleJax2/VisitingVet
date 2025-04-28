@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import api from '../../../services/api'; // Assuming API service module
+import api from '../../../services/api'; // Assuming API service module - Uncommented
 import './CertificateManager.css'; // Add basic styling
 
 // Assume petId is passed as a prop
@@ -17,27 +17,20 @@ const CertificateManager = ({ petId }) => {
         setIsLoading(true);
         setError(null);
         try {
-            console.log(`[Cert Manager] Fetching verified records for pet: ${petId}`);
-            // const response = await api.get(`/vaccinations/pet/${petId}?status=verified`);
-            // setVerifiedRecords(response.data.records || []);
+            // Fetch only verified records
+            const response = await api.get(`/vaccinations/pet/${petId}`, { params: { status: 'verified' } });
+            const fetchedRecords = response.data?.records || response.data || [];
+            const sortedRecords = fetchedRecords.sort((a, b) => 
+                new Date(b.administrationDate) - new Date(a.administrationDate)
+            );
+            setVerifiedRecords(sortedRecords);
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 300));
-            const simulatedRecords = [
-                { _id: 'rec1', vaccineType: 'Rabies', administrationDate: new Date(2023, 9, 26), expirationDate: new Date(2024, 9, 26), verificationStatus: 'verified' },
-                { _id: 'rec3', vaccineType: 'Bordetella', administrationDate: new Date(2024, 0, 15), expirationDate: new Date(2025, 0, 15), verificationStatus: 'verified' },
-            ].sort((a, b) => b.administrationDate - a.administrationDate);
-            setVerifiedRecords(simulatedRecords);
-            console.log(`[Cert Manager] Fetched simulated verified records for pet: ${petId}`);
-
-            // Removed TODO for fetching templates as it wasn't part of the core task
-            // // TODO: Fetch available templates if needed
-            // // const templateResponse = await api.get('/vaccination-templates');
-            // // setAvailableTemplates(templateResponse.data.templates || []);
+            // Removed simulation logic and logs
+            // Removed template fetching TODO and logic
 
         } catch (err) {
             console.error(`[Cert Manager] Error fetching data for pet ${petId}:`, err);
-            setError('Failed to load vaccination records. Please try again.');
+            setError(err.response?.data?.message || 'Failed to load verified vaccination records. Please try again.');
             setVerifiedRecords([]);
         } finally {
             setIsLoading(false);
@@ -53,21 +46,25 @@ const CertificateManager = ({ petId }) => {
         setIsGenerating(true);
         setError(null);
         try {
-            console.log(`[Cert Manager] Requesting certificate generation for record: ${recordId}`);
-            // const response = await api.get(`/vaccinations/${recordId}/certificate`, {
-            //     responseType: 'blob', // Important to handle PDF blob response
-            // });
+            // Request certificate generation from backend
+            const response = await api.get(`/vaccinations/${recordId}/certificate`, {
+                responseType: 'blob', // Important to handle PDF blob response
+            });
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000)); 
-            const simulatedBlob = new Blob([`Simulated PDF content for record ${recordId}`], { type: 'application/pdf' });
-            console.log(`[Cert Manager] Simulated certificate generated for record: ${recordId}`);
+            // Removed simulation logic and logs
 
             // Create a URL for the blob and trigger download
-            const url = window.URL.createObjectURL(simulatedBlob);
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `vaccination-certificate-${recordId}.pdf`);
+            // Extract filename from Content-Disposition header if available, otherwise use default
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = `vaccination-certificate-${recordId}.pdf`;
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="?(.+?)"?$/);
+                if (filenameMatch.length === 2) filename = filenameMatch[1];
+            }
+            link.setAttribute('download', filename);
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -75,7 +72,24 @@ const CertificateManager = ({ petId }) => {
 
         } catch (err) {
             console.error(`[Cert Manager] Error generating certificate for record ${recordId}:`, err);
-            setError(err.response?.data?.message || 'Failed to generate certificate. Please try again.');
+            // Handle potential Blob reading errors if response wasn't a blob
+            if (err.response?.data instanceof Blob) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                         const errorData = JSON.parse(reader.result);
+                         setError(errorData.message || 'Failed to generate certificate.');
+                    } catch (parseError) {
+                         setError('An unexpected error occurred while generating the certificate.');
+                    }
+                };
+                reader.onerror = () => {
+                     setError('Failed to read error response from certificate generation.');
+                };
+                reader.readAsText(err.response.data);
+            } else {
+                 setError(err.response?.data?.message || 'Failed to generate certificate. Please try again.');
+            }
         } finally {
             setIsGenerating(false);
             // setSelectedRecordId(null); // Deselect after generation?

@@ -26,8 +26,8 @@ router.route('/')
   .post(authorize(ROLES.PetOwner), createPet)
   .get(authorize(ROLES.PetOwner), getUserPets);
 
-// Routes for specific pet ID (accessible by Owner and potentially others)
-// TODO: Refine authorization for GET/PUT/DELETE pet details based on provider relationships if needed
+// Routes for specific pet ID (accessible by Owner, related providers/clinics, and Admins)
+// Authorization refined within the getPetById controller
 router.route('/:id')
   .get(authorize(ROLES.PetOwner, ROLES.MVSProvider, ROLES.Clinic, ROLES.Admin), getPetById)
   .put(authorize(ROLES.PetOwner, ROLES.Admin), updatePet)

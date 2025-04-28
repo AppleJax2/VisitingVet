@@ -1,5 +1,8 @@
 const Pet = require('../models/Pet');
 const mongoose = require('mongoose');
+const Appointment = require('../models/Appointment');
+const ServiceRequest = require('../models/ServiceRequest');
+const { ROLES } = require('../config/constants');
 
 // @desc    Create a new pet
 // @route   POST /api/pets
@@ -83,11 +86,11 @@ exports.getUserPets = async (req, res) => {
 
 // @desc    Get a single pet by ID
 // @route   GET /api/pets/:id
-// @access  Private (Owner or relevant Vet/Clinic - TBD)
+// @access  Private (Owner, related Vet/Clinic, Admin)
 exports.getPetById = async (req, res) => {
   const petId = req.params.id;
   const userId = req.user._id; // Assuming auth middleware adds user to req
-  const userRole = req.user.role;
+  const userRole = req.user.role.name; // Get role name from populated user object
 
   if (!mongoose.Types.ObjectId.isValid(petId)) {
     return res.status(400).json({ success: false, error: 'Invalid pet ID format' });
@@ -100,10 +103,46 @@ exports.getPetById = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Pet not found' });
     }
 
-    // Authorization check: Ensure the user is the owner
-    // TODO: Add logic for Vets/Clinics if they need access
-    if (pet.owner.toString() !== userId.toString()) {
-       return res.status(403).json({ success: false, error: 'Not authorized to access this pet' });
+    // Authorization check
+    let isAuthorized = false;
+
+    // 1. Check if the user is the owner
+    if (pet.owner.toString() === userId.toString()) {
+      isAuthorized = true;
+    } 
+    // 2. Check if the user is an Admin
+    else if (userRole === ROLES.Admin) {
+        isAuthorized = true;
+    }
+    // 3. Check if user is MVSProvider or Clinic and has a related active/recent record
+    else if (userRole === ROLES.MVSProvider || userRole === ROLES.Clinic) {
+        // Define criteria for "related" - e.g., active or recent appointments/requests
+        const lookbackDate = new Date();
+        lookbackDate.setDate(lookbackDate.getDate() - 90); // Example: check records within the last 90 days
+
+        const query = {
+            pet: petId,
+            status: { $in: ['Scheduled', 'Confirmed', 'InProgress', 'Completed'] }, // Include relevant statuses
+            // Check if the provider or clinic matches the requesting user
+            $or: [
+                { provider: userId }, 
+                { clinic: userId } 
+            ],
+            // Optionally filter by date
+            // updatedAt: { $gte: lookbackDate } 
+        };
+
+        const relatedAppointment = await Appointment.findOne(query).lean();
+        const relatedServiceRequest = await ServiceRequest.findOne(query).lean();
+
+        if (relatedAppointment || relatedServiceRequest) {
+            isAuthorized = true;
+        }
+    }
+
+    if (!isAuthorized) {
+        // Log unauthorized access attempt? Maybe not necessary here unless debugging.
+        return res.status(403).json({ success: false, error: 'Not authorized to access this pet' });
     }
 
     res.status(200).json({ success: true, pet });

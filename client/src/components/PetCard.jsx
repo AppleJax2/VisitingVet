@@ -45,25 +45,10 @@ const PetCard = ({ pet, onEdit, onDelete, onView }) => {
     if (onDelete) onDelete(pet._id, pet.name);
   };
 
-  const handleCardClick = () => {
-    // Default action on card click could be navigating to profile
-    // Or triggering onView if provided
-    if (onView) {
-      onView(pet); // Or navigate(`/pet/${pet._id}`);
-    } else {
-      // Default navigation if no onView handler
-      // Requires importing useNavigate from react-router-dom
-      // const navigate = useNavigate(); 
-      // navigate(`/pet/${pet._id}`);
-      console.log('Card clicked, navigating to profile not implemented by default here.');
-    }
-  };
-
   return (
     <Card 
       style={styles.petCard} 
-      // onClick={handleCardClick} // Add onClick for card navigation/view
-      // className="cursor-pointer" // Add if making the whole card clickable
+      // onClick is not used, view action is on the button
     >
       <Card.Img 
         variant="top" 

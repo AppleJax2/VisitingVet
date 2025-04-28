@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import api from '../../../services/api'; // Assuming API service module
+import api from '../../../services/api'; // Assuming API service module - Uncommented
 import './VaccinationHistory.css'; // Add basic styling
 
 // Assume petId is passed as a prop
@@ -13,24 +13,21 @@ const VaccinationHistory = ({ petId }) => {
         setIsLoading(true);
         setError(null);
         try {
-            console.log(`[Pet History] Fetching vaccination history for pet: ${petId}`);
-            // const response = await api.get(`/vaccinations/pet/${petId}`);
-            // setRecords(response.data.records || []);
+            // Removed console log
+            const response = await api.get(`/vaccinations/pet/${petId}`);
+            // Ensure response structure is handled (assuming response.data contains the array)
+            const fetchedRecords = response.data?.records || response.data || []; // Handle potential variations
+            // Sort records by administration date, descending
+            const sortedRecords = fetchedRecords.sort((a, b) => 
+                new Date(b.administrationDate) - new Date(a.administrationDate)
+            );
+            setRecords(sortedRecords);
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 400));
-            const simulatedHistory = [
-                { _id: 'rec1', vaccineType: 'Rabies', administrationDate: new Date(2023, 9, 26), expirationDate: new Date(2024, 9, 26), verificationStatus: 'verified' },
-                { _id: 'rec3', vaccineType: 'Bordetella', administrationDate: new Date(2024, 0, 15), expirationDate: new Date(2025, 0, 15), verificationStatus: 'verified' },
-                { _id: 'rec4', vaccineType: 'Leptospirosis', administrationDate: new Date(2024, 4, 1), expirationDate: null, verificationStatus: 'pending' },
-                { _id: 'rec2', vaccineType: 'Distemper', administrationDate: new Date(2023, 5, 10), expirationDate: new Date(2024, 5, 10), verificationStatus: 'rejected', rejectionReason: 'Document unclear' },
-            ].sort((a, b) => b.administrationDate - a.administrationDate); // Sort descending
-            setRecords(simulatedHistory);
-            console.log(`[Pet History] Fetched simulated history for pet: ${petId}`);
+            // Removed simulation logic
 
         } catch (err) {
             console.error(`[Pet History] Error fetching history for pet ${petId}:`, err);
-            setError('Failed to load vaccination history. Please try again.');
+            setError(err.response?.data?.message || 'Failed to load vaccination history. Please try again.');
             setRecords([]);
         } finally {
             setIsLoading(false);
