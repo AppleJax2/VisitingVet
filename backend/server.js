@@ -30,15 +30,26 @@ const usageTrackingService = require('./src/services/usageTrackingService'); // 
 
 // Load env vars
 dotenv.config({ path: './.env' });
+// Log environment and important variables (without sensitive values)
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+console.log('JWT Secret exists:', !!process.env.JWT_SECRET);
 
 // Connect to database
-connectDB();
+try {
+  connectDB();
+} catch (error) {
+  console.error('Failed to connect to database:', error.message);
+  // Don't exit process here to allow more diagnostic info to be logged
+}
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server from Express app
 
 // Configure CORS options (allow frontend URL)
 const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:5173'];
+console.log('Allowed CORS origins:', allowedOrigins);
 const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests) or from allowed origins
@@ -129,5 +140,10 @@ server.listen(
 process.on('unhandledRejection', (err, promise) => {
   console.log(`Error: ${err.message}`);
   // Close server & exit process
-  server.close(() => process.exit(1));
+  // Don't exit process immediately in production to allow for logging
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Unhandled rejection in production. Server will continue running, but functionality may be impaired.');
+  } else {
+    server.close(() => process.exit(1));
+  }
 }); 
