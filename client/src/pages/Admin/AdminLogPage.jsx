@@ -45,24 +45,59 @@ const AdminLogPage = () => {
   };
 
   const renderPaginationItems = () => {
-    // (Same pagination logic as other admin pages)
-     if (!pagination.pages || pagination.pages <= 1) return null;
+    if (!pagination || !pagination.totalPages || pagination.totalPages <= 1) {
+      return null;
+    }
+
     let items = [];
     const maxPagesToShow = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(pagination.pages, startPage + maxPagesToShow - 1);
+    let endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
+
     if (endPage - startPage + 1 < maxPagesToShow) {
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-    items.push(<Pagination.First key="first" onClick={() => handlePageChange(1)} disabled={currentPage === 1} />);
-    items.push(<Pagination.Prev key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />);
-    if (startPage > 1) items.push(<Pagination.Ellipsis key="start-ellipsis" disabled />);
+
+    if (!Pagination) return [];
+
+    if (Pagination.First) {
+      items.push(<Pagination.First key="first" onClick={() => handlePageChange(1)} disabled={currentPage === 1} />);
+    }
+    
+    if (Pagination.Prev) {
+      items.push(<Pagination.Prev key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />);
+    }
+
+    if (startPage > 1 && Pagination.Ellipsis) {
+      items.push(<Pagination.Ellipsis key="start-ellipsis" disabled />);
+    }
+
     for (let number = startPage; number <= endPage; number++) {
-      items.push(<Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>{number}</Pagination.Item>);
+      if (Pagination.Item) {
+        items.push(
+          <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
+            {number}
+          </Pagination.Item>
+        );
+      }
     }
-    if (endPage < pagination.pages) items.push(<Pagination.Ellipsis key="end-ellipsis" disabled />);
-    items.push(<Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.pages} />);
-    items.push(<Pagination.Last key="last" onClick={() => handlePageChange(pagination.pages)} disabled={currentPage === pagination.pages} />);
+
+    if (endPage < pagination.totalPages && Pagination.Ellipsis) {
+      items.push(<Pagination.Ellipsis key="end-ellipsis" disabled />);
+    }
+
+    if (Pagination.Next) {
+      items.push(
+        <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} />
+      );
+    }
+    
+    if (Pagination.Last) {
+      items.push(
+        <Pagination.Last key="last" onClick={() => handlePageChange(pagination.totalPages)} disabled={currentPage === pagination.totalPages} />
+      );
+    }
+
     return items;
   };
 
@@ -119,7 +154,7 @@ const AdminLogPage = () => {
             </tbody>
           </Table>
 
-          {pagination.pages > 1 && (
+          {pagination.totalPages > 1 && (
             <Pagination className="justify-content-center">
               {renderPaginationItems()}
             </Pagination>

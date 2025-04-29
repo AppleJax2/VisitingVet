@@ -32,7 +32,27 @@ api.interceptors.response.use(
     }
     return response;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    // Handle 401 Unauthorized errors globally
+    if (error.response && error.response.status === 401) {
+      console.log('Authentication error: User not authenticated or session expired');
+      // Clear any stored auth data
+      authToken = null;
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
+      document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
+      // Don't redirect from auth endpoints to avoid infinite loops
+      const isAuthEndpoint = error.config.url.includes('/auth/');
+      if (!isAuthEndpoint && window.location.pathname !== '/login') {
+        // Store the current location to redirect back after login
+        sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+        // Redirect to login page
+        window.location.href = '/login?session_expired=true';
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 // Authentication service functions

@@ -82,28 +82,62 @@ function PetOwnerPaymentHistory() {
         else if (Object.keys(activeFilters).length > 0) fetchHistory(1, {});
     };
 
-    const renderPagination = () => {
-         if (totalPages <= 1) return null;
+    const renderPaginationItems = () => {
+        if (!pagination || !pagination.totalPages || pagination.totalPages <= 1) {
+            return null;
+        }
+
         let items = [];
         const maxPagesToShow = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        let endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
 
-        items.push(
-            <Pagination.First key="first" onClick={() => handlePageChange(1)} disabled={currentPage === 1} />,
-            <Pagination.Prev key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
-        );
-        if (startPage > 1) items.push(<Pagination.Ellipsis key="start-ellipsis" />);
-        for (let number = startPage; number <= endPage; number++) {
-            items.push(<Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>{number}</Pagination.Item>);
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
         }
-        if (endPage < totalPages) items.push(<Pagination.Ellipsis key="end-ellipsis" />);
-        items.push(
-            <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />,
-            <Pagination.Last key="last" onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
-        );
-        return <Pagination className="justify-content-center mt-3">{items}</Pagination>;
+
+        // Handle missing Pagination properties gracefully
+        if (!Pagination) return [];
+
+        if (Pagination.First) {
+            items.push(<Pagination.First key="first" onClick={() => handlePageChange(1)} disabled={currentPage === 1} />);
+        }
+        
+        if (Pagination.Prev) {
+            items.push(<Pagination.Prev key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />);
+        }
+
+        if (startPage > 1 && Pagination.Ellipsis) {
+            items.push(<Pagination.Ellipsis key="start-ellipsis" disabled />);
+        }
+
+        for (let number = startPage; number <= endPage; number++) {
+            if (Pagination.Item) {
+                items.push(
+                    <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
+                        {number}
+                    </Pagination.Item>
+                );
+            }
+        }
+
+        if (endPage < pagination.totalPages && Pagination.Ellipsis) {
+            items.push(<Pagination.Ellipsis key="end-ellipsis" disabled />);
+        }
+
+        if (Pagination.Next) {
+            items.push(
+                <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} />
+            );
+        }
+        
+        if (Pagination.Last) {
+            items.push(
+                <Pagination.Last key="last" onClick={() => handlePageChange(pagination.totalPages)} disabled={currentPage === pagination.totalPages} />
+            );
+        }
+
+        return items;
     };
 
     return (
@@ -180,7 +214,7 @@ function PetOwnerPaymentHistory() {
                                 )}
                             </tbody>
                         </Table>
-                        {renderPagination()}
+                        {renderPaginationItems()}
                     </>
                 )}
             </Card.Body>

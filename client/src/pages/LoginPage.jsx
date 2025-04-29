@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { 
   Form, 
   Button, 
@@ -38,6 +38,7 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, user, loading: authLoading, mfaRequired, handleMfaVerification } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -53,9 +54,24 @@ function LoginPage() {
   const [verifyingMfa, setVerifyingMfa] = useState(false);
   const [userId, setUserId] = useState(null);
 
+  // Check for session expired query parameter
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    if (queryParams.get('session_expired') === 'true') {
+      setError('Your session has expired. Please sign in again.');
+    }
+  }, [location.search]);
+
   useEffect(() => {
     if (!authLoading && user) {
-      navigate('/dashboard');
+      // Check if we should redirect to a specific page after login
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        navigate(redirectPath);
+      } else {
+        navigate('/dashboard');
+      }
     }
 
     // Set focus to email input on load
