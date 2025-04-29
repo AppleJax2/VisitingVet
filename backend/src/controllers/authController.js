@@ -6,7 +6,7 @@ const logger = require('../utils/logger');
 const { logUserActivity } = require('./userActivityController'); // Import the logger
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // In-memory store for login attempts (Replace with Redis/DB for production)
 const loginAttempts = new Map();
