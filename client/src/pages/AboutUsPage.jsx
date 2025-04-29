@@ -52,7 +52,7 @@ const AboutUsPage = () => {
     },
     sectionTitle: {
       color: theme.colors.primary.main,
-      fontWeight: '600',
+      fontWeight: 'bold',
       marginBottom: '2rem',
       textAlign: 'center',
     },
@@ -262,31 +262,31 @@ const AboutUsPage = () => {
         <section style={styles.section} aria-labelledby="team-title">
           <h2 style={styles.sectionTitle} id="team-title">Meet the Team</h2>
           <p className="text-center text-muted mb-4">The passionate individuals behind VisitingVet.</p>
-          <Row>
+          <Row className="g-md-4">
             {[
               {
                 name: "Dr. Emily Chen", 
                 role: "Chief Veterinary Officer",
                 bio: "10+ years specializing in small animal care with a passion for making veterinary visits stress-free.",
-                image: "/assets/images/landing-page/hero-bg.jpg" // placeholder
+                image: "/assets/images/team/emily-chen.jpg" // TODO: Replace placeholder image path
               },
               {
                 name: "James Wilson", 
                 role: "Operations Director",
                 bio: "Logistics expert ensuring our veterinary services reach every corner efficiently and effectively.",
-                image: "/assets/images/landing-page/hero-bg.jpg" // placeholder
+                image: "/assets/images/team/james-wilson.jpg" // TODO: Replace placeholder image path
               },
               {
                 name: "Dr. Michael Rodriguez", 
                 role: "Large Animal Specialist",
                 bio: "Farm animal expert with extensive experience in mobile veterinary services for rural communities.",
-                image: "/assets/images/landing-page/hero-bg.jpg" // placeholder
+                image: "/assets/images/team/michael-rodriguez.jpg" // TODO: Replace placeholder image path
               },
               {
                 name: "Sarah Johnson", 
                 role: "Customer Relations",
                 bio: "Dedicated to ensuring exceptional experiences for both pet owners and veterinary professionals.",
-                image: "/assets/images/landing-page/hero-bg.jpg" // placeholder
+                image: "/assets/images/team/sarah-johnson.jpg" // TODO: Replace placeholder image path
               }
             ].map((member, index) => (
               <Col lg={3} md={6} sm={6} className="mb-4" key={index}>
@@ -318,11 +318,16 @@ const AboutUsPage = () => {
                         }}>
                           <Image
                             src={member.image}
-                            alt={member.name}
+                            alt={`${member.name}, ${member.role}`}
                             style={{ 
                               width: '100%', 
                               height: '100%', 
                               objectFit: 'cover' 
+                            }}
+                            onError={(e) => {
+                              // Add fallback logic if needed
+                              e.target.onerror = null; // Prevents infinite loop
+                              e.target.src = '/assets/images/team/default-avatar.png'; // TODO: Define default avatar path
                             }}
                           />
                         </div>
@@ -331,7 +336,7 @@ const AboutUsPage = () => {
                     <Card.Body className="text-center">
                       <Card.Title className="mb-1">{member.name}</Card.Title>
                       <p className="text-muted subtitle mb-2">{member.role}</p>
-                      <Card.Text className="text-muted small">
+                      <Card.Text className="text-muted">
                         {member.bio}
                       </Card.Text>
                       <motion.div
@@ -354,7 +359,7 @@ const AboutUsPage = () => {
             ))}
           </Row>
           <div className="text-center mt-4">
-            <a href="#" className="btn btn-outline-primary">View All Team</a>
+            <a href="#" className="btn btn-primary">View All Team</a>
           </div>
         </section>
         
@@ -370,26 +375,25 @@ const AboutUsPage = () => {
                     quote: "Having the vet come to our home made all the difference for our anxious cat. No more stressful car rides and a much more thorough examination in a comfortable environment.",
                     name: "Maria Thompson",
                     pet: "Cat owner",
-                    image: "/assets/images/landing-page/hero-bg.jpg" // placeholder
+                    image: "/assets/images/testimonials/maria-thompson.jpg" // TODO: Replace placeholder image path
                   },
                   {
                     quote: "As a farm owner, having mobile veterinary services has been transformative. The convenience of on-site care for our animals has saved us countless hours of transport time.",
                     name: "Robert Johnson",
                     pet: "Farm owner",
-                    image: "/assets/images/landing-page/hero-bg.jpg" // placeholder
+                    image: "/assets/images/testimonials/robert-johnson.jpg" // TODO: Replace placeholder image path
                   },
                   {
                     quote: "Our elderly dog has mobility issues, and taking him to a clinic was becoming increasingly difficult. VisitingVet's at-home service has been a blessing for both him and us.",
                     name: "Sarah Davis",
                     pet: "Dog owner",
-                    image: "/assets/images/landing-page/hero-bg.jpg" // placeholder
+                    image: "/assets/images/testimonials/sarah-davis.jpg" // TODO: Replace placeholder image path
                   }
                 ].map((testimonial, index) => (
                   <div className={`carousel-item ${index === 0 ? 'active' : ''}`} key={index}>
-                    <Card style={{ 
+                    <Card className="testimonial-card" style={{
                       border: 'none', 
                       boxShadow: theme.shadows.md,
-                      maxWidth: '800px',
                       margin: '0 auto',
                       borderRadius: '12px',
                       position: 'relative',
@@ -442,29 +446,29 @@ const AboutUsPage = () => {
                 ))}
               </div>
               <div className="d-flex justify-content-center mt-4">
-                <button className="btn btn-sm btn-primary mx-2" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="prev" aria-label="Previous testimonial">
+                <button className="btn btn-sm btn-primary mx-1 mx-sm-2" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="prev" aria-label="Previous testimonial">
                   <i className="fas fa-chevron-left" aria-hidden="true"></i>
                 </button>
-                <button className="btn btn-sm btn-primary mx-2" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="next" aria-label="Next testimonial">
+                <button className="btn btn-sm btn-primary mx-1 mx-sm-2" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="next" aria-label="Next testimonial">
                   <i className="fas fa-chevron-right" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
             
             <div className="text-center mt-5">
-              <a href="#" className="btn btn-outline-primary">Share Your Experience</a>
+              <a href="#" className="btn btn-primary">Share Your Experience</a>
             </div>
           </Container>
         </section>
         
         {/* Statistics Section */}
-        <section style={styles.section} aria-labelledby="stats-title">
+        <section style={{ ...styles.section, margin: '3rem 0' }} aria-labelledby="stats-title">
           <Container>
             <h2 style={styles.sectionTitle} id="stats-title">Our Impact</h2>
             <Row className="justify-content-center">
               {[
                 {
-                  number: "5,000+",
+                  number: "5,000+", // TODO: Replace placeholder value
                   label: "Home Visits",
                   icon: (
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -473,7 +477,7 @@ const AboutUsPage = () => {
                   )
                 },
                 {
-                  number: "450+",
+                  number: "450+", // TODO: Replace placeholder value
                   label: "Veterinary Experts",
                   icon: (
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -482,7 +486,7 @@ const AboutUsPage = () => {
                   )
                 },
                 {
-                  number: "98%",
+                  number: "98%", // TODO: Replace placeholder value
                   label: "Client Satisfaction",
                   icon: (
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -498,48 +502,14 @@ const AboutUsPage = () => {
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
                   >
-                    <Card style={{
-                      ...styles.cardStyle,
-                      border: 'none',
-                      borderRadius: '12px',
-                      padding: '1.5rem',
-                      backgroundColor: 'white',
-                      textAlign: 'center'
-                    }}>
-                      <Card.Body>
-                        <div style={{
-                          width: '80px',
-                          height: '80px',
-                          borderRadius: '50%',
-                          backgroundColor: `${theme.colors.primary.main}15`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          margin: '0 auto 1.5rem'
-                        }}>
+                    <Card style={{ ...styles.cardStyle, backgroundColor: '#fff', border: `1px solid ${theme.colors.neutral[200]}` }} className="text-center">
+                      <Card.Body style={{ padding: '2rem' }}>
+                        <div style={styles.iconWrapper}>
                           {stat.icon}
                         </div>
-                        <motion.h3
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          whileInView={{ 
-                            opacity: 1, 
-                            scale: 1,
-                            transition: {
-                              type: "spring",
-                              stiffness: 100
-                            }
-                          }}
-                          viewport={{ once: true }}
-                          style={{ 
-                            fontSize: '2.5rem', 
-                            color: theme.colors.primary.dark,
-                            fontWeight: 'bold',
-                            marginBottom: '0.5rem'
-                          }}
-                        >
-                          {stat.number}
-                        </motion.h3>
-                        <p className="text-muted">{stat.label}</p>
+                        {/* TODO: Implement count-up animation for stat number */}
+                        <h3 style={{ color: theme.colors.primary.dark, fontWeight: 'bold' }}>{stat.number}</h3> 
+                        <p className="text-muted mb-0">{stat.label}</p>
                       </Card.Body>
                     </Card>
                   </motion.div>

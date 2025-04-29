@@ -115,4 +115,28 @@ textarea {
 /* Make all interactive elements accessible with keyboard */
 a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]) {
   cursor: pointer;
-} 
+}
+
+.testimonial-card {
+  max-width: 90%; /* Default max-width for smaller screens */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 768px) { /* Medium screens and up */
+  .testimonial-card {
+    max-width: 800px;
+  }
+}
+
+/* Add other specific styles for About Us page below */
+.subtitle {
+  font-size: 1.1rem;
+}
+
+.value-card {
+  height: 100%; /* Ensure value cards have same height */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Add any other styles needed */ 
