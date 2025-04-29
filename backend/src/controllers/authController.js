@@ -110,6 +110,10 @@ const registerUser = async (req, res, next) => {
     // Log the received role name to help with debugging
     logger.info(`Registration attempt with role name: "${roleName}"`);
     
+    // Check the available roles in the database for debugging
+    const allRoles = await Role.find({}).select('name');
+    logger.info(`Available roles in database: ${allRoles.map(r => r.name).join(', ')}`);
+    
     // Enhanced role name normalization with multiple strategies
     let normalizedRoleName = roleName;
     
@@ -120,13 +124,17 @@ const registerUser = async (req, res, next) => {
     if (!userRole) {
       if (roleName === 'Pet Owner') {
         normalizedRoleName = 'PetOwner';
-      } else if (roleName === 'Mobile Vet Provider') {
+      } else if (roleName === 'Mobile Vet Provider' || roleName === 'MVSProvider') {
         normalizedRoleName = 'MVSProvider';
       } else if (roleName === 'Veterinary Clinic') {
         normalizedRoleName = 'Clinic';
       }
       
       userRole = await Role.findOne({ name: normalizedRoleName });
+      
+      if (userRole) {
+        logger.info(`Found role after normalization: ${userRole.name}`);
+      }
     }
     
     // 3. If still not found, try case-insensitive matching
@@ -151,6 +159,8 @@ const registerUser = async (req, res, next) => {
     // 5. If still no role found, return an error
     if (!userRole) {
       logger.error(`Registration failed: Role '${normalizedRoleName}' not found. Original role: '${roleName}'. No default role available.`);
+      // Log available roles again
+      logger.error(`Available roles in database: ${allRoles.map(r => r.name).join(', ')}`);
       return res.status(400).json({ message: 'Invalid user role specified' });
     }
 

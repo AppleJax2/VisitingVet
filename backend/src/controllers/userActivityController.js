@@ -15,6 +15,12 @@ const logger = require('../utils/logger'); // Basic logging
  */
 const logUserActivity = async (userId, ipAddress, action, status, details = {}, errorMessage = '') => {
   try {
+    // Validate that userId is provided
+    if (!userId) {
+      logger.warn(`Attempted to log user activity without userId. Action: ${action}, Status: ${status}`);
+      return; // Skip logging if userId is not provided
+    }
+
     // Don't await this, let it run in the background
     UserActivityLog.create({
       user: userId,
@@ -23,7 +29,14 @@ const logUserActivity = async (userId, ipAddress, action, status, details = {}, 
       status,
       details,
       errorMessage: status === 'FAILURE' ? errorMessage : undefined,
+    }).catch(err => {
+      logger.error(`Failed to create UserActivityLog entry: ${err.message}`, {
+        userId,
+        action,
+        status
+      });
     });
+    
     // Optionally log to console as well for immediate visibility during dev
     // logger.info(`Activity Logged: User ${userId}, Action: ${action}, Status: ${status}`);
   } catch (error) {
