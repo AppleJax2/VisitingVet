@@ -1,85 +1,126 @@
-# About Us Page Polish To-Do List
+# Services Page Polish To-Do List
 
-## Typography Updates
-- [x] Import Ranade font family in the main CSS or index.html file
-- [x] Add font-family styles to apply Ranade to all text elements
-- [x] Implement font-weight variations: 300 for body text, 500 for subtitles, 700 for headings
-- [x] Increase hero title to 3.5rem with letter-spacing of -0.5px for more impact
-- [x] Update body text to 1.1rem for better readability
+This document outlines the changes needed to improve the Services page for the unauthenticated frontend view, based on our collaborative review.
 
-## Hero Section Enhancements
-- [x] Implement subtle gradient background (light to lighter variant of primary color)
-- [x] Increase padding to 6rem for more dramatic presence
-- [x] Add a decorative graphic element in the background (subtle veterinary-related pattern)
-- [x] Animate the subtitle with a fade-in effect
-- [x] Add a thin divider line beneath the subtitle
+## Visual Enhancements
 
-## Mission Section Improvements
-- [x] Apply a subtle border (1px) to the image along with the existing shadow
-- [x] Add a hover zoom effect to the image (scale: 1.02)
-- [x] Implement a staggered fade-in animation for text paragraphs
-- [x] Use a pull quote style for one key mission statement
-- [x] Adjust spacing to 32px between paragraphs
+- [x] **Replace emoji icons with SVG icons**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Create a new icons directory if it doesn't exist: `client/src/assets/icons/`
+  - Add 6 professional SVG icons matching our services (small animal, equine, farm animal, preventative care, emergency, diagnostics)
+  - Use primary brand colors for the icons
+  - Note: Keep icon size consistent with current implementation (60px container)
 
-## Values Section Redesign
-- [x] Apply custom background colors to each card (very subtle tints of primary color)
-- [x] Add hover animation effects (slight elevation increase + shadow change)
-- [x] Replace emoji icons with proper SVG icons with consistent styling
-- [x] Add micro-animations to the icons on hover (gentle pulse or rotation)
-- [x] Implement card border-radius of 12px instead of default
+- [x] **Enhance service cards**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Add a subtle light background color to each card (use `theme.colors.background.light` with reduced opacity)
+  - Add a 4px accent border on the left side using primary color
+  - Adjust the `serviceCard` style to include these changes
 
-## New Team Section
-- [x] Create responsive team member cards (4 key team members)
-- [x] Include circular profile images with consistent sizing (150px diameter)
-- [x] Add hover state revealing additional info/social links
-- [x] Implement staggered loading animation when scrolling to section
-- [x] Add "View All Team" link at the bottom for future expansion
+- [x] **Add header banner image**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Create a simple banner showing a veterinarian with a pet
+  - Place in `client/src/assets/images/` directory
+  - Size appropriately for header section (full width, ~300px height)
+  - Ensure image is responsive and properly compressed
+  - Add appropriate alt text for accessibility
 
-## New Testimonials Section
-- [x] Design testimonial carousel with 3-4 client quotes
-- [x] Include pet owner name, pet type, and small thumbnail image
-- [x] Add subtle quotation marks as decorative elements
-- [x] Implement automatic rotation with manual controls
-- [x] Add testimonial submission CTA for social proof collection
+## Interactive Improvements
 
-## Statistics & Achievements Section
-- [x] Create row of 3 key statistics with counting animations
-- [x] Design clean, minimal stats cards with large numbers
-- [x] Add subtle icon accompaniment for each statistic
-- [x] Implement animation trigger on scroll into view
-- [x] Include brief explanatory text beneath each statistic
+- [x] **Add hover effects to service cards**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Implement a subtle lift effect (3px transform) on card hover
+  - Increase shadow depth slightly on hover
+  - Use CSS transitions for smooth animation
+  - Example: Add `.serviceCard:hover` styles or implement styled-components
 
-## Call-to-Action Section
-- [x] Design full-width CTA with background color gradient
-- [x] Add two buttons: "Book a Visit" (primary) and "Join as Vet" (secondary)
-- [x] Implement subtle parallax effect on background
-- [x] Add decorative veterinary-themed illustrations
-- [x] Ensure padding of 5rem (top/bottom) for spacious feel
+- [x] **Enhance CTA button interactions**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Add hover effect that slightly enlarges the "Find Providers" button (scale: 1.05)
+  - Darken button color slightly on hover
+  - Add smooth transition effect (0.2s)
+  - Ensure focus states are also properly styled for accessibility
 
-## Mobile Responsiveness Improvements
-- [x] Optimize mission image to 80% width on mobile
-- [x] Stack value cards vertically with reduced margins on mobile
-- [x] Adjust typography sizes proportionally for small screens
-- [x] Ensure touch targets are at least 44px for all interactive elements
-- [x] Modify padding/margins throughout for balanced mobile appearance
+## Layout & Structure
 
-## Accessibility Enhancements
-- [x] Ensure color contrast meets WCAG AA standards (minimum 4.5:1)
-- [x] Add proper ARIA labels to all decorative elements
-- [x] Implement keyboard navigation for all interactive components
-- [x] Add focus states that are visible and match design aesthetic
-- [x] Ensure all text is properly structured with semantic HTML
+- [x] **Adjust spacing between sections**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Increase section spacing from 3rem to 3.5rem for better visual separation
+  - Update the `section` style in the component
 
-## Animation & Interaction Refinements
-- [x] Add subtle page entrance animation
-- [x] Implement scroll-triggered animations for each section
-- [x] Add hover state micro-interactions to all clickable elements
-- [x] Ensure animations respect reduced-motion preferences
-- [x] Keep animation durations between 300-500ms for optimal response feel
+- [x] **Add "How It Works" section**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Create a new section between the header and services section
+  - Design a 3-step process showing: 1) Find a service, 2) Book an appointment, 3) Receive care
+  - Use consistent styling with the rest of the page
+  - Include simple icons for each step
+  - Keep text concise and action-oriented
 
-## Performance Optimizations
-- [x] Optimize and compress all images
-- [x] Implement lazy loading for images below the fold
-- [x] Ensure SVG icons are optimized for file size
-- [x] Preload critical font weights to avoid FOUT (Flash of Unstyled Text)
-- [x] Implement appropriate caching policies for static assets 
+## Responsive Behavior
+
+- [x] **Optimize for mobile devices**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Test and adjust padding and margins for smaller screens
+  - Ensure service cards stack properly on xs screens
+  - Verify that images scale appropriately
+  - Adjust font sizes if needed for better readability on mobile
+
+- [x] **Improve tablet layout**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Fine-tune the md breakpoint styling to ensure optimal display on tablets
+  - Consider adjusting card sizes and grid layout for better use of space
+
+## Accessibility Improvements
+
+- [x] **Enhance keyboard navigation**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Ensure all interactive elements have proper focus states
+  - Verify tab order is logical
+  - Test with keyboard-only navigation
+
+- [x] **Improve screen reader compatibility**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Add appropriate ARIA labels where needed
+  - Ensure all images have proper alt text
+  - Verify that semantic HTML is used correctly
+
+## Performance Optimization
+
+- [x] **Optimize images**
+  - Target directory: where images will be stored
+  - Compress all images used on the page
+  - Consider using WebP format with fallbacks
+  - Implement lazy loading for images below the fold
+
+- [x] **Code cleanup**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Extract inline styles to styled-components or a separate CSS file
+  - Remove any unused code or comments
+  - Organize imports and component structure
+
+## Content Refinement
+
+- [x] **Review and finalize service descriptions**
+  - Target file: `client/src/pages/ServicesPage.jsx`
+  - Verify accuracy of all service descriptions
+  - Ensure consistent tone and length across all services
+  - Check for typos or grammatical errors
+
+- [x] **Enhance page meta information**
+  - Ensure proper page title is set
+  - Add meta description for SEO purposes
+  - Consider implementing Open Graph tags for social sharing
+
+## Final QA
+
+- [x] **Cross-browser testing**
+  - Test on Chrome, Firefox, Safari, and Edge
+  - Verify consistent appearance and functionality
+
+- [x] **Accessibility audit**
+  - Run automated tests (Lighthouse, axe)
+  - Verify WCAG 2.1 AA compliance
+
+- [x] **Performance testing**
+  - Check page load times
+  - Optimize any slow-loading resources 

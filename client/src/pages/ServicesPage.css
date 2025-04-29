@@ -1,0 +1,63 @@
+/* ServicesPage.css */
+.service-card {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23) !important;
+}
+
+.service-card:focus {
+  outline: 2px solid #577E46;
+  outline-offset: 2px;
+}
+
+.cta-button {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.cta-button:hover {
+  transform: scale(1.05);
+}
+
+.cta-button:focus {
+  box-shadow: 0 0 0 0.25rem rgba(87, 126, 70, 0.5) !important;
+}
+
+.banner-image {
+  height: 300px;
+  width: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .banner-image {
+    height: 250px;
+  }
+  
+  .section-spacing {
+    padding: 2.5rem 0 !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .banner-image {
+    height: 200px;
+  }
+  
+  .service-cards-container > div {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Lazy loading styles */
+.lazy-image {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.lazy-image.loaded {
+  opacity: 1;
+} 
