@@ -68,8 +68,8 @@ const theme = {
   },
   // Font families
   fonts: {
-    heading: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    body: "'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    heading: "'Ranade', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    body: "'Ranade', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
   // Typography

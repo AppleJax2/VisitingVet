@@ -1,0 +1,118 @@
+/* About Us Page Styles */
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  /* Optimize mission image on mobile */
+  .mission-image {
+    width: 80%;
+    margin: 0 auto;
+    display: block;
+  }
+  
+  /* Stack value cards vertically with reduced margins */
+  .value-card {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  /* Adjust typography sizes proportionally */
+  h1 {
+    font-size: 2.5rem !important;
+  }
+  
+  h2 {
+    font-size: 2rem !important;
+  }
+  
+  .lead {
+    font-size: 1rem !important;
+  }
+}
+
+/* Accessibility enhancements */
+:focus {
+  outline: 2px solid var(--primary-main) !important;
+  outline-offset: 3px !important;
+}
+
+/* Ensure all links have proper visual focus state */
+a:focus, button:focus, [role="button"]:focus {
+  outline: 2px solid var(--primary-main) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 3px rgba(87, 126, 70, 0.25) !important;
+}
+
+/* Ensure touch targets are large enough */
+button, 
+a, 
+[role="button"],
+input,
+select,
+textarea {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Animation & Interaction Refinements */
+.page-entrance-animation {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ensure animations respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Testimonial quote marks */
+.testimonial-quote {
+  position: relative;
+}
+
+/* Pull quote styling */
+.pull-quote {
+  font-style: italic;
+  position: relative;
+  padding-left: 20px;
+}
+
+/* Team member hover effects */
+.team-member-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-member-card:hover {
+  transform: translateY(-8px);
+}
+
+/* Statistics animation */
+.stat-number {
+  display: inline-block;
+}
+
+/* CTA section styles */
+.cta-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-decoration {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 0;
+}
+
+/* Make all interactive elements accessible with keyboard */
+a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+} 
