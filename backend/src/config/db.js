@@ -53,7 +53,7 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
-    console.error(`Error connecting to MongoDB: ${error.message}`);
+    console.error('Error connecting to MongoDB:', error);
     if (error.name === 'MongoParseError') {
       console.error('This may indicate an invalid MongoDB connection string');
     } else if (error.name === 'MongoNetworkError') {
