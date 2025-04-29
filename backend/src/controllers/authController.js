@@ -105,23 +105,51 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: 'Mobile carrier is required for SMS notifications' });
     }
 
-    // Normalize role name by removing spaces and converting to correct format
+    // Log the received role name to help with debugging
+    logger.info(`Registration attempt with role name: "${roleName}"`);
+    
+    // Enhanced role name normalization with multiple strategies
     let normalizedRoleName = roleName;
     
-    // Handle the display names shown in the UI vs the actual role names in the database
-    if (roleName === 'Pet Owner') {
-      normalizedRoleName = 'PetOwner';
-    } else if (roleName === 'Mobile Vet Provider') {
-      normalizedRoleName = 'MVSProvider';
-    } else if (roleName === 'Veterinary Clinic') {
-      normalizedRoleName = 'Clinic';
+    // 1. First try direct role name matching (exact match)
+    let userRole = await Role.findOne({ name: normalizedRoleName });
+    
+    // 2. If not found, try normalizing UI display names
+    if (!userRole) {
+      if (roleName === 'Pet Owner') {
+        normalizedRoleName = 'PetOwner';
+      } else if (roleName === 'Mobile Vet Provider') {
+        normalizedRoleName = 'MVSProvider';
+      } else if (roleName === 'Veterinary Clinic') {
+        normalizedRoleName = 'Clinic';
+      }
+      
+      userRole = await Role.findOne({ name: normalizedRoleName });
+    }
+    
+    // 3. If still not found, try case-insensitive matching
+    if (!userRole) {
+      // Create a regex for case-insensitive matching
+      const roleRegex = new RegExp(`^${normalizedRoleName}$`, 'i');
+      userRole = await Role.findOne({ name: { $regex: roleRegex } });
+      
+      if (userRole) {
+        logger.info(`Found role with case-insensitive match: ${userRole.name}`);
+      }
+    }
+    
+    // 4. If still not found, try to find if there's a default role
+    if (!userRole) {
+      userRole = await Role.findOne({ isDefault: true });
+      if (userRole) {
+        logger.info(`Using default role: ${userRole.name}`);
+      }
     }
 
-    // Find the default role or specific role based on normalized roleName
-    const userRole = await Role.findOne({ name: normalizedRoleName });
+    // 5. If still no role found, return an error
     if (!userRole) {
-        logger.error(`Registration failed: Role '${normalizedRoleName}' not found. Original role: '${roleName}'`);
-        return res.status(400).json({ message: 'Invalid user role specified' });
+      logger.error(`Registration failed: Role '${normalizedRoleName}' not found. Original role: '${roleName}'. No default role available.`);
+      return res.status(400).json({ message: 'Invalid user role specified' });
     }
 
     // Create user with all provided fields
