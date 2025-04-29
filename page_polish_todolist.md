@@ -111,37 +111,37 @@ This document contains polish tasks for all unauthenticated pages of the Visitin
 ## Services Page (`ServicesPage.jsx`)
 
 ### Layout & Structure
-- [ ] Fix spacing between services cards on mobile view
-- [ ] Improve banner image responsiveness on different screen sizes
-- [ ] Add more breathing room between sections
-- [ ] Adjust "How It Works" steps to maintain alignment on tablet view
-- [ ] Improve visual hierarchy with subtle background color variations
+- [x] Fix spacing between services cards on mobile view
+- [x] Improve banner image responsiveness on different screen sizes
+- [x] Add more breathing room between sections
+- [x] Adjust "How It Works" steps to maintain alignment on tablet view
+- [x] Improve visual hierarchy with subtle background color variations
 
 ### Styling & Visuals
 - [ ] Replace placeholder icons with custom SVGs matching the brand identity
-- [ ] Add subtle border radius to banner image for consistency
-- [ ] Improve service card hover effect with smooth transition
-- [ ] Add visual indicators to show clickable areas
-- [ ] Add subtle box shadows to create depth between elements
+- [x] Add subtle border radius to banner image for consistency
+- [x] Improve service card hover effect with smooth transition
+- [x] Add visual indicators to show clickable areas
+- [x] Add subtle box shadows to create depth between elements
 
 ### Typography
-- [ ] Standardize font sizes across all content elements
-- [ ] Improve readability of text on the banner by adjusting overlay opacity
-- [ ] Adjust line height for service descriptions
-- [ ] Ensure heading hierarchy is maintained consistently
+- [x] Standardize font sizes across all content elements
+- [x] Improve readability of text on the banner by adjusting overlay opacity
+- [x] Adjust line height for service descriptions
+- [x] Ensure heading hierarchy is maintained consistently
 
 ### Components & Elements
-- [ ] Add consistent call-to-action buttons at the bottom of the page
+- [x] Add consistent call-to-action buttons at the bottom of the page
 - [ ] Fix image paths and replace placeholder images
-- [ ] Improve visual feedback for interactive elements
-- [ ] Add subtle animations to "How It Works" icons
+- [x] Improve visual feedback for interactive elements
+- [x] Add subtle animations to "How It Works" icons
 
 ### Accessibility
-- [ ] Add proper focus indicators for all interactive elements
-- [ ] Ensure banner text has sufficient contrast against background
+- [x] Add proper focus indicators for all interactive elements
+- [x] Ensure banner text has sufficient contrast against background
 - [ ] Add descriptive alt text for all service icons
 - [ ] Add proper ARIA roles for landmark sections
-- [ ] Ensure proper keyboard navigation through service cards
+- [x] Ensure proper keyboard navigation through service cards
 
 ## Login Page (`LoginPage.jsx`)
 

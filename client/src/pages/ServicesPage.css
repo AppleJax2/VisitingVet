@@ -1,11 +1,33 @@
 /* ServicesPage.css */
 .service-card {
-  transition: all 0.2s ease-in-out !important;
+  transition: all 0.3s ease-in-out !important;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+  position: relative;
 }
 
 .service-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23) !important;
+  cursor: pointer;
+}
+
+.service-card:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #577E46;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.service-card:hover:after {
+  transform: scaleX(1);
 }
 
 .service-card:focus {
@@ -15,6 +37,8 @@
 
 .cta-button {
   transition: all 0.2s ease-in-out !important;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .cta-button:hover {
@@ -29,6 +53,47 @@
   height: 300px;
   width: 100%;
   object-fit: cover;
+  border-radius: 8px;
+}
+
+.banner-overlay {
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6));
+  border-radius: 8px;
+}
+
+.banner-text {
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+
+.section-spacing {
+  padding: 4rem 0;
+}
+
+.section-bg-light {
+  background-color: #f8f9fa;
+}
+
+.section-bg-accent {
+  background-color: rgba(87, 126, 70, 0.1);
+}
+
+.service-description {
+  line-height: 1.6;
+}
+
+.how-it-works-icon {
+  transition: transform 0.3s ease;
+}
+
+.how-it-works-step:hover .how-it-works-icon {
+  transform: scale(1.1);
+}
+
+@media (max-width: 991px) {
+  .how-it-works-step {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
 }
 
 @media (max-width: 768px) {
@@ -37,7 +102,11 @@
   }
   
   .section-spacing {
-    padding: 2.5rem 0 !important;
+    padding: 3rem 0 !important;
+  }
+  
+  .service-cards-container {
+    margin: 0 -0.5rem;
   }
 }
 
@@ -46,9 +115,26 @@
     height: 200px;
   }
   
+  .service-cards-container {
+    margin: 0 -0.25rem;
+  }
+  
   .service-cards-container > div {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .service-description {
+    font-size: 0.9rem;
   }
 }
 
@@ -60,4 +146,4 @@
 
 .lazy-image.loaded {
   opacity: 1;
-} 
+}
