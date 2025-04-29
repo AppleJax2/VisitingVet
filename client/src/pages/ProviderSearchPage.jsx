@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Row, Col, Card, Button, Form, InputGroup, Spinner, Alert, Pagination, FloatingLabel } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Container, Row, Col, Card, Button, Form, InputGroup, Spinner, Alert, Pagination, FloatingLabel, Collapse } from 'react-bootstrap';
 import { useNavigate, useLocation, createSearchParams } from 'react-router-dom';
 import { searchProviders } from '../services/api';
-import { Search, GeoAltFill, TagFill, HeartPulseFill } from 'react-bootstrap-icons';
+import { Search, GeoAltFill, TagFill, HeartPulseFill, InfoCircle, StarFill, ExclamationTriangleFill } from 'react-bootstrap-icons';
 import debounce from 'lodash.debounce';
 
 // Assume these are the possible values from the backend model
@@ -10,101 +10,132 @@ const ANIMAL_TYPES = ['Small Animal', 'Large Animal', 'Exotic', 'Avian', 'Equine
 // Add known specialties if applicable, or fetch them from backend later
 const SPECIALTY_SERVICES = ['General Practice', 'Surgery', 'Dentistry', 'Emergency', 'Ferrier', 'Diagnostics'];
 
+// Helper function to render rating stars
+const renderStars = (rating) => {
+  const totalStars = 5;
+  const filledStars = Math.round(rating || 0); // Round rating to nearest whole number
+  const stars = [];
+  for (let i = 1; i <= totalStars; i++) {
+    stars.push(
+      <StarFill 
+        key={i} 
+        size={16} 
+        className={i <= filledStars ? 'text-warning me-1' : 'text-muted me-1'} 
+      />
+    );
+  }
+  return <div className="mb-2">{stars} <small className="text-muted">({(rating || 0).toFixed(1)})</small></div>; // Show rating value
+};
+
 function ProviderSearchPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const resultsContainerRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [results, setResults] = useState([]);
   const [pagination, setPagination] = useState({});
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [liveRegionText, setLiveRegionText] = useState('');
 
-  // Search and filter state - initialize from URL query params
   const queryParams = new URLSearchParams(location.search);
-  const [searchTerm, setSearchTerm] = useState(queryParams.get('search') || '');
-  const [searchLocation, setSearchLocation] = useState(queryParams.get('location') || '');
+  const [searchTerm, setSearchTerm] = useState(queryParams.get('q') || '');
+  const [searchLocation, setSearchLocation] = useState(queryParams.get('loc') || '');
   const [selectedAnimalTypes, setSelectedAnimalTypes] = useState(queryParams.getAll('animalTypes') || []);
   const [selectedSpecialties, setSelectedSpecialties] = useState(queryParams.getAll('specialtyServices') || []);
   const [currentPage, setCurrentPage] = useState(parseInt(queryParams.get('page')) || 1);
+  const [isGeolocating, setIsGeolocating] = useState(false);
+  const [geoError, setGeoError] = useState('');
 
-  // Function to fetch providers based on current state
-  const fetchProviders = useCallback(async (page = 1) => {
+  const fetchProviders = useCallback(async (pageToFetch = 1) => {
     setIsLoading(true);
     setError('');
+    const currentPageForAPI = pageToFetch;
+    const limit = 12;
+
     const params = {
-      page,
-      limit: 9, // Show 9 results per page (fits 3x3 grid)
-      search: searchTerm.trim(),
-      location: searchLocation.trim(),
-      animalTypes: selectedAnimalTypes.join(','),
-      specialtyServices: selectedSpecialties.join(','),
+      page: currentPageForAPI,
+      limit: limit,
+      q: searchTerm.trim(),
+      loc: searchLocation.trim(),
+      animalTypes: selectedAnimalTypes,
+      specialtyServices: selectedSpecialties,
     };
 
-    // Remove empty params
     Object.keys(params).forEach(key => {
-      if (!params[key]) {
+      if (key !== 'page' && key !== 'limit' && !params[key]) {
         delete params[key];
+      }
+      if ((key === 'animalTypes' || key === 'specialtyServices') && params[key]?.length === 0) {
+         delete params[key];
       }
     });
 
     try {
-      const data = await searchProviders(params);
-      
-      if (data && data.success) {
-        // Check if data is in data.data (search endpoint) or data.profiles (list endpoint)
-        const providerResults = data.data || data.profiles || [];
-        setResults(providerResults);
-        
-        // Handle pagination data which might be directly in data or in data.pagination
-        if (data.pagination) {
-          setPagination(data.pagination);
-          setCurrentPage(data.pagination.page || 1);
-        } else {
-          // Simple pagination if the backend doesn't provide it
-          setPagination({
-            page: page,
-            limit: params.limit || 9,
-            total: providerResults.length,
-            pages: 1, // Just one page if we don't know the total
-          });
+      const response = await searchProviders(params);
+      const providerResults = response.data.providers || [];
+      const paginationData = response.data.pagination || {};
+
+      setResults(providerResults);
+      setPagination(paginationData);
+      setCurrentPage(paginationData.currentPage || pageToFetch);
+
+      const { currentPage: pgCurrent, totalPages: pgTotalPages, totalProviders: pgTotal } = paginationData;
+      const count = providerResults.length;
+      const start = count > 0 ? (pgCurrent - 1) * limit + 1 : 0;
+      const end = start + count - 1;
+      const liveText = count > 0
+        ? `Showing ${start}-${end} of ${pgTotal} providers. Page ${pgCurrent} of ${pgTotalPages}.`
+        : `No providers found matching your criteria.`;
+      setLiveRegionText(liveText);
+
+      setTimeout(() => {
+        if (resultsContainerRef.current) {
+          resultsContainerRef.current.focus();
         }
-        
-        // Update URL query params without full page reload
-        navigate({ search: `?${createSearchParams(params)}` }, { replace: true });
-      } else {
-        setError(data.message || 'Failed to fetch providers.');
-        setResults([]);
-        setPagination({});
-      }
+      }, 100);
+
     } catch (err) {
-      setError(err.message || 'An error occurred while searching.');
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to fetch providers. Please try again later.';
+      setError(errorMsg);
       setResults([]);
       setPagination({});
+      setLiveRegionText('Error fetching providers. Please try again.');
     } finally {
       setIsLoading(false);
     }
   }, [searchTerm, searchLocation, selectedAnimalTypes, selectedSpecialties, navigate]);
 
-  // Debounced search trigger
-  const debouncedFetch = useCallback(debounce(() => fetchProviders(1), 500), [fetchProviders]);
-
-  // Effect to fetch on initial load and when filters/search terms change (debounced)
   useEffect(() => {
-    // Fetch immediately if page changes, otherwise debounce for text inputs
-    if (currentPage !== pagination?.page) {
-       fetchProviders(currentPage);
-    } else {
-       // Fetch initial data based on URL params on first load
-       if (!location.search && !isLoading && results.length === 0) {
-         fetchProviders(1);
-       } else {
-         // Debounce subsequent fetches triggered by input changes
-         debouncedFetch();
-       }
-    }
-    // Cleanup debounce timer on unmount
-    return () => debouncedFetch.cancel();
-  }, [searchTerm, searchLocation, selectedAnimalTypes, selectedSpecialties, currentPage, fetchProviders, debouncedFetch, location.search]);
+    const paramsFromUrl = new URLSearchParams(location.search);
+    setSearchTerm(paramsFromUrl.get('q') || '');
+    setSearchLocation(paramsFromUrl.get('loc') || '');
+    setSelectedAnimalTypes(paramsFromUrl.getAll('animalTypes') || []);
+    setSelectedSpecialties(paramsFromUrl.getAll('specialtyServices') || []);
+    const pageFromUrl = parseInt(paramsFromUrl.get('page')) || 1;
+    setCurrentPage(pageFromUrl);
+
+    fetchProviders(pageFromUrl);
+
+  }, [location.search]);
+
+  const debouncedUpdateUrl = useCallback(debounce(() => {
+      const params = {};
+      if (searchTerm) params.q = searchTerm;
+      if (searchLocation) params.loc = searchLocation;
+      if (selectedAnimalTypes.length > 0) params.animalTypes = selectedAnimalTypes;
+      if (selectedSpecialties.length > 0) params.specialtyServices = selectedSpecialties;
+      if (currentPage > 1) params.page = currentPage;
+
+      const searchString = createSearchParams(params).toString();
+      navigate(`${location.pathname}?${searchString}`, { replace: true });
+  }, 500), [searchTerm, searchLocation, selectedAnimalTypes, selectedSpecialties, currentPage, navigate, location.pathname]);
+
+  useEffect(() => {
+      debouncedUpdateUrl();
+      return () => debouncedUpdateUrl.cancel();
+  }, [searchTerm, searchLocation, selectedAnimalTypes, selectedSpecialties, currentPage, debouncedUpdateUrl]);
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber !== currentPage) {
@@ -112,30 +143,53 @@ function ProviderSearchPage() {
     }
   };
 
-  const handleAnimalTypeChange = (e) => {
+  const handleCheckboxChange = (setter, currentValues) => (e) => {
     const { value, checked } = e.target;
-    setSelectedAnimalTypes(prev =>
-      checked ? [...prev, value] : prev.filter(type => type !== value)
+    setter(prev =>
+      checked ? [...prev, value] : prev.filter(item => item !== value)
     );
-    setCurrentPage(1); // Reset to page 1 on filter change
+    setCurrentPage(1);
   };
 
-  const handleSpecialtyChange = (e) => {
-    const { value, checked } = e.target;
-    setSelectedSpecialties(prev =>
-      checked ? [...prev, value] : prev.filter(spec => spec !== value)
-    );
-    setCurrentPage(1); // Reset to page 1 on filter change
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSearchLocation('');
+    setSelectedAnimalTypes([]);
+    setSelectedSpecialties([]);
+    setCurrentPage(1);
   };
 
-  // Function to render pagination
+  const handleGeolocate = () => {
+    if (!navigator.geolocation) {
+      setGeoError('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setIsGeolocating(true);
+    setGeoError('');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('Lat:', position.coords.latitude, 'Lon:', position.coords.longitude);
+        setGeoError('Geolocation successful, but reverse geocoding needed to fill input.');
+        setIsGeolocating(false);
+      },
+      (error) => {
+        setGeoError(`Geolocation error: ${error.message}`);
+        setIsGeolocating(false);
+      }
+    );
+  };
+
   const renderPaginationItems = () => {
-    if (!pagination.pages || pagination.pages <= 1) return null;
+    if (!pagination || !pagination.totalPages || pagination.totalPages <= 1) {
+      return null;
+    }
 
     let items = [];
     const maxPagesToShow = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(pagination.pages, startPage + maxPagesToShow - 1);
+    let endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
 
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
@@ -160,94 +214,134 @@ function ProviderSearchPage() {
       );
     }
 
-    if (endPage < pagination.pages) {
+    if (endPage < pagination.totalPages) {
       items.push(<Pagination.Ellipsis key="end-ellipsis" disabled />);
     }
 
     items.push(
-      <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.pages} />
+      <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} />
     );
     items.push(
-      <Pagination.Last key="last" onClick={() => handlePageChange(pagination.pages)} disabled={currentPage === pagination.pages} />
+      <Pagination.Last key="last" onClick={() => handlePageChange(pagination.totalPages)} disabled={currentPage === pagination.totalPages} />
     );
 
     return items;
   };
 
-  // View a provider's profile
   const viewProviderProfile = (userId) => {
-    navigate(`/providers/${userId}`);
+    navigate(`/provider/${userId}`);
   };
 
   return (
     <Container fluid className="my-4">
+      <div className="visually-hidden" aria-live="polite" aria-atomic="true">
+        {liveRegionText}
+      </div>
+
+      {error && (
+        <Alert variant="danger" dismissible onClose={() => setError('')} className="d-flex align-items-center">
+          <ExclamationTriangleFill className="me-2" size={20}/>
+          <div>{error}</div>
+        </Alert>
+      )}
       <Row>
-        {/* Filters Sidebar */}
-        <Col md={3} className="mb-4">
+        <Col md={3} xs={12} className="mb-4 mb-md-0 sticky-sidebar">
           <Card>
-            <Card.Header as="h5">Refine Search</Card.Header>
-            <Card.Body>
-              <Form>
-                <FloatingLabel controlId="searchTerm" label="Search Name/Bio..." className="mb-3">
-                  <Form.Control
-                    type="search"
-                    placeholder="Search Name/Bio..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1); // Reset page on new search
-                    }}
-                  />
-                </FloatingLabel>
+            <Card.Header as="h5" className="d-flex justify-content-between align-items-center">
+              Refine Search
+              <Button 
+                variant="outline-secondary" 
+                size="sm" 
+                className="d-md-none"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                aria-controls="filter-collapse-area"
+                aria-expanded={isFilterOpen}
+              >
+                {isFilterOpen ? 'Hide' : 'Show'} Filters
+              </Button>
+            </Card.Header>
+            <Collapse in={isFilterOpen} className="d-md-block"> 
+              <div id="filter-collapse-area">
+                <Card.Body>
+                  <Form>
+                    <FloatingLabel controlId="searchTermInput" label="Search Name/Bio..." className="mb-3">
+                      <Form.Control
+                        type="search"
+                        placeholder="Search Name/Bio..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                      />
+                    </FloatingLabel>
 
-                <FloatingLabel controlId="searchLocation" label="ZIP Code / Area" className="mb-3">
-                  <Form.Control
-                    type="search"
-                    placeholder="ZIP Code / Area"
-                    value={searchLocation}
-                    onChange={(e) => {
-                      setSearchLocation(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                  />
-                </FloatingLabel>
+                    <InputGroup className="mb-3">
+                      <FloatingLabel controlId="searchLocationInput" label="ZIP Code / Area" className="flex-grow-1">
+                        <Form.Control
+                          type="search"
+                          placeholder="ZIP Code / Area"
+                          value={searchLocation}
+                          onChange={(e) => {
+                            setSearchLocation(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          disabled={isGeolocating}
+                        />
+                      </FloatingLabel>
+                      <Button variant="outline-secondary" onClick={handleGeolocate} disabled={isGeolocating} title="Use Current Location" aria-label="Use current location">
+                        {isGeolocating ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : <GeoAltFill />}
+                      </Button>
+                    </InputGroup>
+                    {geoError && <Alert variant="warning" size="sm" className="mt-2">{geoError}</Alert>}
 
-                <h6 className="mt-4"><HeartPulseFill className="me-2"/>Animal Types</h6>
-                <div className="mb-3 filter-checkbox-group">
-                  {ANIMAL_TYPES.map(type => (
-                    <Form.Check
-                      key={type}
-                      type="checkbox"
-                      id={`animal-${type}`}
-                      label={type}
-                      value={type}
-                      checked={selectedAnimalTypes.includes(type)}
-                      onChange={handleAnimalTypeChange}
-                    />
-                  ))}
-                </div>
+                    <h6 className="mt-4"><HeartPulseFill className="me-2"/>Animal Types</h6>
+                    <div className="mb-3">
+                      {ANIMAL_TYPES.map(type => (
+                        <Form.Check
+                          key={`animal-${type}`}
+                          type="checkbox"
+                          id={`animal-${type.replace(/\s+/g, '-')}`}
+                          label={type}
+                          value={type}
+                          checked={selectedAnimalTypes.includes(type)}
+                          onChange={handleCheckboxChange(setSelectedAnimalTypes, selectedAnimalTypes)}
+                        />
+                      ))}
+                    </div>
 
-                <h6 className="mt-4"><TagFill className="me-2"/>Specialties</h6>
-                <div className="filter-checkbox-group">
-                  {SPECIALTY_SERVICES.map(spec => (
-                    <Form.Check
-                      key={spec}
-                      type="checkbox"
-                      id={`specialty-${spec}`}
-                      label={spec}
-                      value={spec}
-                      checked={selectedSpecialties.includes(spec)}
-                      onChange={handleSpecialtyChange}
-                    />
-                  ))}
-                </div>
+                    <h6><TagFill className="me-2"/>Specialties</h6>
+                    <div className="mb-3">
+                      {SPECIALTY_SERVICES.map(spec => (
+                        <Form.Check
+                          key={`spec-${spec}`}
+                          type="checkbox"
+                          id={`spec-${spec.replace(/\s+/g, '-')}`}
+                          label={spec}
+                          value={spec}
+                          checked={selectedSpecialties.includes(spec)}
+                          onChange={handleCheckboxChange(setSelectedSpecialties, selectedSpecialties)}
+                        />
+                      ))}
+                    </div>
 
-              </Form>
-            </Card.Body>
+                    <Button 
+                      variant="outline-danger" 
+                      size="sm" 
+                      className="mt-3 w-100" 
+                      onClick={handleClearFilters}
+                      disabled={!searchTerm && !searchLocation && selectedAnimalTypes.length === 0 && selectedSpecialties.length === 0}
+                     >
+                       Clear All Filters
+                     </Button>
+
+                  </Form>
+                </Card.Body>
+              </div>
+            </Collapse>
           </Card>
         </Col>
 
-        {/* Search Results */}
         <Col md={9}>
           <h1 className="mb-4">Find a Visiting Veterinarian</h1>
           {error && <Alert variant="danger">{error}</Alert>}
@@ -259,12 +353,19 @@ function ProviderSearchPage() {
               </Spinner>
             </div>
           ) : results.length === 0 ? (
-            <Alert variant="info" className="text-center">
-              No visiting veterinarians found matching your criteria. Try adjusting your search filters.
+            <Alert variant="light" className="text-center p-4 border rounded d-flex flex-column align-items-center">
+              <InfoCircle size={40} className="mb-3 text-secondary" />
+              <h5 className="mb-3">No Veterinarians Found</h5>
+              <p className="mb-0 text-muted">No visiting veterinarians found matching your criteria. Try adjusting your search filters.</p>
             </Alert>
           ) : (
             <>
-              <Row xs={1} md={2} lg={3} className="g-4">
+              <Row 
+                ref={resultsContainerRef} 
+                tabIndex={-1} 
+                aria-label={liveRegionText}
+                xs={1} md={2} lg={3} className="g-4"
+              >
                 {results.map(profile => (
                   <Col key={profile._id}>
                     <Card className="h-100 shadow-sm provider-card">
@@ -273,16 +374,33 @@ function ProviderSearchPage() {
                          src={profile.user?.profileImage || 'https://via.placeholder.com/300x200?text=No+Image'} 
                          alt={`${profile.user?.name || 'Provider'}'s image`} 
                          style={{ height: '200px', objectFit: 'cover' }}
+                         onError={(e) => { 
+                           if (e.target.src !== 'https://via.placeholder.com/300x200?text=No+Image') {
+                             e.target.onerror = null;
+                             e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
+                           }
+                         }} 
                        />
                       <Card.Body className="d-flex flex-column">
                         <Card.Title className="text-primary mb-2">{profile.businessName || profile.user?.name || 'Unnamed Provider'}</Card.Title>
                         <Card.Subtitle className="mb-2 text-muted">{profile.user?.email}</Card.Subtitle>
-                        <Card.Text className="text-muted flex-grow-1">
-                          {profile.bio && profile.bio.length > 100
-                            ? `${profile.bio.substring(0, 100)}...`
-                            : profile.bio || 'No bio available.'}
+                        
+                        {renderStars(profile.averageRating)} 
+
+                        <Card.Text 
+                          className="text-muted flex-grow-1" 
+                          style={{ 
+                            display: '-webkit-box', 
+                            WebkitLineClamp: 3, 
+                            WebkitBoxOrient: 'vertical', 
+                            overflow: 'hidden', 
+                            textOverflow: 'ellipsis' 
+                           }}
+                          title={profile.bio || 'No bio available.'}
+                        >
+                          {profile.bio || 'No bio available.'}
                         </Card.Text>
-                        <div>
+                        <div className="mb-3">
                           {profile.animalTypes && profile.animalTypes.length > 0 && (
                             <div className="mb-1">
                               <HeartPulseFill size={14} className="me-1 text-secondary"/> 
@@ -309,7 +427,7 @@ function ProviderSearchPage() {
                 ))}
               </Row>
 
-              {pagination.pages > 1 && (
+              {pagination.totalPages > 1 && (
                 <div className="d-flex justify-content-center mt-4">
                   <Pagination>{renderPaginationItems()}</Pagination>
                 </div>
@@ -324,7 +442,6 @@ function ProviderSearchPage() {
 
 export default ProviderSearchPage;
 
-// Add some basic CSS for better presentation (consider moving to App.css or a dedicated CSS file)
 const style = document.createElement('style');
 style.textContent = `
   .filter-checkbox-group {
@@ -343,4 +460,20 @@ style.textContent = `
     box-shadow: 0 4px 15px rgba(0,0,0,.1);
   }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);
+
+const stickyStyle = document.createElement('style');
+stickyStyle.textContent = `
+  @media (min-width: 768px) {
+    .sticky-sidebar {
+      position: sticky;
+      top: 20px;
+      height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+    .sticky-sidebar > .card {
+       height: 100%; 
+    }
+  }
+`;
+document.head.appendChild(stickyStyle); 
