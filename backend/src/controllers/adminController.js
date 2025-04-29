@@ -4,7 +4,7 @@ const AdminActionLog = require('../models/AdminActionLog');
 const VerificationRequest = require('../models/VerificationRequest');
 const VisitingVetProfile = require('../models/VisitingVetProfile');
 const crypto = require('crypto');
-const sendEmail = require('../utils/sendEmail'); // Assuming an email utility
+const { sendEmailNotification } = require('../utils/notificationService'); // Assuming an email utility
 const logger = require('../utils/logger'); // Assuming logger
 const UserActivityLog = require('../models/UserActivityLog'); // Import the model
 const mongoose = require('mongoose');
@@ -568,7 +568,7 @@ exports.requestAdminPasswordReset = async (req, res) => {
     `;
 
     try {
-      await sendEmail({
+      await sendEmailNotification({
         to: user.email,
         subject: 'Admin Password Reset Request',
         html: message,
@@ -641,7 +641,7 @@ exports.resetAdminPassword = async (req, res) => {
     logger.info(`Admin password successfully reset for email: ${user.email}`);
 
     // Optionally: Send a confirmation email
-    // await sendEmail({ to: user.email, subject: 'Password Changed', text: 'Your admin password has been successfully changed.' });
+    // await sendEmailNotification({ to: user.email, subject: 'Password Changed', text: 'Your admin password has been successfully changed.' });
 
     // Optionally: Log the user out of other sessions?
 
