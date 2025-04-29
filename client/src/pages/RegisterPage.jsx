@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { register } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
-import { Form, Button, Container, Row, Col, Card, Alert, Spinner, Tab, Nav } from 'react-bootstrap';
-import { Envelope, Lock, PersonFill, TelephoneFill, Building, HospitalFill, PeopleFill, Check2Circle } from 'react-bootstrap-icons';
+import { Form, Button, Container, Row, Col, Card, Alert, Spinner, Tab, Nav, InputGroup, ProgressBar } from 'react-bootstrap';
+import { Envelope, Lock, PersonFill, TelephoneFill, Building, HospitalFill, PeopleFill, Check2Circle, EyeFill, EyeSlashFill } from 'react-bootstrap-icons';
 import theme from '../utils/theme';
 import PasswordStrengthMeter from '../components/Shared/PasswordStrengthMeter';
 import { validatePasswordStrength } from '../utils/passwordUtils';
@@ -23,7 +23,22 @@ function RegisterPage() {
   
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Check if passwords match whenever either password field changes
+    if (formData.password || formData.confirmPassword) {
+      if (formData.password !== formData.confirmPassword) {
+        setFormErrors({...formErrors, confirmPassword: 'Passwords do not match'});
+      } else {
+        const { confirmPassword, ...rest } = formErrors;
+        setFormErrors(rest);
+      }
+    }
+  }, [formData.password, formData.confirmPassword]);
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -31,26 +46,62 @@ function RegisterPage() {
       ...formData,
       [name]: type === 'checkbox' ? checked : value
     });
+    
+    // Clear field-specific error when user makes changes
+    if (formErrors[name]) {
+      const newErrors = {...formErrors};
+      delete newErrors[name];
+      setFormErrors(newErrors);
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    
+    // Email validation
+    if (formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        errors.email = 'Please enter a valid email address';
+      }
+    }
+    
+    // Password validation
+    if (formData.password) {
+      const passwordValidation = validatePasswordStrength(formData.password);
+      if (!passwordValidation.isValid) {
+        errors.password = 'Password does not meet requirements';
+      }
+    }
+    
+    // Confirm password validation
+    if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    // Phone validation if provided
+    if (formData.phoneNumber) {
+      const phoneRegex = /^[\d\s\(\)\-\+]+$/;
+      if (!phoneRegex.test(formData.phoneNumber)) {
+        errors.phoneNumber = 'Please enter a valid phone number';
+      }
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Clear previous errors
+    
+    // Validate form
+    if (!validateForm()) {
+      setError('Please correct the highlighted errors before continuing');
+      return;
+    }
+    
     setIsLoading(true);
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    // Check password strength
-    const passwordValidation = validatePasswordStrength(formData.password);
-    if (!passwordValidation.isValid) {
-      setError('Please correct the password issues before continuing');
-      setIsLoading(false);
-      return;
-    }
 
     try {
       // Extract confirmPassword from form data before sending
@@ -69,6 +120,14 @@ function RegisterPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   const roleOptions = [
@@ -146,10 +205,10 @@ function RegisterPage() {
                     </Alert>
                   )}
                   
-                  <Form onSubmit={handleSubmit}>
+                  <Form onSubmit={handleSubmit} noValidate>
                     {/* Account Type Selector */}
                     <Form.Group className="mb-4">
-                      <Form.Label>I am registering as:</Form.Label>
+                      <Form.Label className="fw-bold">I am registering as:</Form.Label>
                       <div className="role-options mt-2">
                         {roleOptions.map((role) => (
                           <div 
@@ -186,180 +245,224 @@ function RegisterPage() {
                       </div>
                     </Form.Group>
 
-                    <Row>
-                      <Col md={6}>
-                        {/* Email Field */}
-                        <Form.Group className="mb-4" controlId="formRegisterEmail">
-                          <Form.Label>Email address*</Form.Label>
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <Envelope />
-                            </span>
-                            <Form.Control
-                              type="email"
-                              placeholder="Enter your email"
-                              name="email"
-                              value={formData.email}
-                              onChange={handleChange}
-                              required
-                              className="auth-input"
-                            />
-                          </div>
-                          <Form.Text className="text-muted">
-                            We'll never share your email with anyone else.
-                          </Form.Text>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        {/* Name Field */}
-                        <Form.Group className="mb-4" controlId="formRegisterName">
-                          <Form.Label>Full Name</Form.Label>
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <PersonFill />
-                            </span>
-                            <Form.Control
-                              type="text"
-                              placeholder="Enter your name"
-                              name="name"
-                              value={formData.name}
-                              onChange={handleChange}
-                              className="auth-input"
-                            />
-                          </div>
-                        </Form.Group>
-                      </Col>
-                    </Row>
+                    <div className="form-section personal-info-section mb-4">
+                      <h5 className="form-section-title mb-3">Personal Information</h5>
+                      <Row>
+                        <Col md={6}>
+                          {/* Email Field */}
+                          <Form.Group className="mb-4" controlId="formRegisterEmail">
+                            <Form.Label>Email address<span className="text-danger">*</span></Form.Label>
+                            <InputGroup hasValidation>
+                              <InputGroup.Text>
+                                <Envelope />
+                              </InputGroup.Text>
+                              <Form.Control
+                                type="email"
+                                placeholder="Enter your email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                                className="auth-input"
+                                isInvalid={!!formErrors.email}
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {formErrors.email}
+                              </Form.Control.Feedback>
+                            </InputGroup>
+                            <Form.Text className="text-muted">
+                              We'll never share your email with anyone else.
+                            </Form.Text>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          {/* Name Field */}
+                          <Form.Group className="mb-4" controlId="formRegisterName">
+                            <Form.Label>Full Name</Form.Label>
+                            <InputGroup>
+                              <InputGroup.Text>
+                                <PersonFill />
+                              </InputGroup.Text>
+                              <Form.Control
+                                type="text"
+                                placeholder="Enter your name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                className="auth-input"
+                              />
+                            </InputGroup>
+                          </Form.Group>
+                        </Col>
+                      </Row>
 
-                    <Row>
-                      <Col md={6}>
-                        {/* Password Field */}
-                        <Form.Group className="mb-4" controlId="formRegisterPassword">
-                          <Form.Label>Password*</Form.Label>
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <Lock />
-                            </span>
-                            <Form.Control
-                              type="password"
-                              placeholder="Create password"
-                              name="password"
-                              value={formData.password}
-                              onChange={handleChange}
-                              required
-                              minLength={8}
-                              className="auth-input"
-                            />
-                          </div>
-                          <PasswordStrengthMeter password={formData.password} />
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        {/* Confirm Password Field */}
-                        <Form.Group className="mb-4" controlId="formRegisterConfirmPassword">
-                          <Form.Label>Confirm Password*</Form.Label>
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <Lock />
-                            </span>
-                            <Form.Control
-                              type="password"
-                              placeholder="Confirm password"
-                              name="confirmPassword"
-                              value={formData.confirmPassword}
-                              onChange={handleChange}
-                              required
-                              className="auth-input"
-                            />
-                          </div>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
-                    <div className="auth-divider">
-                      <span>Contact Preferences</span>
+                      <Row>
+                        <Col md={6}>
+                          {/* Password Field */}
+                          <Form.Group className="mb-4" controlId="formRegisterPassword">
+                            <Form.Label>Password<span className="text-danger">*</span></Form.Label>
+                            <InputGroup hasValidation>
+                              <InputGroup.Text>
+                                <Lock />
+                              </InputGroup.Text>
+                              <Form.Control
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Create password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                minLength={8}
+                                className="auth-input"
+                                isInvalid={!!formErrors.password}
+                              />
+                              <Button 
+                                variant="outline-secondary" 
+                                onClick={togglePasswordVisibility}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                className="password-toggle"
+                              >
+                                {showPassword ? <EyeSlashFill /> : <EyeFill />}
+                              </Button>
+                              <Form.Control.Feedback type="invalid">
+                                {formErrors.password}
+                              </Form.Control.Feedback>
+                            </InputGroup>
+                            <div className="mt-2">
+                              <PasswordStrengthMeter password={formData.password} />
+                            </div>
+                            <div className="password-requirements mt-2">
+                              <small className="text-muted">
+                                Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+                              </small>
+                            </div>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          {/* Confirm Password Field */}
+                          <Form.Group className="mb-4" controlId="formRegisterConfirmPassword">
+                            <Form.Label>Confirm Password<span className="text-danger">*</span></Form.Label>
+                            <InputGroup hasValidation>
+                              <InputGroup.Text>
+                                <Lock />
+                              </InputGroup.Text>
+                              <Form.Control
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="Confirm password"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                                className="auth-input"
+                                isInvalid={!!formErrors.confirmPassword}
+                              />
+                              <Button 
+                                variant="outline-secondary" 
+                                onClick={toggleConfirmPasswordVisibility}
+                                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                className="password-toggle"
+                              >
+                                {showConfirmPassword ? <EyeSlashFill /> : <EyeFill />}
+                              </Button>
+                              <Form.Control.Feedback type="invalid">
+                                {formErrors.confirmPassword}
+                              </Form.Control.Feedback>
+                            </InputGroup>
+                          </Form.Group>
+                        </Col>
+                      </Row>
                     </div>
 
-                    <Row>
-                      <Col md={6}>
-                        {/* Phone Number Field */}
-                        <Form.Group className="mb-4" controlId="formRegisterPhone">
-                          <Form.Label>Phone Number</Form.Label>
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <TelephoneFill />
-                            </span>
-                            <Form.Control
-                              type="tel"
-                              placeholder="(123) 456-7890"
-                              name="phoneNumber"
-                              value={formData.phoneNumber}
+                    <div className="form-section contact-prefs-section mb-4">
+                      <h5 className="form-section-title mb-3">Contact Preferences</h5>
+                      <Row>
+                        <Col md={6}>
+                          {/* Phone Number Field */}
+                          <Form.Group className="mb-4" controlId="formRegisterPhone">
+                            <Form.Label>Phone Number</Form.Label>
+                            <InputGroup hasValidation>
+                              <InputGroup.Text>
+                                <TelephoneFill />
+                              </InputGroup.Text>
+                              <Form.Control
+                                type="tel"
+                                placeholder="(123) 456-7890"
+                                name="phoneNumber"
+                                value={formData.phoneNumber}
+                                onChange={handleChange}
+                                className="auth-input"
+                                isInvalid={!!formErrors.phoneNumber}
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {formErrors.phoneNumber}
+                              </Form.Control.Feedback>
+                            </InputGroup>
+                            <Form.Text className="text-muted">
+                              Required for SMS notifications
+                            </Form.Text>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          {/* Mobile Carrier Field */}
+                          <Form.Group className="mb-4" controlId="formRegisterCarrier">
+                            <Form.Label>Mobile Carrier</Form.Label>
+                            <Form.Select
+                              name="carrier"
+                              value={formData.carrier}
                               onChange={handleChange}
+                              disabled={!formData.phoneNumber}
                               className="auth-input"
-                            />
+                            >
+                              <option value="">Select your carrier</option>
+                              <option value="att">AT&T</option>
+                              <option value="tmobile">T-Mobile</option>
+                              <option value="verizon">Verizon</option>
+                              <option value="sprint">Sprint</option>
+                              <option value="boost">Boost Mobile</option>
+                              <option value="cricket">Cricket</option>
+                              <option value="metro">Metro by T-Mobile</option>
+                              <option value="uscellular">US Cellular</option>
+                              <option value="virgin">Virgin Mobile</option>
+                              <option value="xfinity">Xfinity Mobile</option>
+                              <option value="other">Other</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+
+                      <Row className="mb-4">
+                        <Col xs={12}>
+                          <div className="notification-options p-3 border rounded">
+                            <p className="mb-3 fw-medium">Notification Preferences</p>
+                            <div className="d-flex flex-wrap gap-4">
+                              <Form.Group controlId="formRegisterEmailNotifications">
+                                <Form.Check
+                                  type="checkbox"
+                                  label="Receive email notifications"
+                                  name="emailNotificationsEnabled"
+                                  checked={formData.emailNotificationsEnabled}
+                                  onChange={handleChange}
+                                  className="auth-checkbox"
+                                />
+                              </Form.Group>
+                              <Form.Group controlId="formRegisterSmsNotifications">
+                                <Form.Check
+                                  type="checkbox"
+                                  label="Receive SMS notifications"
+                                  name="smsNotificationsEnabled"
+                                  checked={formData.smsNotificationsEnabled}
+                                  onChange={handleChange}
+                                  disabled={!formData.phoneNumber || !formData.carrier}
+                                  className="auth-checkbox"
+                                />
+                              </Form.Group>
+                            </div>
                           </div>
-                          <Form.Text className="text-muted">
-                            Required for SMS notifications
-                          </Form.Text>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        {/* Mobile Carrier Field */}
-                        <Form.Group className="mb-4" controlId="formRegisterCarrier">
-                          <Form.Label>Mobile Carrier</Form.Label>
-                          <Form.Select
-                            name="carrier"
-                            value={formData.carrier}
-                            onChange={handleChange}
-                            disabled={!formData.phoneNumber}
-                            className="auth-input"
-                          >
-                            <option value="">Select your carrier</option>
-                            <option value="att">AT&T</option>
-                            <option value="tmobile">T-Mobile</option>
-                            <option value="verizon">Verizon</option>
-                            <option value="sprint">Sprint</option>
-                            <option value="boost">Boost Mobile</option>
-                            <option value="cricket">Cricket</option>
-                            <option value="metro">Metro by T-Mobile</option>
-                            <option value="uscellular">US Cellular</option>
-                            <option value="virgin">Virgin Mobile</option>
-                            <option value="xfinity">Xfinity Mobile</option>
-                            <option value="other">Other</option>
-                          </Form.Select>
-                        </Form.Group>
-                      </Col>
-                    </Row>
+                        </Col>
+                      </Row>
+                    </div>
 
-                    <Row className="mb-4">
-                      <Col xs={12}>
-                        <div className="d-flex flex-wrap gap-4">
-                          <Form.Group controlId="formRegisterEmailNotifications">
-                            <Form.Check
-                              type="checkbox"
-                              label="Receive email notifications"
-                              name="emailNotificationsEnabled"
-                              checked={formData.emailNotificationsEnabled}
-                              onChange={handleChange}
-                              className="auth-checkbox"
-                            />
-                          </Form.Group>
-                          <Form.Group controlId="formRegisterSmsNotifications">
-                            <Form.Check
-                              type="checkbox"
-                              label="Receive SMS notifications"
-                              name="smsNotificationsEnabled"
-                              checked={formData.smsNotificationsEnabled}
-                              onChange={handleChange}
-                              disabled={!formData.phoneNumber || !formData.carrier}
-                              className="auth-checkbox"
-                            />
-                          </Form.Group>
-                        </div>
-                      </Col>
-                    </Row>
-
-                    <div className="mt-4 mb-3">
+                    <div className="mt-4 mb-4">
                       <Form.Check
                         type="checkbox"
                         id="terms"
@@ -413,6 +516,88 @@ function RegisterPage() {
           </Col>
         </Row>
       </Container>
+
+      {/* Additional styling */}
+      <style jsx>{`
+        .form-section {
+          background-color: #f9f9f9;
+          border-radius: 12px;
+          padding: 1.5rem;
+          position: relative;
+          overflow: hidden;
+          border-left: 4px solid ${theme.colors.primary.main};
+        }
+        
+        .form-section-title {
+          color: ${theme.colors.primary.dark};
+          font-weight: 600;
+          position: relative;
+        }
+        
+        .auth-card {
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        
+        .password-toggle {
+          border-left: none;
+        }
+        
+        .password-toggle:focus, 
+        .password-toggle:active {
+          box-shadow: none;
+        }
+        
+        .role-option {
+          transition: transform 0.2s ease-in-out;
+        }
+        
+        .role-option:hover {
+          transform: translateY(-3px);
+        }
+        
+        .role-option.selected {
+          box-shadow: 0 0 0 1px ${theme.colors.primary.main};
+        }
+        
+        .auth-input {
+          height: calc(2.5rem + 2px);
+        }
+        
+        .notification-options {
+          background-color: #f5f5f5;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+          .auth-card {
+            border-radius: 12px;
+            margin: 0 1rem;
+          }
+          
+          .form-section {
+            padding: 1.25rem;
+          }
+          
+          .role-option {
+            padding: 0.75rem !important;
+          }
+        }
+        
+        @media (max-width: 576px) {
+          .auth-card {
+            margin: 0 0.5rem;
+          }
+          
+          .card-body {
+            padding: 1.25rem !important;
+          }
+          
+          .form-section {
+            padding: 1rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }

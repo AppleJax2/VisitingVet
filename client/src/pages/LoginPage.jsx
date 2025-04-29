@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Form, 
@@ -12,7 +12,10 @@ import {
   Toast, 
   ToastContainer,
   Modal,
-  FormControl 
+  FormControl,
+  InputGroup,
+  OverlayTrigger,
+  Tooltip
 } from 'react-bootstrap';
 import { 
   Envelope, 
@@ -22,7 +25,9 @@ import {
   ShieldCheck, 
   Calendar,
   GeoAlt,
-  ShieldLock
+  ShieldLock,
+  EyeFill,
+  EyeSlashFill
 } from 'react-bootstrap-icons';
 import './AuthPages.css';
 import { useAuth } from '../contexts/AuthContext';
@@ -37,6 +42,9 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const emailInputRef = useRef(null);
   
   // MFA verification states
   const [showMfaModal, setShowMfaModal] = useState(false);
@@ -49,6 +57,11 @@ function LoginPage() {
     if (!authLoading && user) {
       navigate('/dashboard');
     }
+
+    // Set focus to email input on load
+    if (emailInputRef.current) {
+      emailInputRef.current.focus();
+    }
   }, [user, authLoading, navigate]);
 
   // Show MFA modal when MFA is required
@@ -58,10 +71,37 @@ function LoginPage() {
     }
   }, [mfaRequired]);
 
+  const validateEmail = (email) => {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const handleEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    
+    if (newEmail && !validateEmail(newEmail)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
+    
+    // Validate email format
+    if (email && !validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      setIsSubmitting(false);
+      return;
+    }
     
     try {
       const response = await login({ email, password, rememberMe });
@@ -156,6 +196,7 @@ function LoginPage() {
         backdrop="static"
         keyboard={false}
         centered
+        className="auth-modal"
       >
         <Modal.Header>
           <Modal.Title>
@@ -186,6 +227,7 @@ function LoginPage() {
                 autoFocus
                 required
                 disabled={verifyingMfa}
+                className="auth-input"
               />
             </Form.Group>
             
@@ -194,6 +236,7 @@ function LoginPage() {
                 variant="primary" 
                 type="submit"
                 disabled={verifyingMfa || !mfaToken || mfaToken.length < 6}
+                className="auth-button"
               >
                 {verifyingMfa ? (
                   <>
@@ -218,11 +261,11 @@ function LoginPage() {
       
       <Container>
         <Row className="justify-content-center">
-          <Col lg={10} xl={9}>
+          <Col xs={12} md={10} lg={10} xl={9}>
             <Card className="auth-card overflow-hidden">
               <Row className="g-0">
                 <Col lg={5} className="auth-sidebar d-none d-lg-flex">
-                  <div>
+                  <div className="auth-sidebar-content">
                     <div className="auth-logo">
                       <svg 
                         width="28" 
@@ -263,7 +306,7 @@ function LoginPage() {
                 <Col lg={7}>
                   <div className="auth-content">
                     <div className="d-flex justify-content-center mb-4 d-lg-none">
-                      <div className="auth-logo">
+                      <div className="auth-logo auth-logo-mobile">
                         <svg 
                           width="28" 
                           height="28" 
@@ -291,67 +334,95 @@ function LoginPage() {
                     )}
                     
                     <Form onSubmit={handleSubmit} className="auth-form">
-                      <Form.Group className="mb-3" controlId="formBasicEmail">
+                      <Form.Group className="mb-4" controlId="formBasicEmail">
                         <Form.Label>Email address</Form.Label>
-                        <Form.Control
-                          type="email"
-                          placeholder="Enter your email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                          disabled={isSubmitting}
-                        />
+                        <InputGroup hasValidation>
+                          <InputGroup.Text>
+                            <Envelope />
+                          </InputGroup.Text>
+                          <Form.Control
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={handleEmailChange}
+                            required
+                            disabled={isSubmitting}
+                            isInvalid={!!emailError}
+                            ref={emailInputRef}
+                            className="auth-input"
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {emailError}
+                          </Form.Control.Feedback>
+                        </InputGroup>
                       </Form.Group>
 
-                      <Form.Group className="mb-3" controlId="formBasicPassword">
-                        <div className="d-flex justify-content-between align-items-center mb-1">
+                      <Form.Group className="mb-4" controlId="formBasicPassword">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
                           <Form.Label className="mb-0">Password</Form.Label>
                           <Link to="/forgot-password" className="forgot-password">
                             Forgot Password?
                           </Link>
                         </div>
-                        <Form.Control
-                          type="password"
-                          placeholder="Enter your password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                          disabled={isSubmitting}
-                        />
+                        <InputGroup>
+                          <InputGroup.Text>
+                            <Lock />
+                          </InputGroup.Text>
+                          <Form.Control
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            disabled={isSubmitting}
+                            className="auth-input"
+                          />
+                          <Button 
+                            variant="outline-secondary" 
+                            onClick={togglePasswordVisibility}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            className="password-toggle"
+                          >
+                            {showPassword ? <EyeSlashFill /> : <EyeFill />}
+                          </Button>
+                        </InputGroup>
                       </Form.Group>
                       
-                      <Form.Group className="mb-3" controlId="formBasicCheckbox">
+                      <Form.Group className="mb-4" controlId="formBasicCheckbox">
                         <Form.Check
                           type="checkbox"
                           label="Remember me"
                           checked={rememberMe}
                           onChange={(e) => setRememberMe(e.target.checked)}
                           disabled={isSubmitting}
+                          className="auth-checkbox"
                         />
                       </Form.Group>
                       
-                      <Button 
-                        variant="primary" 
-                        type="submit" 
-                        disabled={isSubmitting}
-                        className="btn-primary w-100"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Spinner
-                              as="span"
-                              animation="border"
-                              size="sm"
-                              role="status"
-                              aria-hidden="true"
-                              className="me-2"
-                            />
-                            Signing in...
-                          </>
-                        ) : (
-                          "Sign In"
-                        )}
-                      </Button>
+                      <div className="login-button-container mb-3">
+                        <Button 
+                          variant="primary" 
+                          type="submit" 
+                          disabled={isSubmitting}
+                          className="btn-primary w-100 auth-button"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                className="me-2"
+                              />
+                              Signing in...
+                            </>
+                          ) : (
+                            "Sign In"
+                          )}
+                        </Button>
+                      </div>
                       
                       <div className="auth-footer">
                         Don't have an account? <Link to="/register">Create Account</Link>
@@ -364,6 +435,56 @@ function LoginPage() {
           </Col>
         </Row>
       </Container>
+
+      {/* Additional styling for improvements */}
+      <style jsx>{`
+        .auth-sidebar-content {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        
+        .auth-logo-mobile {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .login-button-container {
+          margin-top: 1.5rem;
+        }
+        
+        .password-toggle {
+          border-left: none;
+        }
+        
+        .password-toggle:focus, 
+        .password-toggle:active {
+          box-shadow: none;
+        }
+        
+        .auth-input {
+          height: calc(2.5rem + 2px);
+        }
+        
+        .auth-checkbox .form-check-label {
+          display: flex;
+          align-items: center;
+        }
+        
+        /* Extra small screen improvements */
+        @media (max-width: 576px) {
+          .auth-content {
+            padding: 1.5rem;
+          }
+          
+          .auth-card {
+            margin: 0 0.5rem;
+            border-radius: 12px;
+          }
+        }
+      `}</style>
     </div>
   );
 }

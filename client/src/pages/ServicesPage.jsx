@@ -126,37 +126,37 @@ const ServicesPage = () => {
 
   const services = [
     {
-      icon: <img src={SmallAnimalIcon} alt="Small Animal Care" />,
+      icon: <img src={SmallAnimalIcon} alt="Icon depicting dogs and cats for small animal care services" />,
       title: 'Small Animal Care',
       description: 'Comprehensive health services for dogs, cats, rabbits, and other household pets, including wellness exams, vaccinations, diagnostics, and minor procedures, all in the familiar environment of your home.',
       link: '/search-providers?animalType=Small%20Animal',
     },
     {
-      icon: <img src={EquineIcon} alt="Equine Services" />,
+      icon: <img src={EquineIcon} alt="Horse icon representing equine veterinary services" />,
       title: 'Equine Services',
       description: 'Specialized veterinary care for horses, covering routine checkups, dental floating, lameness evaluations, pre-purchase exams, vaccinations, and emergency field services for stables and private owners.',
       link: '/search-providers?animalType=Equine',
     },
     {
-      icon: <img src={FarmAnimalIcon} alt="Farm Animal Care" />,
+      icon: <img src={FarmAnimalIcon} alt="Farm animal icon showing livestock veterinary care" />,
       title: 'Farm Animal Care',
       description: 'On-site veterinary services for cattle, sheep, goats, pigs, and other livestock. We offer herd health management, reproductive services, sick animal exams, and preventative care tailored to your farm\'s needs.',
       link: '/search-providers?animalType=Large%20Animal',
     },
     {
-      icon: <img src={PreventativeCareIcon} alt="Preventative Care" />,
+      icon: <img src={PreventativeCareIcon} alt="Shield icon representing preventative veterinary care" />,
       title: 'Preventative Care',
       description: 'Proactive health management including vaccinations, parasite control (flea, tick, heartworm), nutritional counseling, and routine health screenings to keep your animals healthy and prevent future issues.',
       link: '/search-providers?specialtyServices=Preventative',
     },
     {
-      icon: <img src={EmergencyIcon} alt="Emergency Services" />,
+      icon: <img src={EmergencyIcon} alt="Cross icon representing emergency veterinary services" />,
       title: 'Emergency Services',
       description: 'Urgent care availability for critical situations. Connect with providers offering emergency response for injuries, acute illnesses, and other immediate veterinary needs outside of regular hours (subject to provider availability).',
       link: '/search-providers?specialtyServices=Emergency',
     },
     {
-      icon: <img src={DiagnosticsIcon} alt="Diagnostics & Lab Work" />,
+      icon: <img src={DiagnosticsIcon} alt="Microscope icon representing diagnostic laboratory services" />,
       title: 'Diagnostics & Lab Work',
       description: 'Mobile diagnostic capabilities including sample collection for blood work, urinalysis, fecal exams, and coordination with labs for comprehensive testing to aid in accurate diagnosis and treatment planning.',
       link: '/search-providers?specialtyServices=Diagnostics',
@@ -198,14 +198,14 @@ const ServicesPage = () => {
         </Container>
       </div>
 
-      <Container style={styles.section}>
-        <h2 style={styles.sectionTitle}>How It Works</h2>
+      <Container style={styles.section} role="region" aria-labelledby="how-it-works-heading">
+        <h2 id="how-it-works-heading" style={styles.sectionTitle}>How It Works</h2>
         <Row>
           {howItWorksSteps.map((step, index) => (
             <Col md={4} key={index}>
               <div style={styles.stepCard}>
                 <div style={styles.stepNumber}>{index + 1}</div>
-                <div style={styles.howItWorksIcon}>{step.icon}</div>
+                <div className="how-it-works-icon" style={styles.howItWorksIcon} aria-hidden="true">{step.icon}</div>
                 <h3>{step.title}</h3>
                 <p>{step.description}</p>
               </div>
@@ -214,8 +214,8 @@ const ServicesPage = () => {
         </Row>
       </Container>
 
-      <Container style={styles.section}>
-        <h2 style={styles.sectionTitle}>What We Offer</h2>
+      <Container style={styles.section} role="region" aria-labelledby="services-heading">
+        <h2 id="services-heading" style={styles.sectionTitle}>What We Offer</h2>
         <Row>
           {services.map((service, index) => (
             <Col md={6} lg={4} key={index}>
@@ -226,7 +226,7 @@ const ServicesPage = () => {
               >
                 <Card.Body style={styles.cardBody}>
                   <div>
-                    <div style={styles.iconWrapper}>{service.icon}</div>
+                    <div style={styles.iconWrapper} className="service-icon">{service.icon}</div>
                     <Card.Title className="text-center">{service.title}</Card.Title>
                     <Card.Text className="text-muted">
                       {service.description}
@@ -261,6 +261,26 @@ const ServicesPage = () => {
           background-color: ${theme.colors.secondary.dark} !important;
           border-color: ${theme.colors.secondary.dark} !important;
           transform: scale(1.05);
+        }
+        
+        .service-icon img {
+          width: 48px;
+          height: 48px;
+          filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1));
+          transition: transform 0.3s ease;
+        }
+        
+        .service-card:hover .service-icon img {
+          transform: scale(1.1);
+        }
+        
+        .how-it-works-icon {
+          transition: all 0.3s ease;
+        }
+        
+        .how-it-works-icon:hover {
+          transform: scale(1.15);
+          background-color: ${theme.colors.primary.light}60;
         }
         
         @media (max-width: ${theme.breakpoints.md}) {
