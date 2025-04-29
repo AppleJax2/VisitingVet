@@ -1,9 +1,11 @@
+console.log('--- db.js execution started ---');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const path = require('path');
+// Remove dotenv and path requires as Render injects env vars
+// const dotenv = require('dotenv');
+// const path = require('path');
 
-// Try to load env vars from multiple potential locations
-// This helps when deployed in different environments
+// Remove dotenv loading logic
+/*
 const envPaths = [
   path.resolve(process.cwd(), '.env'),
   path.resolve(process.cwd(), './src/config/.env'),
@@ -14,8 +16,10 @@ for (const envPath of envPaths) {
   console.log(`Trying to load .env from: ${envPath}`);
   dotenv.config({ path: envPath });
 }
+*/
 
 const connectDB = async () => {
+  console.log('--- connectDB function called ---');
   try {
     // Log MongoDB connection attempt
     const mongoUri = process.env.MONGODB_URI;

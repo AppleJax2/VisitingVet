@@ -1,5 +1,8 @@
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+// Remove dotenv require and config call
+// const path = require('path');
+// require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
+console.log('--- config.js execution started ---');
 
 const config = {
   app: {
