@@ -40,19 +40,50 @@ if (!process.env.MONGODB_URI) {
 console.log('MongoDB URI exists check passed.');
 console.log('JWT Secret exists:', !!process.env.JWT_SECRET);
 
+// Function to attempt database connection with retries
+const connectWithRetry = async (maxRetries = 5, retryDelay = 5000) => {
+  let retries = 0;
+  
+  while (retries < maxRetries) {
+    try {
+      console.log(`Database connection attempt ${retries + 1} of ${maxRetries}...`);
+      const dbConnection = await connectDB();
+      
+      if (dbConnection) {
+        console.log('Database connection successful after', retries > 0 ? `${retries} retries.` : 'first attempt.');
+        return dbConnection;
+      }
+      
+      // If connectDB returns null (in production), we should retry
+      console.log(`Database connection returned null, retrying in ${retryDelay/1000} seconds...`);
+    } catch (error) {
+      console.error(`Connection attempt ${retries + 1} failed:`, error.message);
+      
+      // Special handling for replica set issues
+      if (error.name === 'MongoServerSelectionError' && error.message.includes('primary marked stale')) {
+        console.log('Detected stale primary error - likely a temporary replica set election issue');
+      }
+    }
+    
+    retries++;
+    if (retries < maxRetries) {
+      console.log(`Waiting ${retryDelay/1000} seconds before retry ${retries + 1}...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+  }
+  
+  // If we reach here, all retries failed
+  throw new Error(`Failed to connect to database after ${maxRetries} attempts`);
+};
+
 // Wrap the server startup in an async function to allow await for connectDB
 const startServer = async () => {
   console.log('--- startServer function called ---');
   try {
-    // Connect to database and wait for it to succeed
-    console.log('Attempting database connection...');
-    const dbConnection = await connectDB();
-    // Explicitly check if the connection was successful
-    if (!dbConnection) {
-        // Even in production, we need the DB to start. Throw error.
-        throw new Error('Database connection failed. Server cannot start.');
-    }
-    console.log('Database connection successful.');
+    // Connect to database with retry mechanism
+    console.log('Attempting database connection with retry mechanism...');
+    const dbConnection = await connectWithRetry();
+    console.log('Database connection successful and stable.');
 
     const app = express();
     const server = http.createServer(app); // Create HTTP server from Express app

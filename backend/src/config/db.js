@@ -4,19 +4,7 @@ const mongoose = require('mongoose');
 // const dotenv = require('dotenv');
 // const path = require('path');
 
-// Remove dotenv loading logic
-/*
-const envPaths = [
-  path.resolve(process.cwd(), '.env'),
-  path.resolve(process.cwd(), './src/config/.env'),
-  path.resolve(process.cwd(), '../.env')
-];
-
-for (const envPath of envPaths) {
-  console.log(`Trying to load .env from: ${envPath}`);
-  dotenv.config({ path: envPath });
-}
-*/
+// Removed the block that attempted to load .env files
 
 const connectDB = async () => {
   console.log('--- connectDB function called ---');
@@ -33,7 +21,35 @@ const connectDB = async () => {
     const sanitizedUri = mongoUri.replace(/:\/\/[^@]*@/, '://****:****@');
     console.log(`Attempting to connect to MongoDB: ${sanitizedUri}`);
     
-    const conn = await mongoose.connect(mongoUri);
+    // Add advanced options to handle replica set issues
+    const mongooseOptions = {
+      serverSelectionTimeoutMS: 30000, // Increase timeout for server selection
+      socketTimeoutMS: 45000, // Increase socket timeout
+      heartbeatFrequencyMS: 5000, // More frequent heartbeats to detect changes
+      maxPoolSize: 10, // Control the connection pool size
+      minPoolSize: 3, // Maintain minimum connections
+      retryWrites: true, // Enable retry for write operations
+      retryReads: true, // Enable retry for read operations
+      connectTimeoutMS: 30000, // Connection timeout
+      family: 4, // Use IPv4, skip trying IPv6
+    };
+    
+    // Connect with enhanced options
+    const conn = await mongoose.connect(mongoUri, mongooseOptions);
+    
+    // Setup connection event listeners for monitoring
+    mongoose.connection.on('error', err => {
+      console.error('MongoDB connection error:', err);
+    });
+    
+    mongoose.connection.on('disconnected', () => {
+      console.warn('MongoDB disconnected. Attempting to reconnect...');
+    });
+    
+    mongoose.connection.on('reconnected', () => {
+      console.log('MongoDB reconnected successfully');
+    });
+    
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
@@ -44,6 +60,13 @@ const connectDB = async () => {
       console.error('This may indicate network issues or incorrect credentials');
     } else if (error.name === 'MongoServerSelectionError') {
       console.error('Failed to select MongoDB server. Check if the server is running and accessible');
+      console.error('This could be due to a replica set election or reconfiguration');
+      
+      // Add more specific handling for the StalePrimaryError
+      if (error.message.includes('primary marked stale')) {
+        console.error('Detected stale primary error - this is typically temporary during replica set elections');
+        console.error('Will attempt to reconnect with the topology');
+      }
     }
     
     // Only exit in non-production environments
@@ -51,6 +74,14 @@ const connectDB = async () => {
       process.exit(1); // Exit process with failure
     } else {
       console.error('Database connection failed but continuing execution due to production environment.');
+      
+      // In production, retry connection after delay instead of returning null
+      console.log('Will retry connection in 5 seconds...');
+      setTimeout(() => {
+        console.log('Retrying MongoDB connection...');
+        connectDB().catch(err => console.error('Retry connection failed:', err.message));
+      }, 5000);
+      
       return null;
     }
   }
