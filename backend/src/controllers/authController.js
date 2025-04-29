@@ -105,11 +105,22 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: 'Mobile carrier is required for SMS notifications' });
     }
 
-    // Find the default role or specific role based on roleName
-    // This needs adjustment based on how roles are assigned during registration
-    const userRole = await Role.findOne({ name: roleName || 'PetOwner' }); // Example: default to PetOwner
+    // Normalize role name by removing spaces and converting to correct format
+    let normalizedRoleName = roleName;
+    
+    // Handle the display names shown in the UI vs the actual role names in the database
+    if (roleName === 'Pet Owner') {
+      normalizedRoleName = 'PetOwner';
+    } else if (roleName === 'Mobile Vet Provider') {
+      normalizedRoleName = 'MVSProvider';
+    } else if (roleName === 'Veterinary Clinic') {
+      normalizedRoleName = 'Clinic';
+    }
+
+    // Find the default role or specific role based on normalized roleName
+    const userRole = await Role.findOne({ name: normalizedRoleName });
     if (!userRole) {
-        logger.error(`Registration failed: Role '${roleName || 'PetOwner'}' not found.`);
+        logger.error(`Registration failed: Role '${normalizedRoleName}' not found. Original role: '${roleName}'`);
         return res.status(400).json({ message: 'Invalid user role specified' });
     }
 
