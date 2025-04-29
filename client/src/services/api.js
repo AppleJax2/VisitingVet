@@ -2,10 +2,38 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+// Create axios instance
 const api = axios.create({
   baseURL: API_URL,
   withCredentials: true, // Important to send cookies
 });
+
+// Auth token storage
+let authToken = null;
+
+// Add a request interceptor to add auth token to requests
+api.interceptors.request.use(
+  (config) => {
+    // If we have a token stored in memory, add it to the Authorization header
+    if (authToken) {
+      config.headers.Authorization = `Bearer ${authToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Add a response interceptor to save auth token from response
+api.interceptors.response.use(
+  (response) => {
+    // If token is in the response, store it
+    if (response.data && response.data.token) {
+      authToken = response.data.token;
+    }
+    return response;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Authentication service functions
 export const register = async (userData) => {
@@ -32,6 +60,8 @@ export const login = async (credentials) => {
 export const logout = async () => {
   try {
     const response = await api.post('/auth/logout');
+    // Also clear the stored token
+    authToken = null;
     return response.data;
   } catch (error) {
     console.error('Logout error:', error.response?.data || error.message);

@@ -65,7 +65,14 @@ const startServer = async () => {
     const server = http.createServer(app); // Create HTTP server from Express app
 
     // Configure CORS options (allow frontend URL)
-    const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:5173'];
+    const allowedOrigins = [
+      process.env.CLIENT_URL || 'http://localhost:5173',
+      'https://visitingvet.netlify.app',  // Explicitly add Netlify domain
+      'https://www.visitingvet.netlify.app',
+      'http://localhost:3000',
+      'http://localhost:5000',
+      'http://localhost:5173'
+    ];
     console.log('Allowed CORS origins:', allowedOrigins);
     const corsOptions = {
         origin: function (origin, callback) {
@@ -73,11 +80,14 @@ const startServer = async () => {
             if (!origin || allowedOrigins.indexOf(origin) !== -1) {
                 callback(null, true);
             } else {
-                console.error(`CORS Error: Origin '${origin}' not allowed.`);
-                callback(new Error('Not allowed by CORS'));
+                console.warn(`CORS Warning: Origin '${origin}' not allowed. Allowed origins: [${allowedOrigins.join(', ')}]`);
+                callback(null, false);  // Changed: Still allow the request but without CORS headers
             }
         },
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
         credentials: true, // Allow cookies/auth headers
+        maxAge: 86400  // Cache preflight request for 1 day
     };
 
     // Setup Socket.IO Server

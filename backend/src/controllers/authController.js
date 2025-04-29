@@ -42,14 +42,14 @@ const sendTokenResponse = async (user, statusCode, res) => {
     expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'Strict', // Max CSRF protection
+    sameSite: isProduction ? 'None' : 'Lax', // Changed from 'Strict' to 'None' for cross-domain
     domain: cookieDomain,
   };
   const refreshOptions = {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'Strict',
+    sameSite: isProduction ? 'None' : 'Lax', // Changed from 'Strict' to 'None' for cross-domain
     path: '/api/auth/refresh',
     domain: cookieDomain,
   };
@@ -59,12 +59,14 @@ const sendTokenResponse = async (user, statusCode, res) => {
   delete userOutput.password;
   delete userOutput.refreshToken;
 
+  // Add token to JSON response for clients that can't receive cookies
   res
     .status(statusCode)
     .cookie('jwt', accessToken, accessOptions)
     .cookie('refreshToken', refreshToken, refreshOptions)
     .json({
       success: true,
+      token: accessToken, // Include token in response for clients that can't handle cookies
       user: userOutput,
     });
 };
@@ -301,7 +303,7 @@ const logoutUser = async (req, res) => { // Made async for logging
     expires: new Date(0), // Set expiry date to the past
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'Strict',
+    sameSite: isProduction ? 'None' : 'Lax', // Changed from 'Strict' to 'None' for cross-domain
     path: '/',
     domain: cookieDomain,
   };

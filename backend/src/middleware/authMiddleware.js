@@ -14,7 +14,16 @@ const updateLastActivity = async (userId) => {
 
 const protect = async (req, res, next) => {
   let token;
-  token = req.cookies.jwt;
+
+  // Check JWT token from cookie first
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  } 
+  // If not found in cookie, check Authorization header
+  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    // Format: "Bearer token_value"
+    token = req.headers.authorization.split(' ')[1];
+  }
 
   if (token) {
     try {
@@ -52,14 +61,14 @@ const protect = async (req, res, next) => {
 
       next();
     } catch (error) {
+      console.error('Auth Middleware Error:', error);
       if (error.name === 'TokenExpiredError') {
         return res.status(401).json({ message: 'Token expired', code: 'TOKEN_EXPIRED' });
       }
-      console.error('Auth Middleware Error:', error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      return res.status(401).json({ message: 'Not authorized, token failed' });
     }
   } else {
-    res.status(401).json({ message: 'Not authorized, no token' });
+    return res.status(401).json({ message: 'Not authorized, no token' });
   }
 };
 
