@@ -353,8 +353,8 @@ function ProviderSearchPage() {
               </Spinner>
             </div>
           ) : results.length === 0 ? (
-            <Alert variant="light" className="text-center p-4 border rounded d-flex flex-column align-items-center">
-              <InfoCircle size={40} className="mb-3 text-secondary" />
+            <Alert variant="light" className="text-center p-4 border rounded d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '300px' }}>
+              <InfoCircle size={50} className="mb-3 text-secondary" />
               <h5 className="mb-3">No Veterinarians Found</h5>
               <p className="mb-0 text-muted">No visiting veterinarians found matching your criteria. Try adjusting your search filters.</p>
             </Alert>
@@ -388,7 +388,7 @@ function ProviderSearchPage() {
                         {renderStars(profile.averageRating)} 
 
                         <Card.Text 
-                          className="text-muted flex-grow-1" 
+                          className="text-muted flex-grow-1 mb-3"
                           style={{ 
                             display: '-webkit-box', 
                             WebkitLineClamp: 3, 
