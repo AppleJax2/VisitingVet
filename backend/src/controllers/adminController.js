@@ -1052,23 +1052,23 @@ exports.getVerificationMetrics = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllUsers,
-  getFilteredUsers,
-  getUserDetails,
-  adminCreateUser,
-  adminCreateUpdateProfile,
-  banUser,
-  unbanUser,
-  verifyUser,
-  getPendingVerifications,
-  approveVerification,
-  rejectVerification,
-  getActionLogs,
-  requestAdminPasswordReset,
-  resetAdminPassword,
-  getUserActivityLogs,
-  handleBulkUserAction,
-  getVerificationHistory,
-  getVerificationMetrics,
-}; 
+// module.exports = {
+//   getAllUsers,
+//   getFilteredUsers,
+//   getUserDetails,
+//   adminCreateUser,
+//   adminCreateUpdateProfile,
+//   banUser,
+//   unbanUser,
+//   verifyUser,
+//   getPendingVerifications,
+//   approveVerification,
+//   rejectVerification,
+//   getActionLogs,
+//   requestAdminPasswordReset,
+//   resetAdminPassword,
+//   getUserActivityLogs,
+//   handleBulkUserAction,
+//   getVerificationHistory,
+//   getVerificationMetrics,
+// }; 
