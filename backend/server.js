@@ -92,16 +92,16 @@ const startServer = async () => {
     app.use(usageTrackingService.logApiCallMiddleware);
 
     // IMPORTANT: Stripe webhook needs raw body, so define it BEFORE express.json()
-    app.use('/api/payments/webhook', express.raw({type: 'application/json'}), (req, res, next) => {
-        const paymentRouter = require('./src/routes/paymentRoutes');
-        const webhookHandler = paymentRouter.stack.find(layer => layer.route && layer.route.path === '/webhook' && layer.route.methods.post);
-        if (webhookHandler && webhookHandler.handle) {
-            webhookHandler.handle(req, res, next);
-        } else {
-            console.error('Stripe webhook handler not found in paymentRoutes');
-            res.status(404).send('Webhook endpoint not configured correctly');
-        }
-    });
+    // app.use('/api/payments/webhook', express.raw({type: 'application/json'}), (req, res, next) => {
+    //     const paymentRouter = require('./src/routes/paymentRoutes');
+    //     const webhookHandler = paymentRouter.stack.find(layer => layer.route && layer.route.path === '/webhook' && layer.route.methods.post);
+    //     if (webhookHandler && webhookHandler.handle) {
+    //         webhookHandler.handle(req, res, next);
+    //     } else {
+    //         console.error('Stripe webhook handler not found in paymentRoutes');
+    //         res.status(404).send('Webhook endpoint not configured correctly');
+    //     }
+    // });
 
     // Body parser - MUST be after the raw body route for webhook
     app.use(express.json());
