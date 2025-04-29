@@ -34,9 +34,11 @@ const connectDB = async () => {
       family: 4, // Use IPv4, skip trying IPv6
     };
     
+    console.log('>>> About to call mongoose.connect with options:', mongooseOptions);
     // Connect with enhanced options
     const conn = await mongoose.connect(mongoUri, mongooseOptions);
     
+    console.log('>>> mongoose.connect promise resolved successfully.');
     // Setup connection event listeners for monitoring
     mongoose.connection.on('error', err => {
       console.error('MongoDB connection error:', err);
@@ -53,6 +55,7 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
+    console.error('!!! Reached catch block in connectDB !!!');
     console.error('Error connecting to MongoDB:', error);
     if (error.name === 'MongoParseError') {
       console.error('This may indicate an invalid MongoDB connection string');
