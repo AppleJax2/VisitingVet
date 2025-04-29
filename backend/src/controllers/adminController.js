@@ -1019,4 +1019,56 @@ exports.getVerificationHistory = async (req, res) => {
     logger.error('Error getting verification history:', error);
     res.status(500).json({ success: false, error: 'Server error' });
   }
+};
+
+/**
+ * @desc    Get basic metrics about verification requests
+ * @route   GET /api/admin/verifications/metrics
+ * @access  Private/Admin (Requires verifications:read_metrics permission)
+ */
+exports.getVerificationMetrics = async (req, res) => {
+  try {
+    const pendingCount = await VerificationRequest.countDocuments({ status: 'Pending' });
+    const approvedCount = await VerificationRequest.countDocuments({ status: 'Approved' });
+    const rejectedCount = await VerificationRequest.countDocuments({ status: 'Rejected' });
+    const totalCount = pendingCount + approvedCount + rejectedCount; // Or count all
+
+    // You could add more complex metrics later, e.g., average approval time
+    // const avgProcessingTime = await VerificationRequest.aggregate([...]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        pending: pendingCount,
+        approved: approvedCount,
+        rejected: rejectedCount,
+        total: totalCount,
+        // avgProcessingTime: avgProcessingTime[0]?.avgDuration || null,
+      },
+    });
+  } catch (error) {
+    logger.error('Error fetching verification metrics:', error);
+    res.status(500).json({ success: false, error: 'Server error fetching metrics' });
+  }
+};
+
+module.exports = {
+  getAllUsers,
+  getFilteredUsers,
+  getUserDetails,
+  adminCreateUser,
+  adminCreateUpdateProfile,
+  banUser,
+  unbanUser,
+  verifyUser,
+  getPendingVerifications,
+  approveVerification,
+  rejectVerification,
+  getActionLogs,
+  requestAdminPasswordReset,
+  resetAdminPassword,
+  getUserActivityLogs,
+  handleBulkUserAction,
+  getVerificationHistory,
+  getVerificationMetrics,
 }; 
