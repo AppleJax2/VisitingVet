@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Card, Button, Modal, Form, Spinner, Alert, ButtonGroup, Dropdown, DropdownButton } from 'react-bootstrap';
 import { BoxArrowUpRight, HandThumbsUpFill, ShieldLockFill, ShieldSlashFill } from 'react-bootstrap-icons';
-import apiClient from '../../services/apiClient';
+import apiClient from '../../services/api';
 import logger from '../../utils/logger';
 
 function BulkUserActions({ selectedUserIds, onActionComplete }) {

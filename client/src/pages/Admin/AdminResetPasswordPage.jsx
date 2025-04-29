@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Form, Button, Container, Card, Alert, Spinner } from 'react-bootstrap';
-import apiClient from '../../services/apiClient'; // Assuming axios instance setup
+import apiClient from '../../services/api'; // Corrected path
 import { toast } from 'react-hot-toast'; // Assuming toast notifications
-import logger from '../../utils/logger'; // Assuming logger utility
+import logger from '../../utils/logger'; // Removed .js extension
 import PasswordStrengthMeter from '../../components/Shared/PasswordStrengthMeter';
 import { validatePasswordStrength } from '../../utils/passwordUtils';
 

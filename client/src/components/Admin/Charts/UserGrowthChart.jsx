@@ -15,8 +15,8 @@ import {
 import 'chartjs-adapter-date-fns'; // Keep date adapter
 
 // Bootstrap components (assuming they exist)
-import { LoadingSpinner } from '../../Shared/LoadingSpinner';
-import { ErrorMessage } from '../../Shared/ErrorMessage';
+import LoadingSpinner from '../../Shared/LoadingSpinner';
+import ErrorMessage from '../../Shared/ErrorMessage';
 
 // Register necessary Chart.js components
 ChartJS.register(

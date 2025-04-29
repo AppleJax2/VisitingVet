@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Spinner, Alert, ListGroup, Badge, Row, Col } from 'react-bootstrap';
 import { ClockHistory, CheckCircleFill, XCircleFill, HourglassSplit } from 'react-bootstrap-icons';
-import apiClient from '../../services/apiClient';
+import apiClient from '../../services/api';
 import logger from '../../utils/logger';
 
 function VerificationMetricsCard() {

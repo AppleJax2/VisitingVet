@@ -21,8 +21,8 @@ import { useAuth } from '../../contexts/AuthContext'; // For socket auth
 import logger from '../../utils/logger'; // For logging
 
 // Import shared Bootstrap components (assuming they exist)
-import { LoadingSpinner } from '../../components/Shared/LoadingSpinner'; 
-import { ErrorMessage } from '../../components/Shared/ErrorMessage'; 
+import LoadingSpinner from '../../components/Shared/LoadingSpinner'; // Corrected to default import
+import ErrorMessage from '../../components/Shared/ErrorMessage'; // Corrected to default import
 
 // Bootstrap Placeholder Chart Component
 const PlaceholderChart = ({ title }) => (

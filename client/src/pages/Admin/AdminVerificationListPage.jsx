@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Table, Button, Badge, Spinner, Alert, Pagination, Modal, Form, Card, ListGroup, Row, Col, FormSelect, Toast, ToastContainer, InputGroup } from 'react-bootstrap';
-import { adminGetPendingVerifications, adminApproveVerification, adminRejectVerification, adminSaveDocumentAnnotations, adminUpdateManualVerification } from '../../services/apiClient';
+import { adminGetPendingVerifications, adminApproveVerification, adminRejectVerification, adminSaveDocumentAnnotations, adminUpdateManualVerification } from '../../services/api';
 import { CheckCircleFill, XCircleFill, FileEarmarkTextFill, BoxArrowUpRight, QuestionCircleFill } from 'react-bootstrap-icons';
 import { format } from 'date-fns';
 import logger from '../../utils/logger';

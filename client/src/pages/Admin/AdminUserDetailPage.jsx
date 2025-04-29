@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import apiClient from '../../services/apiClient';
+import apiClient from '../../services/api';
 import logger from '../../utils/logger';
 import { Container, Card, Spinner, Alert, Table, Pagination, Badge } from 'react-bootstrap'; // Added Table, Pagination, Badge
 

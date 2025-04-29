@@ -1,9 +1,12 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { 
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
+    BarChart, Bar, PieChart, Pie, Cell 
+} from 'recharts';
 
 // Bootstrap components
-import { LoadingSpinner } from '../../Shared/LoadingSpinner';
-import { ErrorMessage } from '../../Shared/ErrorMessage';
+import LoadingSpinner from '../../Shared/LoadingSpinner';
+import ErrorMessage from '../../Shared/ErrorMessage';
 
 // Define colors for different event types
 const EVENT_COLORS = {

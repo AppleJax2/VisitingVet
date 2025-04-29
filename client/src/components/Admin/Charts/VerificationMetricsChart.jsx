@@ -4,8 +4,8 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 // Assuming standard Bootstrap CSS is linked in the main HTML file
 
 // Shared components likely using Bootstrap
-import { LoadingSpinner } from '../../Shared/LoadingSpinner'; // Assuming this renders a Bootstrap spinner
-import { ErrorMessage } from '../../Shared/ErrorMessage'; // Assuming this renders a Bootstrap alert
+import LoadingSpinner from '../../Shared/LoadingSpinner'; // Corrected to default import
+import ErrorMessage from '../../Shared/ErrorMessage'; // Corrected to default import
 
 // Updated to accept data, loading, and error states as props
 const VerificationMetricsChart = ({ data: apiData, loading, error }) => {

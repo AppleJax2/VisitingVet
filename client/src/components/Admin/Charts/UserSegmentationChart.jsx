@@ -2,8 +2,8 @@ import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Bootstrap components
-import { LoadingSpinner } from '../../Shared/LoadingSpinner';
-import { ErrorMessage } from '../../Shared/ErrorMessage';
+import LoadingSpinner from '../../Shared/LoadingSpinner';
+import ErrorMessage from '../../Shared/ErrorMessage';
 
 // Define colors or import from theme
 const COLORS = {

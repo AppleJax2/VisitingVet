@@ -990,6 +990,22 @@ export const adminGetVerificationHistory = async (page = 1, limit = 25, filters 
   }
 };
 
+/**
+ * Update the manual DORA verification status for a provider
+ * @param {string} userId - The ID of the user (provider)
+ * @param {object} verificationData - Data including { doraVerificationStatus, doraVerificationDate }
+ * @returns {Promise<Object>} Response with success status
+ */
+export const adminUpdateManualVerification = async (userId, verificationData) => {
+  try {
+    const response = await api.put(`/admin/users/${userId}/manual-verification`, verificationData);
+    return response.data;
+  } catch (error) {
+    console.error(`Admin update manual verification error for user ${userId}:`, error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to update manual verification status');
+  }
+};
+
 // --- Admin Analytics API Functions ---
 
 /**
@@ -1034,6 +1050,21 @@ export const adminGetServiceUsageMetrics = async (params = {}) => {
   } catch (error) {
     console.error('Admin get service usage metrics error:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to fetch service usage metrics');
+  }
+};
+
+/**
+ * Fetch user segmentation data by role.
+ * @param {object} params - Optional query parameters (e.g., for date range).
+ * @returns {Promise<Object>} Response with user segmentation data.
+ */
+export const adminGetUserSegmentsByRole = async (params = {}) => {
+  try {
+    const response = await api.get('/admin/analytics/user-segments', { params });
+    return response.data; // Expects { success: true, data: [{ role: string, count: number }, ...] }
+  } catch (error) {
+    console.error('Admin get user segments error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to fetch user segmentation data');
   }
 };
 

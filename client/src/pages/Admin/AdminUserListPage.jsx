@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Table, Button, Badge, Spinner, Alert, Pagination, InputGroup, FormControl, Modal, Form, Row, Col, Card, FormSelect } from 'react-bootstrap';
-import { adminGetAllUsers, adminBanUser, adminUnbanUser, adminVerifyUser, adminCreateUser, getRoles } from '../../services/apiClient';
+import { adminGetAllUsers, adminBanUser, adminUnbanUser, adminVerifyUser, adminCreateUser, adminGetRoles } from '../../services/api';
 import { PersonDashFill, PersonCheckFill, PersonXFill, CheckCircleFill, XCircleFill, Search, PersonPlusFill, PencilSquare, Sliders, CheckSquareFill } from 'react-bootstrap-icons';
 import { format } from 'date-fns';
 import debounce from 'lodash.debounce';
@@ -137,7 +137,7 @@ const AdminUserListPage = () => {
     const fetchRoles = async () => {
       setLoadingRoles(true);
       try {
-        const response = await getRoles();
+        const response = await adminGetRoles();
         if (response.success) {
           setRoles(response.data || []);
         } else {
