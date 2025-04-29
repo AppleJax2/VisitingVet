@@ -46,8 +46,13 @@ const startServer = async () => {
   try {
     // Connect to database and wait for it to succeed
     console.log('Attempting database connection...');
-    await connectDB();
-    console.log('Database connection successful (or handled gracefully in production).');
+    const dbConnection = await connectDB();
+    // Explicitly check if the connection was successful
+    if (!dbConnection) {
+        // Even in production, we need the DB to start. Throw error.
+        throw new Error('Database connection failed. Server cannot start.');
+    }
+    console.log('Database connection successful.');
 
     const app = express();
     const server = http.createServer(app); // Create HTTP server from Express app
