@@ -380,8 +380,8 @@ const LandingPage = () => {
                   </div>
                 </Carousel.Item>
               ))}
-              <Carousel.Control.Prev aria-label="Previous testimonial" />
-              <Carousel.Control.Next aria-label="Next testimonial" />
+              <Carousel.Prev aria-label="Previous testimonial" />
+              <Carousel.Next aria-label="Next testimonial" />
             </Carousel>
           </Container>
         </section>
