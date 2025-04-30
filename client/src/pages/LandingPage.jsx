@@ -294,13 +294,11 @@ const LandingPage = () => {
             </div>
             
             <Carousel 
-              fade
-              controls={true} 
+              controls={true}
               indicators={true}
               interval={5000}
               pause="hover"
               keyboard={true}
-              aria-label="Customer testimonials carousel"
             >
               {[
                 {
