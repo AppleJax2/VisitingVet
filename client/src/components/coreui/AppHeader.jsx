@@ -26,10 +26,12 @@ import {
 } from '@coreui/icons'
 
 import { AppHeaderDropdown } from './header/index'
+import { useAuth } from '../../../contexts/AuthContext'
 
 const AppHeader = () => {
   const headerRef = useRef()
   const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
+  const { user } = useAuth()
 
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
@@ -64,7 +66,8 @@ const AppHeader = () => {
           </CNavItem>
         </CHeaderNav>
         <CHeaderNav className="ms-auto">
-          <CNavItem>
+          {/* Removed template notification/list icons - add back if needed */}
+          {/* <CNavItem>
             <CNavLink href="#">
               <CIcon icon={cilBell} size="lg" />
             </CNavLink>
@@ -78,7 +81,7 @@ const AppHeader = () => {
             <CNavLink href="#">
               <CIcon icon={cilEnvelopeOpen} size="lg" />
             </CNavLink>
-          </CNavItem>
+          </CNavItem> */}
         </CHeaderNav>
         <CHeaderNav>
           <li className="nav-item py-1">
@@ -130,9 +133,9 @@ const AppHeader = () => {
           <AppHeaderDropdown />
         </CHeaderNav>
       </CContainer>
-      <CContainer className="px-4" fluid>
-        {/* <AppBreadcrumb /> */}
-      </CContainer>
+      {/* <CContainer className="px-4" fluid>
+        <AppBreadcrumb />
+      </CContainer> */}
     </CHeader>
   )
 }
