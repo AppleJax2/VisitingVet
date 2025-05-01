@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 
-import ComponentsImg from 'src/assets/images/components.webp'
+import ComponentsImg from '../../assets/images/components.webp'
 
 const DocsComponents = (props) => (
   <div className="bg-primary bg-opacity-10 border border-2 border-primary rounded mb-4">
@@ -16,7 +16,7 @@ const DocsComponents = (props) => (
         />
       </div>
       <div className="col-md col-12 px-lg-4">
-        Our Admin Panel isn’t just a mix of third-party components. It’s{' '}
+        Our Admin Panel isn't just a mix of third-party components. It's{' '}
         <strong>
           the only open-source React dashboard built on a professional, enterprise-grade UI
           Components Library
