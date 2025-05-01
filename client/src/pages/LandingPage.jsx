@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { 
   Search, Check2Circle, Shield, Clock, Award, 
   People, ArrowRight, Star, GeoAlt, Calendar3, 
-  CardChecklist, HeartPulse, TelephonePlus
+  CardChecklist, HeartPulse, TelephonePlus, Quote
 } from 'react-bootstrap-icons';
 import './LandingPage.css';
 
@@ -54,7 +54,8 @@ const LandingPage = () => {
         <div className="hero-bg-container position-absolute w-100 h-100">
           {/* Consistent overlay gradient */}
           <div className="hero-bg-overlay position-absolute w-100 h-100" 
-               style={{ background: 'linear-gradient(135deg, rgba(18, 68, 56, 0.85) 0%, rgba(87, 126, 70, 0.8) 100%)' }}>
+               /* Style moved to CSS */
+          >
           </div>
         </div>
         <Container className="position-relative py-5">
@@ -62,9 +63,16 @@ const LandingPage = () => {
             <Col lg={7} className="py-5">
               <div className="hero-content fade-in">
                 <span className="badge py-2 px-3 mb-3 section-badge-accent">Trusted Veterinary Care</span>
-                <h1 id="hero-heading" className="display-4 fw-bold mb-4">Expert Veterinary Care <br/>At Your Doorstep</h1>
-                <p className="lead mb-5 text-white-80">Connect with verified mobile veterinary professionals for all your animals - from household pets to farm animals. Quality care that comes to you.</p>
-                <div className="d-flex flex-wrap gap-3">
+                <h1 id="hero-heading" className="display-3 fw-bolder mb-3">Convenient Vet Care,<br/> Right Where You Are.</h1>
+                <h2 className="h4 fw-light text-white-80 mb-4">Compassionate, expert care delivered to your home, farm, or stable.</h2>
+                <p className="lead mb-5 text-white-80">
+                  Skip the stressful clinic visit. Easily find and book qualified mobile veterinarians for pets, horses, and farm animals in your local area.
+                </p>
+                {/* Stats Card for mobile/tablet */}
+                <div className="d-lg-none mb-4">
+                  <HeroStatsCard />
+                </div>
+                <div className="d-grid gap-3 d-sm-flex flex-wrap">
                   <Button 
                     as={Link} 
                     to="/search-providers" 
@@ -77,13 +85,16 @@ const LandingPage = () => {
                   <Button 
                     as={Link} 
                     to="/register" 
-                    variant="outline-light" 
+                    variant="outline-light"
                     size="lg"
-                    className="fw-semibold px-4 py-3 border-2"
+                    className="fw-semibold px-4 py-3 border-2 flex-sm-grow-0"
                     aria-label="Register as a veterinary provider"
                   >
                     Join as a Provider
                   </Button>
+                </div>
+                <div className="position-absolute stats-card-desktop-wrapper">
+                   <HeroStatsCard />
                 </div>
               </div>
             </Col>
@@ -94,33 +105,12 @@ const LandingPage = () => {
                     <source srcSet={heroVetImage.webp} type="image/webp" />
                     <img 
                       src={heroVetImage.fallback}
-                      alt="Veterinarian making a house call with a dog and cat" 
+                      alt="Smiling veterinarian holding a clipboard, ready for a house call." 
                       className="img-fluid w-100 rounded-3 shadow-lg"
                       style={{ maxHeight: '450px', objectFit: 'cover' }}
                       loading="eager"
                     />
                   </picture>
-                  <div className="stats-card position-absolute">
-                    <div className="d-flex align-items-center mb-2">
-                      <div className="stats-icon stats-icon-warning">
-                        <Star className="text-warning" size={20} />
-                      </div>
-                      <div>
-                        <div className="fs-6 fw-bold">4.9/5.0</div>
-                        <div className="text-muted small">Customer Rating</div>
-                      </div>
-                    </div>
-                    <hr className="my-2" />
-                    <div className="d-flex align-items-center">
-                      <div className="stats-icon stats-icon-primary">
-                        <Check2Circle className="text-success" size={20} />
-                      </div>
-                      <div>
-                        <div className="fs-6 fw-bold">100+</div>
-                        <div className="text-muted small">Verified Providers</div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </Col>
@@ -133,7 +123,7 @@ const LandingPage = () => {
         <section className="py-5 bg-white section scroll-fade-in features-section" role="region" aria-labelledby="features-heading">
           <Container>
             <div className="text-center mb-5">
-              <span className="badge px-3 py-2 mb-2 section-badge-primary">OUR SERVICES</span>
+              <span className="badge px-3 py-2 mb-3 section-badge-primary">OUR SERVICES</span>
               <h2 id="features-heading" className="section-title fw-bold mb-3">Comprehensive Veterinary Services</h2>
               <p className="text-muted section-description mx-auto" style={{ maxWidth: '800px' }}>
                 From routine checkups to specialized treatments, our mobile veterinary professionals bring a wide range of services directly to you.
@@ -212,7 +202,7 @@ const LandingPage = () => {
         <section className="py-5 bg-light section scroll-fade-in" role="region" aria-labelledby="how-it-works-heading">
           <Container>
             <div className="text-center mb-5">
-              <span className="badge px-3 py-2 mb-2 section-badge-secondary">SIMPLE PROCESS</span>
+              <span className="badge px-3 py-2 mb-3 section-badge-secondary">SIMPLE PROCESS</span>
               <h2 id="how-it-works-heading" className="section-title fw-bold mb-3">How It Works</h2>
               <p className="text-muted section-description mx-auto" style={{ maxWidth: '800px' }}>
                 Getting quality veterinary care for your animals has never been easier with our simple three-step process.
@@ -286,7 +276,7 @@ const LandingPage = () => {
         <section className="py-5 position-relative overflow-hidden section scroll-fade-in" role="region" aria-labelledby="testimonials-heading">
           <Container>
             <div className="text-center mb-5">
-              <span className="badge px-3 py-2 mb-2 section-badge-accent">TESTIMONIALS</span>
+              <span className="badge px-3 py-2 mb-3 section-badge-accent">TESTIMONIALS</span>
               <h2 id="testimonials-heading" className="section-title fw-bold mb-3">What Our Clients Say</h2>
               <p className="text-muted section-description mx-auto" style={{ maxWidth: '800px' }}>
                 Hear from pet owners and farmers who have experienced the convenience and quality of our mobile veterinary services.
@@ -343,7 +333,7 @@ const LandingPage = () => {
                                       loading="lazy"
                                     />
                                   </div>
-                                  <h5 className="text-white mb-1 fw-bold">{testimonial.name}</h5>
+                                  <h5 className="text-white mb-1 fw-bold testimonial-name">{testimonial.name}</h5>
                                   <p className="text-white-80 mb-0 small">{testimonial.role}</p>
                                 </div>
                               </Col>
@@ -358,7 +348,7 @@ const LandingPage = () => {
                                       loading="lazy"
                                     />
                                     <div>
-                                      <h5 className="mb-0 fw-bold">{testimonial.name}</h5>
+                                      <h5 className="mb-0 fw-bold testimonial-name">{testimonial.name}</h5>
                                       <p className="text-muted mb-0 small">{testimonial.role}</p>
                                     </div>
                                   </div>
@@ -369,7 +359,7 @@ const LandingPage = () => {
                                     <Star className="text-warning me-1" />
                                     <Star className="text-warning" />
                                   </div>
-                                  <p className="testimonial-text mb-0 fs-5 fw-medium">"{testimonial.text}"</p>
+                                  <p className="testimonial-text mb-0 fs-6 fst-italic"><Quote size={20} className="me-1 opacity-50"/>{testimonial.text}</p>
                                 </div>
                               </Col>
                             </Row>
@@ -430,5 +420,32 @@ const LandingPage = () => {
     </div>
   );
 };
+
+// Stats Card Component (Refactored for reuse)
+const HeroStatsCard = () => (
+  <Card className="stats-card shadow-sm">
+    <Card.Body className="p-3">
+      <div className="d-flex align-items-center mb-2">
+        <div className="stats-icon stats-icon-warning me-2">
+          <Star className="text-warning" size={18} aria-hidden="true" />
+        </div>
+        <div>
+          <div className="fs-6 fw-bold">4.9 / 5.0</div>
+          <div className="text-muted small">Avg. Rating</div>
+        </div>
+      </div>
+      <hr className="my-2" />
+      <div className="d-flex align-items-center">
+        <div className="stats-icon stats-icon-primary me-2">
+          <Check2Circle className="text-success" size={18} aria-hidden="true" />
+        </div>
+        <div>
+          <div className="fs-6 fw-bold">100+</div>
+          <div className="text-muted small">Verified Providers</div>
+        </div>
+      </div>
+    </Card.Body>
+  </Card>
+);
 
 export default LandingPage; 
