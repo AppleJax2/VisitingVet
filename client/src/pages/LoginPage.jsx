@@ -29,7 +29,6 @@ import {
   EyeFill,
   EyeSlashFill
 } from 'react-bootstrap-icons';
-import './AuthPages.css';
 import { useAuth } from '../contexts/AuthContext';
 
 function LoginPage() {
@@ -175,11 +174,11 @@ function LoginPage() {
 
   if (authLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 76px)' }}>
+      <Container fluid className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 56px)' }}>
         <Spinner animation="border" variant="primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
-      </div>
+      </Container>
     );
   }
 
@@ -188,15 +187,15 @@ function LoginPage() {
   }
 
   return (
-    <div className="auth-page">
-      <ToastContainer position="top-end" className="p-3">
+    <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1100 }}>
         <Toast 
           onClose={() => setShowToast(false)} 
           show={showToast} 
           delay={3000} 
           autohide
           bg="success"
-          text="white"
+          className="text-white"
         >
           <Toast.Header closeButton>
             <strong className="me-auto">Success</strong>
@@ -205,16 +204,14 @@ function LoginPage() {
         </Toast>
       </ToastContainer>
       
-      {/* MFA Verification Modal */}
       <Modal 
         show={showMfaModal} 
         onHide={() => setShowMfaModal(false)}
         backdrop="static"
         keyboard={false}
         centered
-        className="auth-modal"
       >
-        <Modal.Header>
+        <Modal.Header closeButton>
           <Modal.Title>
             <ShieldLock className="me-2" />
             Two-Factor Authentication
@@ -243,7 +240,7 @@ function LoginPage() {
                 autoFocus
                 required
                 disabled={verifyingMfa}
-                className="auth-input"
+                className="text-center"
               />
             </Form.Group>
             
@@ -252,18 +249,10 @@ function LoginPage() {
                 variant="primary" 
                 type="submit"
                 disabled={verifyingMfa || !mfaToken || mfaToken.length < 6}
-                className="auth-button"
               >
                 {verifyingMfa ? (
                   <>
-                    <Spinner
-                      as="span"
-                      animation="border"
-                      size="sm"
-                      role="status"
-                      aria-hidden="true"
-                      className="me-2"
-                    />
+                    <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
                     Verifying...
                   </>
                 ) : (
@@ -277,230 +266,120 @@ function LoginPage() {
       
       <Container>
         <Row className="justify-content-center">
-          <Col xs={12} md={10} lg={10} xl={9}>
-            <Card className="auth-card overflow-hidden">
-              <Row className="g-0">
-                <Col lg={5} className="auth-sidebar d-none d-lg-flex">
-                  <div className="auth-sidebar-content">
-                    <div className="auth-logo">
-                      <svg 
-                        width="28" 
-                        height="28" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round"
-                      >
-                        <path d="M14 10h.01M10 14h.01M8.5 8.5h.01M18.5 8.5h.01M18.5 14.5h.01M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0z"/>
-                        <path d="M7 15.5c1 1 3.2 2 5.5 2s4-.5 5.5-2"/>
-                      </svg>
-                      <h4>VisitingVet</h4>
-                    </div>
-                    
-                    <h2>Welcome Back!</h2>
-                    <p>Log in to access your account and manage your veterinary services.</p>
-                    
-                    <ul className="auth-features">
-                      <li>
-                        <ShieldCheck />
-                        Connect with verified veterinary professionals
-                      </li>
-                      <li>
-                        <Calendar />
-                        Manage appointments effortlessly
-                      </li>
-                      <li>
-                        <GeoAlt />
-                        Get care delivered right to your doorstep
-                      </li>
-                    </ul>
-                  </div>
-                </Col>
-                
-                <Col lg={7}>
-                  <div className="auth-content">
-                    <div className="d-flex justify-content-center mb-4 d-lg-none">
-                      <div className="auth-logo auth-logo-mobile">
-                        <svg 
-                          width="28" 
-                          height="28" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="#577E46" 
-                          strokeWidth="2" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                        >
-                          <path d="M14 10h.01M10 14h.01M8.5 8.5h.01M18.5 8.5h.01M18.5 14.5h.01M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0z"/>
-                          <path d="M7 15.5c1 1 3.2 2 5.5 2s4-.5 5.5-2"/>
-                        </svg>
-                        <h4 style={{ color: '#577E46' }}>VisitingVet</h4>
-                      </div>
-                    </div>
-                    
-                    <h2>Sign In</h2>
-                    <p>Enter your credentials to access your account</p>
-                    
-                    {error && (
-                      <div className="auth-error">
-                        {error}
-                      </div>
-                    )}
-                    
-                    <Form onSubmit={handleSubmit} className="auth-form">
-                      <Form.Group className="mb-4" controlId="formBasicEmail">
-                        <Form.Label>Email address</Form.Label>
-                        <InputGroup hasValidation>
-                          <InputGroup.Text>
-                            <Envelope />
-                          </InputGroup.Text>
-                          <Form.Control
-                            type="email"
-                            placeholder="Enter your email"
-                            value={email}
-                            onChange={handleEmailChange}
-                            required
-                            disabled={isSubmitting}
-                            isInvalid={!!emailError}
-                            ref={emailInputRef}
-                            className="auth-input"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {emailError}
-                          </Form.Control.Feedback>
-                        </InputGroup>
-                      </Form.Group>
+          <Col md={8} lg={7} xl={6}>
+            <Card className="mx-4 p-4 p-md-5 shadow-sm border-0">
+              <div className="text-center mb-4">
+                <svg 
+                  width="32" 
+                  height="32" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="text-primary mb-2"
+                >
+                  <path d="M14 10h.01M10 14h.01M8.5 8.5h.01M18.5 8.5h.01M18.5 14.5h.01M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0z"/>
+                  <path d="M7 15.5c1 1 3.2 2 5.5 2s4-.5 5.5-2"/>
+                </svg>
+                <h4 className="text-primary mb-0">VisitingVet</h4>
+              </div>
+              
+              <h2 className="text-center fw-bold mb-3">Sign In</h2>
+              <p className="text-center text-muted mb-4">Enter your credentials to access your account</p>
+              
+              {error && (
+                <Alert variant="danger" className="text-center p-2 mb-3">
+                  {error}
+                </Alert>
+              )}
+              
+              <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3" controlId="formBasicEmail">
+                  <Form.Label>Email address</Form.Label>
+                  <InputGroup hasValidation>
+                    <InputGroup.Text><Envelope /></InputGroup.Text>
+                    <Form.Control
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={handleEmailChange}
+                      required
+                      disabled={isSubmitting}
+                      isInvalid={!!emailError}
+                      ref={emailInputRef}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {emailError}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
 
-                      <Form.Group className="mb-4" controlId="formBasicPassword">
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <Form.Label className="mb-0">Password</Form.Label>
-                          <Link to="/forgot-password" className="forgot-password">
-                            Forgot Password?
-                          </Link>
-                        </div>
-                        <InputGroup>
-                          <InputGroup.Text>
-                            <Lock />
-                          </InputGroup.Text>
-                          <Form.Control
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            disabled={isSubmitting}
-                            className="auth-input"
-                          />
-                          <Button 
-                            variant="outline-secondary" 
-                            onClick={togglePasswordVisibility}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                            className="password-toggle"
-                          >
-                            {showPassword ? <EyeSlashFill /> : <EyeFill />}
-                          </Button>
-                        </InputGroup>
-                      </Form.Group>
-                      
-                      <Form.Group className="mb-4" controlId="formBasicCheckbox">
-                        <Form.Check
-                          type="checkbox"
-                          label="Remember me"
-                          checked={rememberMe}
-                          onChange={(e) => setRememberMe(e.target.checked)}
-                          disabled={isSubmitting}
-                          className="auth-checkbox"
-                        />
-                      </Form.Group>
-                      
-                      <div className="login-button-container mb-3">
-                        <Button 
-                          variant="primary" 
-                          type="submit" 
-                          disabled={isSubmitting}
-                          className="btn-primary w-100 auth-button"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <Spinner
-                                as="span"
-                                animation="border"
-                                size="sm"
-                                role="status"
-                                aria-hidden="true"
-                                className="me-2"
-                              />
-                              Signing in...
-                            </>
-                          ) : (
-                            "Sign In"
-                          )}
-                        </Button>
-                      </div>
-                      
-                      <div className="auth-footer">
-                        Don't have an account? <Link to="/register">Create Account</Link>
-                      </div>
-                    </Form>
+                <Form.Group className="mb-3" controlId="formBasicPassword">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <Form.Label className="mb-0">Password</Form.Label>
+                    <Link to="/forgot-password" className="small">
+                      Forgot Password?
+                    </Link>
                   </div>
-                </Col>
-              </Row>
+                  <InputGroup>
+                    <InputGroup.Text><Lock /></InputGroup.Text>
+                    <Form.Control
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                    />
+                    <Button 
+                      variant="outline-secondary" 
+                      onClick={togglePasswordVisibility}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      style={{ borderLeft: 'none' }}
+                    >
+                      {showPassword ? <EyeSlashFill /> : <EyeFill />}
+                    </Button>
+                  </InputGroup>
+                </Form.Group>
+                
+                <Form.Group className="mb-4" controlId="formBasicCheckbox">
+                  <Form.Check
+                    type="checkbox"
+                    label="Remember me"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    disabled={isSubmitting}
+                  />
+                </Form.Group>
+                
+                <div className="d-grid mb-3">
+                  <Button 
+                    variant="primary" 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    size="lg"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </Button>
+                </div>
+                
+                <div className="text-center text-muted">
+                  Don't have an account? <Link to="/register">Create Account</Link>
+                </div>
+              </Form>
             </Card>
           </Col>
         </Row>
       </Container>
-
-      {/* Additional styling for improvements */}
-      <style jsx>{`
-        .auth-sidebar-content {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-        
-        .auth-logo-mobile {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .login-button-container {
-          margin-top: 1.5rem;
-        }
-        
-        .password-toggle {
-          border-left: none;
-        }
-        
-        .password-toggle:focus, 
-        .password-toggle:active {
-          box-shadow: none;
-        }
-        
-        .auth-input {
-          height: calc(2.5rem + 2px);
-        }
-        
-        .auth-checkbox .form-check-label {
-          display: flex;
-          align-items: center;
-        }
-        
-        /* Extra small screen improvements */
-        @media (max-width: 576px) {
-          .auth-content {
-            padding: 1.5rem;
-          }
-          
-          .auth-card {
-            margin: 0 0.5rem;
-            border-radius: 12px;
-          }
-        }
-      `}</style>
     </div>
   );
 }
