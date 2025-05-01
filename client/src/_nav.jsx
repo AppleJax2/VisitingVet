@@ -13,6 +13,15 @@ import {
   cilPuzzle,
   cilSpeedometer,
   cilStar,
+  cilUser,
+  cilDog,
+  cilCalendar,
+  cilList,
+  cilSettings,
+  cilMedicalCross,
+  cilShieldAlt,
+  cilMoney,
+  cilChatBubble,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -22,10 +31,115 @@ const _nav = [
     name: 'Dashboard',
     to: '/dashboard',
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
-    badge: {
-      color: 'info',
-      text: 'NEW',
-    },
+  },
+  {
+    component: CNavItem,
+    name: 'Messages',
+    to: '/dashboard/messages',
+    icon: <CIcon icon={cilChatBubble} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'My Pets',
+  },
+  {
+    component: CNavItem,
+    name: 'My Pets',
+    to: '/my-pets',
+    icon: <CIcon icon={cilDog} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'My Appointments',
+    to: '/my-appointments',
+    icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Manage Reminders',
+    to: '/manage-reminders',
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Service Requests',
+    to: '/dashboard/pet-owner/service-requests',
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Search Providers',
+    to: '/search-providers',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Provider Tools',
+  },
+  {
+    component: CNavItem,
+    name: 'Provider Appointments',
+    to: '/provider-appointments',
+    icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Edit Profile',
+    to: '/provider-profile',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Admin Panel',
+  },
+  {
+    component: CNavGroup,
+    name: 'User Management',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Users List',
+        to: '/admin/users',
+      },
+      {
+        component: CNavItem,
+        name: 'Verifications',
+        to: '/admin/verifications',
+      },
+      {
+        component: CNavItem,
+        name: 'Permissions',
+        to: '/admin/permissions',
+      },
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'System',
+    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Logs',
+        to: '/admin/logs',
+      },
+      {
+        component: CNavItem,
+        name: 'Settings',
+        to: '/admin/settings',
+      },
+      {
+        component: CNavItem,
+        name: 'Analytics',
+        to: '/admin/analytics',
+      },
+      {
+        component: CNavItem,
+        name: 'Sessions',
+        to: '/admin/sessions',
+      },
+    ],
   },
   {
     component: CNavTitle,
