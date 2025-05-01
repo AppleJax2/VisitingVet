@@ -26,7 +26,7 @@ import {
 } from '@coreui/icons'
 
 import { AppHeaderDropdown } from './header/index'
-import { useAuth } from '../../../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 const AppHeader = () => {
   const headerRef = useRef()
