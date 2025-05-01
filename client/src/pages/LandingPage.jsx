@@ -270,6 +270,7 @@ const LandingPage = () => {
                       </div>
                     </Carousel.Item>
                   ))}
+                  <Carousel.Control prevLabel="" nextLabel="" />
                 </Carousel>
               </Col>
             </Row>
