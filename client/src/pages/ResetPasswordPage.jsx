@@ -52,94 +52,92 @@ function ResetPasswordPage() {
   };
 
   return (
-    <div className="auth-page">
-      <Container>
-        <Row className="justify-content-center">
-          <Col md={8} lg={6} xl={5}>
-            <Card className="auth-card shadow-lg">
-              <Card.Body className="p-4 p-md-5">
-                <div className="text-center mb-4">
-                  {/* Optional: Add Logo Here */}
-                  <h2 className="h3 mb-2">Create New Password</h2>
-                  <p className="text-muted">Enter your new password below.</p>
-                </div>
+    <Container className="d-flex justify-content-center align-items-center min-vh-100 py-5">
+      <Row className="justify-content-center w-100">
+        <Col md={8} lg={6} xl={5}>
+          <Card className="shadow-lg border-0">
+            <Card.Body className="p-4 p-md-5">
+              <div className="text-center mb-4">
+                {/* Optional: Add Logo Here */}
+                <h2 className="h3 mb-2">Create New Password</h2>
+                <p className="text-muted">Enter your new password below.</p>
+              </div>
 
-                {message && <Alert variant="success">{message}</Alert>}
-                {error && <Alert variant="danger">{error}</Alert>}
-                
-                <Form onSubmit={handleSubmit} className="auth-form">
-                  <Form.Group className="mb-3" controlId="formNewPassword">
-                    <Form.Label>New Password</Form.Label>
-                    <div className="input-group">
-                      <span className="input-group-text">
-                        <Lock />
-                      </span>
-                      <Form.Control
-                        type="password"
-                        placeholder="Enter new password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={isLoading}
-                        minLength="8"
+              {message && <Alert variant="success">{message}</Alert>}
+              {error && <Alert variant="danger">{error}</Alert>}
+              
+              <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3" controlId="formNewPassword">
+                  <Form.Label>New Password</Form.Label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <Lock />
+                    </span>
+                    <Form.Control
+                      type="password"
+                      placeholder="Enter new password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      minLength="8"
+                    />
+                  </div>
+                  <Form.Text className="text-muted">
+                    Password must be at least 8 characters long.
+                  </Form.Text>
+                </Form.Group>
+
+                <Form.Group className="mb-4" controlId="formConfirmPassword">
+                  <Form.Label>Confirm Password</Form.Label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <Lock />
+                    </span>
+                    <Form.Control
+                      type="password"
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      minLength="8"
+                    />
+                  </div>
+                </Form.Group>
+
+                <Button 
+                  variant="primary" 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="btn-primary w-100"
+                >
+                  {isLoading ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
                       />
-                    </div>
-                    <Form.Text className="text-muted">
-                      Password must be at least 8 characters long.
-                    </Form.Text>
-                  </Form.Group>
-
-                  <Form.Group className="mb-4" controlId="formConfirmPassword">
-                    <Form.Label>Confirm Password</Form.Label>
-                    <div className="input-group">
-                      <span className="input-group-text">
-                        <Lock />
-                      </span>
-                      <Form.Control
-                        type="password"
-                        placeholder="Confirm new password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        disabled={isLoading}
-                        minLength="8"
-                      />
-                    </div>
-                  </Form.Group>
-
-                  <Button 
-                    variant="primary" 
-                    type="submit" 
-                    disabled={isLoading}
-                    className="btn-primary w-100"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Spinner
-                          as="span"
-                          animation="border"
-                          size="sm"
-                          role="status"
-                          aria-hidden="true"
-                          className="me-2"
-                        />
-                        Resetting...
-                      </>
-                    ) : 'Reset Password'}
-                  </Button>
-                </Form>
-                
-                <div className="text-center mt-4">
-                  <Link to="/login" className="auth-link">
-                    Back to Login
-                  </Link>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+                      Resetting...
+                    </>
+                  ) : 'Reset Password'}
+                </Button>
+              </Form>
+              
+              <div className="text-center mt-4">
+                <Link to="/login">
+                  Back to Login
+                </Link>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
