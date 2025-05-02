@@ -10,26 +10,33 @@ import {
 // Create the context
 const AuthContext = createContext(null);
 
+// Default empty user object with required properties to prevent undefined errors
+const DEFAULT_USER = null;
+
 // Create the provider component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(DEFAULT_USER);
   const [loading, setLoading] = useState(true); // Start as true to check initial status
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaUserId, setMfaUserId] = useState(null);
+  const [authError, setAuthError] = useState(null);
 
   // Function to check authentication status on initial load
   const verifyAuth = useCallback(async () => {
     setLoading(true);
+    setAuthError(null);
     try {
       const response = await checkAuthStatus();
       if (response && response.success) {
         setUser(response.user);
       } else {
-        setUser(null);
+        setUser(DEFAULT_USER);
       }
     } catch (error) {
       // Expected if not logged in (e.g., 401 error)
-      setUser(null);
+      setUser(DEFAULT_USER);
+      setAuthError(error.message || 'Authentication failed');
+      console.log('Auth verification failed:', error);
     } finally {
       setLoading(false);
     }
@@ -43,6 +50,7 @@ export const AuthProvider = ({ children }) => {
   // Handle MFA verification during login
   const handleMfaVerification = async (userId, mfaToken) => {
     setLoading(true);
+    setAuthError(null);
     try {
       const response = await verifyMFALogin(userId, mfaToken);
       if (response && response.success) {
@@ -56,6 +64,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       setLoading(false);
+      setAuthError(error.message || 'MFA verification failed');
       console.error('MFA verification error in context:', error);
       throw error;
     }
@@ -64,6 +73,7 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (credentials) => {
     setLoading(true);
+    setAuthError(null);
     try {
       const response = await apiLogin(credentials);
       
@@ -85,8 +95,9 @@ export const AuthProvider = ({ children }) => {
         throw new Error(response?.message || 'Login failed');
       }
     } catch (error) {
-      setUser(null);
+      setUser(DEFAULT_USER);
       setLoading(false);
+      setAuthError(error.message || 'Login failed');
       console.error('Login error in context:', error);
       throw error; // Re-throw error to be caught by the calling component
     }
@@ -95,6 +106,7 @@ export const AuthProvider = ({ children }) => {
   // Register function
   const register = async (userData) => {
     setLoading(true);
+    setAuthError(null);
     try {
       const response = await apiRegister(userData);
        // Registration might not automatically log the user in, depending on backend setup.
@@ -106,6 +118,7 @@ export const AuthProvider = ({ children }) => {
       return response; // Return the full response
     } catch (error) {
       setLoading(false);
+      setAuthError(error.message || 'Registration failed');
       console.error('Registration error in context:', error);
       throw error; // Re-throw error
     }
@@ -114,14 +127,16 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     setLoading(true);
+    setAuthError(null);
     try {
       await apiLogout();
     } catch (error) {
       // Log error but proceed with clearing user state
       console.error('Logout API call failed, clearing session locally:', error);
+      setAuthError(error.message || 'Logout failed, but session was cleared locally');
     } finally {
       // Clear user state
-      setUser(null);
+      setUser(DEFAULT_USER);
       setMfaRequired(false);
       setMfaUserId(null);
       
@@ -149,7 +164,8 @@ export const AuthProvider = ({ children }) => {
     register,
     verifyAuth, // Expose verifyAuth if manual re-check is needed
     mfaRequired,
-    handleMfaVerification
+    handleMfaVerification,
+    authError
   };
 
   return (

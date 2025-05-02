@@ -8,9 +8,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import DefaultLayout from './layout/DefaultLayout'; 
 // import Header from './components/Header'; // Removed Header below
 // import Footer from './components/Footer'; // Removed Footer below
-import { Spinner, Container } from 'react-bootstrap'; // Keep for PrivateRoute loading
+import { Spinner, Container, Button } from 'react-bootstrap'; // Keep for PrivateRoute loading
 
-import { checkAuthStatus } from './services/api';
+// Removed direct import of checkAuthStatus as we use it via context now
+// import { checkAuthStatus } from './services/api';
+
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -67,10 +69,9 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage'; // Assume this page
 import StripeConnectReturnPage from './pages/StripeConnectReturnPage';
 import StripeConnectRefreshPage from './pages/StripeConnectRefreshPage';
 
-
 // Protected route component remains the same for now, handling role checks within the layout
 const PrivateRoute = ({ allowedRoles }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, authError } = useAuth();
 
   if (loading) {
     return (
@@ -102,9 +103,8 @@ const LayoutWrapper = ({ children }) => {
   return <DefaultLayout>{children}</DefaultLayout>;
 };
 
-
 function AppRoutes() {
-  const { user, loading } = useAuth(); // Use auth context here
+  const { user, loading, authError } = useAuth(); // Use auth context here
 
   if (loading) {
     // Keep the top-level loading spinner for initial auth check
@@ -115,6 +115,8 @@ function AppRoutes() {
     );
   }
 
+  // Even if there's an auth error, we should still render the routes
+  // React can recover from this if user navigates to a public route
   return (
     <Routes>
       {/* Public Routes (remain outside DefaultLayout) */}
@@ -194,13 +196,38 @@ function AppRoutes() {
   );
 }
 
-
 function App() {
+  // Handle potential errors at the top level
+  const [appError, setAppError] = useState(null);
+
+  useEffect(() => {
+    // Global error handler for unhandled exceptions
+    const errorHandler = (error) => {
+      console.error('Unhandled error in React:', error);
+      setAppError('An unexpected error occurred. Please refresh the page.');
+    };
+
+    // Add global error listener
+    window.addEventListener('error', errorHandler);
+    
+    return () => {
+      window.removeEventListener('error', errorHandler);
+    };
+  }, []);
+
   return (
     <AuthProvider>
-      <SocketProvider> { /* Wrap Router with SocketProvider */}
+      <SocketProvider>
         <Router>
-          <AppRoutes />
+          {appError ? (
+            <Container className="text-center mt-5">
+              <h2>Something went wrong</h2>
+              <p>{appError}</p>
+              <Button onClick={() => window.location.reload()}>Refresh</Button>
+            </Container>
+          ) : (
+            <AppRoutes />
+          )}
         </Router>
       </SocketProvider>
     </AuthProvider>

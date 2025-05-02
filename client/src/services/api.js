@@ -1,10 +1,6 @@
 import axios from 'axios';
 
-// Fix: Ensure API_URL is trimmed to remove any whitespace
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').trim();
-
-// Log for debugging
-console.log('Using API URL:', API_URL);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance
 const api = axios.create({
@@ -46,9 +42,11 @@ api.interceptors.response.use(
       sessionStorage.removeItem('user');
       document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       
-      // Don't redirect from auth endpoints to avoid infinite loops
+      // Don't redirect from auth endpoints or landing page to avoid infinite loops or React errors
       const isAuthEndpoint = error.config.url.includes('/auth/');
-      if (!isAuthEndpoint && window.location.pathname !== '/login') {
+      const isLandingPage = window.location.pathname === '/';
+      
+      if (!isAuthEndpoint && !isLandingPage && window.location.pathname !== '/login') {
         // Store the current location to redirect back after login
         sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
         // Redirect to login page
