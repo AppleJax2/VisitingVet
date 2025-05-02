@@ -1,7 +1,7 @@
 @use "@coreui/coreui/scss/coreui" as coreui with (
   $enable-deprecation-messages: false,
 );
-@use "@coreui/chartjs/scss/coreui-chartjs";
+@use "@coreui/chartjs/scss/coreui-chartjs" as chartjs;
 @use "vendors/simplebar";
 
 body {
