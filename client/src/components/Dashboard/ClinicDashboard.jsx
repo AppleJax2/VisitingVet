@@ -7,7 +7,6 @@ import {
   Building, Download, Wallet2, BellFill,
   PencilSquare, PlusCircle, BarChartFill, FileEarmarkText
 } from 'react-bootstrap-icons';
-import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { 
@@ -52,8 +51,8 @@ const ClinicDashboard = ({ user }) => {
       {
         label: 'Revenue',
         data: [],
-        backgroundColor: `${theme.colors.primary.main}50`,
-        borderColor: theme.colors.primary.main,
+        backgroundColor: 'rgba(var(--bs-primary-rgb), 0.3)',
+        borderColor: 'var(--bs-primary)',
         borderWidth: 2,
         tension: 0.4,
         fill: true,
@@ -67,12 +66,14 @@ const ClinicDashboard = ({ user }) => {
         label: 'Services',
         data: [],
         backgroundColor: [
-          theme.colors.primary.main,
-          theme.colors.primary.light,
-          theme.colors.secondary.main,
-          theme.colors.accent.gold,
-          theme.colors.error,
-          theme.colors.accent.lightGreen,
+          'var(--bs-primary)',
+          'var(--bs-info)',
+          'var(--bs-warning)',
+          'var(--bs-success)',
+          'var(--bs-secondary)',
+          'var(--bs-danger)',
+          'var(--bs-light)',
+          'var(--bs-dark)'
         ],
         borderWidth: 1,
       }
@@ -174,7 +175,6 @@ const ClinicDashboard = ({ user }) => {
     setLoadingChartData(true);
     setChartDataError('');
     try {
-      // Load revenue data
       const revenueResponse = await fetchClinicRevenueData(user?.clinicId);
       if (revenueResponse.success) {
         setRevenueData({
@@ -183,8 +183,8 @@ const ClinicDashboard = ({ user }) => {
             {
               label: 'Revenue',
               data: revenueResponse.data.values || [],
-              backgroundColor: `${theme.colors.primary.main}50`,
-              borderColor: theme.colors.primary.main,
+              backgroundColor: 'rgba(var(--bs-primary-rgb), 0.3)',
+              borderColor: 'var(--bs-primary)',
               borderWidth: 2,
               tension: 0.4,
               fill: true,
@@ -195,7 +195,6 @@ const ClinicDashboard = ({ user }) => {
         setChartDataError(revenueResponse.error || 'Failed to load revenue data.');
       }
       
-      // Load service distribution data
       const serviceResponse = await fetchClinicServiceData(user?.clinicId);
       if (serviceResponse.success) {
         setServiceDistributionData({
@@ -205,12 +204,14 @@ const ClinicDashboard = ({ user }) => {
               label: 'Services',
               data: serviceResponse.data.values || [],
               backgroundColor: [
-                theme.colors.primary.main,
-                theme.colors.primary.light,
-                theme.colors.secondary.main,
-                theme.colors.accent.gold,
-                theme.colors.error,
-                theme.colors.accent.lightGreen,
+                'var(--bs-primary)',
+                'var(--bs-info)',
+                'var(--bs-warning)',
+                'var(--bs-success)',
+                'var(--bs-secondary)',
+                'var(--bs-danger)',
+                'var(--bs-light)',
+                'var(--bs-dark)'
               ],
               borderWidth: 1,
             }
@@ -255,7 +256,7 @@ const ClinicDashboard = ({ user }) => {
       y: {
         beginAtZero: true,
         grid: {
-          color: `${theme.colors.text.light}20`,
+          color: 'rgba(var(--bs-body-color-rgb), 0.1)',
         },
       },
       x: {
@@ -280,196 +281,109 @@ const ClinicDashboard = ({ user }) => {
     },
   };
 
-  // Styles
-  const styles = {
-    statCard: {
-      border: 'none',
-      borderRadius: theme.borderRadius.lg,
-      height: '100%',
-      boxShadow: theme.shadows.sm,
-    },
-    statIcon: {
-      width: '48px',
-      height: '48px',
-      borderRadius: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: '16px',
-      fontSize: '1.5rem',
-    },
-    sectionTitle: {
-      color: theme.colors.primary.dark,
-      fontWeight: '600',
-      marginBottom: '20px',
-    },
-    viewAllLink: {
-      color: theme.colors.primary.main,
-      textDecoration: 'none',
-      fontWeight: '500',
-      display: 'flex',
-      alignItems: 'center',
-    },
-    statusBadge: (status) => {
-      const colors = {
-        confirmed: theme.colors.success,
-        pending: theme.colors.warning,
-        cancelled: theme.colors.error,
-        completed: '#6c757d',
-        active: theme.colors.success,
-        break: theme.colors.warning,
-        off: theme.colors.error,
-        low: theme.colors.error,
-        ok: theme.colors.success,
-        unknown: '#999999' // Default color for unknown status
-      };
-      return {
-        backgroundColor: colors[status] || colors.unknown,
-      };
-    },
-    staffCard: {
-      border: 'none',
-      borderRadius: theme.borderRadius.md,
-      height: '100%',
-      boxShadow: theme.shadows.sm,
-    },
-    staffImage: {
-      width: '50px',
-      height: '50px',
-      borderRadius: '50%',
-      marginRight: '15px',
-      objectFit: 'cover',
-    },
-    appointmentRow: {
-      borderRadius: theme.borderRadius.md,
-      marginBottom: '10px',
-      padding: '10px',
-      backgroundColor: theme.colors.background.white,
-      boxShadow: theme.shadows.sm,
-    },
-    chartContainer: {
-      height: '300px',
-    },
-    dateSelector: {
-      borderColor: theme.colors.primary.main,
-      borderRadius: theme.borderRadius.md,
-      padding: '8px 16px',
-      color: theme.colors.primary.main,
-      fontWeight: '500',
-    },
-    tab: {
-      fontWeight: '500',
-      padding: '12px 20px',
-      color: theme.colors.text.secondary,
-      border: 'none',
-      borderBottom: '2px solid transparent',
-    },
-    tabActive: {
-      color: theme.colors.primary.main,
-      borderBottom: `2px solid ${theme.colors.primary.main}`,
-    },
-    installButton: {
-      backgroundColor: theme.colors.secondary.main,
-      borderColor: theme.colors.secondary.main,
-      padding: '10px 20px',
-      fontWeight: '500',
-    },
+  // Helper for badge variants
+  const getStatusBadgeVariant = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'confirmed':
+      case 'active':
+      case 'ok':
+         return 'success';
+      case 'pending':
+      case 'break':
+         return 'warning';
+      case 'cancelled':
+      case 'off':
+      case 'low':
+         return 'danger';
+      case 'completed':
+         return 'secondary';
+      default:
+         return 'light'; // Default for unknown
+    }
   };
 
   return (
-    <div className="clinic-dashboard">
+    <div className="clinic-dashboard p-3">
       {/* Stats Cards */}
       <Row className="mb-4">
-        <Col md={3}>
-          <Card style={styles.statCard}>
+        <Col md={6} lg={3} className="mb-3">
+          <Card className="border-0 shadow-sm h-100">
             <Card.Body className="d-flex align-items-center">
               <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.primary.main}20`,
-                  color: theme.colors.primary.main
-                }}
+                className="d-flex align-items-center justify-content-center me-3 p-2 bg-primary-subtle text-primary rounded"
+                style={{ width: '48px', height: '48px', fontSize: '1.5rem' }}
               >
                 <Calendar3 />
               </div>
               <div>
-                <h6 className="text-muted mb-1">Total Appointments</h6>
+                <h6 className="text-muted mb-1 small">Total Appointments</h6>
                 {loadingStats ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  <h3 className="mb-0">{clinicStats.totalAppointments}</h3>
+                  <h3 className="mb-0 fw-bold">{clinicStats.totalAppointments}</h3>
                 )}
               </div>
             </Card.Body>
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
+        <Col md={6} lg={3} className="mb-3">
+          <Card className="border-0 shadow-sm h-100">
             <Card.Body className="d-flex align-items-center">
               <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.success}20`,
-                  color: theme.colors.success
-                }}
+                className="d-flex align-items-center justify-content-center me-3 p-2 bg-success-subtle text-success rounded"
+                style={{ width: '48px', height: '48px', fontSize: '1.5rem' }}
               >
                 <PeopleFill />
               </div>
               <div>
-                <h6 className="text-muted mb-1">Staff Members</h6>
+                <h6 className="text-muted mb-1 small">Staff Members</h6>
                 {loadingStats ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  <h3 className="mb-0">{clinicStats.totalProviders}</h3>
+                  <h3 className="mb-0 fw-bold">{clinicStats.totalProviders}</h3>
                 )}
               </div>
             </Card.Body>
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
+        <Col md={6} lg={3} className="mb-3">
+          <Card className="border-0 shadow-sm h-100">
             <Card.Body className="d-flex align-items-center">
               <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.accent.gold}20`,
-                  color: theme.colors.accent.gold
-                }}
+                className="d-flex align-items-center justify-content-center me-3 p-2 bg-warning-subtle text-warning rounded"
+                style={{ width: '48px', height: '48px', fontSize: '1.5rem' }}
               >
                 <PeopleFill />
               </div>
               <div>
-                <h6 className="text-muted mb-1">Clients</h6>
+                <h6 className="text-muted mb-1 small">Clients</h6>
                 {loadingStats ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  <h3 className="mb-0">{clinicStats.totalClients}</h3>
+                  <h3 className="mb-0 fw-bold">{clinicStats.totalClients}</h3>
                 )}
               </div>
             </Card.Body>
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
+        <Col md={6} lg={3} className="mb-3">
+          <Card className="border-0 shadow-sm h-100">
             <Card.Body className="d-flex align-items-center">
               <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.secondary.main}20`,
-                  color: theme.colors.secondary.main
-                }}
+                className="d-flex align-items-center justify-content-center me-3 p-2 bg-secondary-subtle text-secondary rounded"
+                style={{ width: '48px', height: '48px', fontSize: '1.5rem' }}
               >
                 <Cash />
               </div>
               <div>
-                <h6 className="text-muted mb-1">Monthly Revenue</h6>
+                <h6 className="text-muted mb-1 small">Monthly Revenue</h6>
                 {loadingStats ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  <h3 className="mb-0">${clinicStats.totalEarnings}</h3>
+                  <h3 className="mb-0 fw-bold">${clinicStats.totalEarnings}</h3>
                 )}
               </div>
             </Card.Body>
@@ -479,19 +393,19 @@ const ClinicDashboard = ({ user }) => {
 
       {/* Calendar and Staff Section */}
       <Row className="mb-4">
-        <Col md={8}>
+        <Col lg={8} className="mb-3 mb-lg-0">
           <Card className="border-0 shadow-sm mb-4">
-            <Card.Header className="bg-white d-flex justify-content-between align-items-center" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Today's Schedule</h5>
+            <Card.Header className="bg-light d-flex justify-content-between align-items-center">
+              <h5 className="mb-0 text-dark fw-semibold">Today's Schedule</h5>
               <div className="d-flex align-items-center">
                 <Form.Control
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  style={styles.dateSelector}
-                  className="me-2"
+                  className="me-2 form-control-sm"
+                  style={{ width: 'auto' }}
                 />
-                <Link to="/clinic-appointments" style={styles.viewAllLink}>
+                <Link to="/clinic-appointments" className="btn btn-link btn-sm text-primary fw-medium">
                   View Full Calendar
                 </Link>
               </div>
@@ -502,56 +416,55 @@ const ClinicDashboard = ({ user }) => {
               {!loadingAppointments && !appointmentsError && appointments.length === 0 && (
                   <p className="text-center text-muted">No appointments scheduled for {format(new Date(selectedDate+'T00:00:00Z'), 'PPP')}.</p>
               )}
-              {!loadingAppointments && !appointmentsError && appointments.map((appointment) => (
-                <Row 
-                  key={appointment._id} 
-                  style={styles.appointmentRow}
-                  className="align-items-center"
-                >
-                  <Col md={1}>
-                    <span className="fw-bold">{appointment.time}</span>
-                  </Col>
-                  <Col md={3}>
-                    <div>
-                      <h6 style={{ color: theme.colors.primary.main, fontWeight: '600', marginBottom: '2px' }}>
-                        {appointment.client}
-                      </h6>
-                      <small className="text-muted d-block">
-                        {appointment.petName} ({appointment.petType})
-                      </small>
-                    </div>
-                  </Col>
-                  <Col md={3}>
-                    <span>{appointment.service}</span>
-                  </Col>
-                  <Col md={3}>
-                    <span>{appointment.assignedTo}</span>
-                  </Col>
-                  <Col md={2} className="text-end">
-                    <Badge 
-                      style={styles.statusBadge(appointment.status || 'unknown')}
-                      className="me-2"
-                    >
-                      {appointment.status ? 
-                        appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) :
-                        'Unknown'}
-                    </Badge>
-                    <Button 
-                      variant="outline-primary" 
-                      size="sm"
-                      as={Link}
-                      to={`/appointment/${appointment.id}`}
-                      style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                    >
-                      <Eye size={14} />
-                    </Button>
-                  </Col>
-                </Row>
-              ))}
+              <ListGroup variant="flush">
+                {!loadingAppointments && !appointmentsError && appointments.map((appointment) => (
+                  <ListGroup.Item key={appointment._id} className="px-0">
+                    <Row className="align-items-center g-2">
+                      <Col xs={2} md={1} className="text-center">
+                        <span className="fw-bold small">{appointment.time}</span>
+                      </Col>
+                      <Col xs={10} md={3}>
+                        <h6 className="mb-0 text-primary small fw-semibold">
+                          {appointment.client}
+                        </h6>
+                        <small className="text-muted d-block">
+                          {appointment.petName} ({appointment.petType})
+                        </small>
+                      </Col>
+                      <Col xs={12} md={3} className="mt-1 mt-md-0">
+                        <span className="small">{appointment.service}</span>
+                      </Col>
+                      <Col xs={6} md={3} className="mt-1 mt-md-0">
+                        <span className="small">{appointment.assignedTo}</span>
+                      </Col>
+                      <Col xs={6} md={2} className="text-end mt-1 mt-md-0">
+                        <Badge 
+                          pill
+                          bg={getStatusBadgeVariant(appointment.status)}
+                          className="me-2"
+                        >
+                          {appointment.status ? 
+                            appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) :
+                            'Unknown'}
+                        </Badge>
+                        <Button 
+                          variant="outline-primary" 
+                          size="sm"
+                          as={Link}
+                          to={`/appointment/${appointment.id}`}
+                          title="View Details"
+                        >
+                          <Eye size={14} />
+                        </Button>
+                      </Col>
+                    </Row>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
               <div className="text-center mt-3">
                 <Button 
                   variant="outline-primary"
-                  style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
+                  size="sm"
                 >
                   <PlusCircle size={16} className="me-2" /> Add Appointment
                 </Button>
@@ -560,128 +473,113 @@ const ClinicDashboard = ({ user }) => {
           </Card>
         </Col>
         
-        <Col md={4}>
+        <Col lg={4}>
           <Card className="border-0 shadow-sm mb-4">
-            <Card.Header className="bg-white d-flex justify-content-between align-items-center" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Staff</h5>
-              <Link to="/clinic-staff" style={styles.viewAllLink}>
+            <Card.Header className="bg-light d-flex justify-content-between align-items-center">
+              <h5 className="mb-0 text-dark fw-semibold">Staff</h5>
+              <Link to="/clinic-staff" className="btn btn-link btn-sm text-primary fw-medium">
                 Manage Staff
               </Link>
             </Card.Header>
-            <Card.Body>
-              {loadingStaff && <div className="text-center"><Spinner animation="border" /></div>}
-              {staffError && <Alert variant="danger">{staffError}</Alert>}
+            <ListGroup variant="flush">
+              {loadingStaff && <ListGroup.Item className="text-center"><Spinner animation="border" size="sm" /></ListGroup.Item>}
+              {staffError && <ListGroup.Item><Alert variant="danger" size="sm">{staffError}</Alert></ListGroup.Item>}
               {!loadingStaff && !staffError && staff.length === 0 && (
-                <p className="text-center text-muted">No staff members found.</p>
+                <ListGroup.Item className="text-center text-muted">No staff members found.</ListGroup.Item>
               )}
-              {!loadingStaff && !staffError && staff.map((staffMember, index) => (
-                <div 
-                  key={staffMember.id}
-                  className="d-flex align-items-center mb-3 pb-3"
-                  style={{ borderBottom: index !== staff.length - 1 ? `1px solid ${theme.colors.background.light}` : 'none' }}
-                >
+              {!loadingStaff && !staffError && staff.map((staffMember) => (
+                <ListGroup.Item key={staffMember.id} className="d-flex align-items-center">
                   <img 
                     src={staffMember.image}
                     alt={staffMember.name}
-                    style={styles.staffImage}
+                    className="rounded-circle me-3"
+                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                   />
                   <div className="flex-grow-1">
-                    <h6 className="mb-0" style={{ color: theme.colors.primary.main }}>
+                    <h6 className="mb-0 text-primary fw-semibold">
                       {staffMember.name}
                     </h6>
                     <small className="d-block text-muted">
                       {staffMember.role} • {staffMember.specialty}
                     </small>
-                    <small className="d-block">
-                      {staffMember.appointmentsToday} appointments today
+                    <small className="d-block text-muted">
+                      {staffMember.appointmentsToday} appt(s) today
                     </small>
                   </div>
-                  <Badge style={styles.statusBadge(staffMember.status || 'unknown')}>
+                  <Badge pill bg={getStatusBadgeVariant(staffMember.status)}>
                     {staffMember.status ? 
                       (staffMember.status.charAt(0).toUpperCase() + staffMember.status.slice(1)) : 
                       'Unknown'}
                   </Badge>
-                </div>
+                </ListGroup.Item>
               ))}
-              <div className="text-center mt-3">
-                <Button 
-                  variant="outline-primary"
-                  style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                >
-                  <PlusCircle size={16} className="me-2" /> Add Staff Member
-                </Button>
-              </div>
+            </ListGroup>
+            <Card.Body className="text-center border-top">
+              <Button 
+                variant="outline-primary"
+                size="sm"
+              >
+                <PlusCircle size={16} className="me-2" /> Add Staff Member
+              </Button>
             </Card.Body>
           </Card>
           
           <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Inventory Alerts</h5>
+            <Card.Header className="bg-light">
+              <h5 className="mb-0 text-dark fw-semibold">Inventory Alerts</h5>
             </Card.Header>
-            <Card.Body>
-              {loadingInventory && <div className="text-center"><Spinner animation="border" /></div>}
-              {inventoryError && <Alert variant="danger">{inventoryError}</Alert>}
+            <ListGroup variant="flush">
+              {loadingInventory && <ListGroup.Item className="text-center"><Spinner animation="border" size="sm" /></ListGroup.Item>}
+              {inventoryError && <ListGroup.Item><Alert variant="danger" size="sm">{inventoryError}</Alert></ListGroup.Item>}
               {!loadingInventory && !inventoryError && inventoryAlerts.length === 0 && (
-                <p className="text-center text-muted">No inventory alerts at this time.</p>
+                <ListGroup.Item className="text-center text-muted">No inventory alerts.</ListGroup.Item>
               )}
-              {!loadingInventory && !inventoryError && inventoryAlerts.map((item, index) => (
-                <div 
-                  key={item.id}
-                  className="d-flex justify-content-between align-items-center mb-3 pb-2"
-                  style={{ borderBottom: index !== inventoryAlerts.length - 1 ? `1px solid ${theme.colors.background.light}` : 'none' }}
-                >
+              {!loadingInventory && !inventoryError && inventoryAlerts.map((item) => (
+                <ListGroup.Item key={item.id} className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h6 className="mb-0">{item.item}</h6>
+                    <h6 className="mb-0 small fw-semibold">{item.item}</h6>
                     <small className="text-muted">
                       Stock: {item.currentStock} / {item.minRequired}
                     </small>
                   </div>
                   <div>
-                    <Badge style={styles.statusBadge(item.status || 'unknown')} className="me-2">
-                      {item.status === 'low' ? 'Low Stock' : 'In Stock'}
+                    <Badge pill bg={getStatusBadgeVariant(item.status)} className="me-2">
+                      {item.status === 'low' ? 'Low' : 'OK'}
                     </Badge>
                     {item.status === 'low' && (
                       <Button 
                         variant="outline-primary" 
                         size="sm"
-                        style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
                       >
                         Reorder
                       </Button>
                     )}
                   </div>
-                </div>
+                </ListGroup.Item>
               ))}
-              <div className="text-center mt-3">
-                <Button 
-                  as={Link}
-                  to="/inventory"
-                  variant="outline-primary"
-                  style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                >
-                  View Inventory
-                </Button>
-              </div>
+            </ListGroup>
+            <Card.Body className="text-center border-top">
+              <Button 
+                as={Link}
+                to="/inventory"
+                variant="outline-primary"
+                size="sm"
+              >
+                View Inventory
+              </Button>
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
       {/* Analytics Section */}
-      <Row>
+      <Row className="mt-4">
         <Col md={12}>
           <Card className="border-0 shadow-sm mb-4">
-            <Card.Header className="bg-white">
-              <Tabs 
-                defaultActiveKey="revenue" 
-                className="border-0"
-              >
-                <Tab 
-                  eventKey="revenue" 
-                  title="Revenue"
-                  tabClassName="border-0"
-                >
-                  <div style={styles.chartContainer} className="mt-4">
+            <Tabs defaultActiveKey="revenue" id="clinic-analytics-tabs" className="nav-tabs-bordered">
+              <Tab eventKey="revenue" title="Revenue">
+                <Card.Body>
+                  <div style={{ height: '300px' }} className="mt-3">
                     {loadingChartData ? (
                       <div className="text-center h-100 d-flex align-items-center justify-content-center">
                         <Spinner animation="border" />
@@ -692,15 +590,13 @@ const ClinicDashboard = ({ user }) => {
                       <Chart type="line" data={revenueData} options={chartOptions} />
                     )}
                   </div>
-                </Tab>
-                <Tab 
-                  eventKey="services" 
-                  title="Services"
-                  tabClassName="border-0"
-                >
-                  <Row className="mt-4">
-                    <Col md={7}>
-                      <div style={styles.chartContainer}>
+                </Card.Body>
+              </Tab>
+              <Tab eventKey="services" title="Services">
+                <Card.Body>
+                  <Row className="mt-3">
+                    <Col md={7} className="mb-3 mb-md-0">
+                      <div style={{ height: '300px' }}>
                         {loadingChartData ? (
                           <div className="text-center h-100 d-flex align-items-center justify-content-center">
                             <Spinner animation="border" />
@@ -713,59 +609,46 @@ const ClinicDashboard = ({ user }) => {
                       </div>
                     </Col>
                     <Col md={5} className="d-flex flex-column justify-content-center">
-                      <h5 className="mb-3">Service Distribution</h5>
-                      <p className="text-muted">
-                        {serviceDistributionData.labels.length > 0 ? 
-                          `Regular checkups and vaccinations make up over ${
-                            Math.round((serviceDistributionData.datasets[0].data[0] + serviceDistributionData.datasets[0].data[1]) / 
-                            serviceDistributionData.datasets[0].data.reduce((sum, val) => sum + val, 0) * 100)
-                          }% of all services performed at your clinic.` : 
+                      <h5 className="mb-3 text-dark fw-semibold">Service Distribution</h5>
+                      <p className="text-muted small">
+                        {(serviceDistributionData.labels?.length || 0) > 0 ? 
+                          `Analysis shows dominant service types.` :
                           'No service data available for analysis.'}
                       </p>
                       <Button 
                         variant="outline-primary"
+                        size="sm"
                         className="mt-3 align-self-start"
-                        style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
                       >
                         <BarChartFill className="me-2" /> View Detailed Reports
                       </Button>
                     </Col>
                   </Row>
-                </Tab>
-              </Tabs>
-            </Card.Header>
+                </Card.Body>
+              </Tab>
+            </Tabs>
           </Card>
         </Col>
       </Row>
       
       {/* Install Now Card */}
-      <Row>
+      <Row className="mb-4">
         <Col md={12}>
-          <Card className="border-0 shadow-sm text-center p-4">
+          <Card className="border-0 shadow-sm text-center p-4 bg-light">
             <Card.Body className="d-flex flex-column align-items-center">
               <div 
-                style={{
-                  backgroundColor: `${theme.colors.secondary.main}20`,
-                  color: theme.colors.secondary.main,
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '2rem',
-                  marginBottom: '16px',
-                }}
+                className="d-flex align-items-center justify-content-center mb-3 p-3 bg-secondary-subtle text-secondary rounded-3"
+                style={{ fontSize: '2rem' }}
               >
                 <Download />
               </div>
-              <h4 style={{ color: theme.colors.primary.dark, fontWeight: '600', marginBottom: '10px' }}>Desktop Application Available</h4>
-              <p className="text-muted mb-4 w-75">
+              <h4 className="text-dark fw-semibold mb-2">Desktop Application Available</h4>
+              <p className="text-muted mb-4 w-75 small">
                 For faster access to your clinic management dashboard and additional offline features, install our desktop application. 
                 Manage your clinic operations seamlessly even with unstable internet connections.
               </p>
               <Button 
-                style={styles.installButton}
+                variant="secondary"
               >
                 <Download className="me-2" /> Install Now
               </Button>
@@ -775,24 +658,27 @@ const ClinicDashboard = ({ user }) => {
       </Row>
 
       {/* Service Requests Card */}
-      <Col md={4}>
-        <Card className="dashboard-card shadow-sm h-100">
-          <Card.Body className="text-center">
-            <FileEarmarkText size={40} className="mb-3 text-primary" />
-            <Card.Title>Specialist Referrals</Card.Title>
-            <Card.Text>
-              Manage referrals to mobile veterinary specialists.
-            </Card.Text>
-            <Button 
-              variant="primary" 
-              as={Link} 
-              to="/dashboard/clinic/service-requests"
-            >
-              Manage Referrals
-            </Button>
-          </Card.Body>
-        </Card>
-      </Col>
+      <Row className="mb-4">
+        <Col md={4}>
+          <Card className="shadow-sm h-100 border-0">
+            <Card.Body className="text-center d-flex flex-column align-items-center p-4">
+              <FileEarmarkText size={40} className="mb-3 text-primary" />
+              <Card.Title className="h6 fw-semibold">Specialist Referrals</Card.Title>
+              <Card.Text className="small text-muted flex-grow-1">
+                Manage referrals to mobile veterinary specialists.
+              </Card.Text>
+              <Button 
+                variant="primary" 
+                as={Link} 
+                to="/dashboard/clinic/service-requests"
+                className="mt-3"
+              >
+                Manage Referrals
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Appointment Detail Modal */}
       {selectedAppointmentId && (

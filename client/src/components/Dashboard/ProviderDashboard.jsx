@@ -4,9 +4,8 @@ import { Link } from 'react-router-dom';
 import { 
   Calendar3, Clock, GeoAlt, Cash, Star, 
   PeopleFill, Check2Circle, XCircle, Eye, 
-  BarChart, Download, Wallet2, BellFill, FileEarmarkText 
+  BarChart, Download, Wallet2, BellFill, FileEarmarkText, Search, GeoAltFill, TagFill, HeartPulseFill, InfoCircle, StarFill, ExclamationTriangleFill 
 } from 'react-bootstrap-icons';
-import theme from '../../utils/theme';
 import { Chart } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { 
@@ -19,6 +18,7 @@ import {
 } from '../../services/api';
 import AppointmentDetailModal from '../AppointmentDetailModal';
 import { format } from 'date-fns';
+import debounce from 'lodash.debounce';
 
 const ProviderDashboard = ({ user }) => {
   const [dateRange, setDateRange] = useState('week');
@@ -38,15 +38,15 @@ const ProviderDashboard = ({ user }) => {
   const [loadingStats, setLoadingStats] = useState(true);
   const [statsError, setStatsError] = useState('');
   
-  // Chart data state
+  // Chart data state with updated colors using CSS variables
   const [earningsData, setEarningsData] = useState({
     labels: [],
     datasets: [
       {
         label: 'Earnings',
         data: [],
-        backgroundColor: `${theme.colors.primary.main}50`,
-        borderColor: theme.colors.primary.main,
+        backgroundColor: 'rgba(var(--bs-primary-rgb), 0.3)', // Use CSS var with opacity
+        borderColor: 'var(--bs-primary)', // Use CSS var
         borderWidth: 2,
         tension: 0.4,
         fill: true,
@@ -60,12 +60,15 @@ const ProviderDashboard = ({ user }) => {
         label: 'Appointment Types',
         data: [],
         backgroundColor: [
-          theme.colors.primary.main,
-          theme.colors.primary.light,
-          theme.colors.secondary.main,
-          theme.colors.accent.gold,
-          theme.colors.accent.lightGreen,
-        ],
+          'var(--bs-primary)', 
+          'var(--bs-info)', 
+          'var(--bs-warning)', 
+          'var(--bs-success)',
+          'var(--bs-secondary)',
+          'var(--bs-danger)', 
+          'var(--bs-light)', 
+          'var(--bs-dark)'
+        ], // Use CSS vars for colors
         borderWidth: 1,
       }
     ]
@@ -76,7 +79,7 @@ const ProviderDashboard = ({ user }) => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
 
-  // Chart options
+  // Chart options - updated grid color
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -89,7 +92,7 @@ const ProviderDashboard = ({ user }) => {
       y: {
         beginAtZero: true,
         grid: {
-          color: `${theme.colors.text.light}20`,
+          color: 'rgba(var(--bs-body-color-rgb), 0.1)', // Use body color CSS var with opacity
         },
       },
       x: {
@@ -112,105 +115,6 @@ const ProviderDashboard = ({ user }) => {
         },
       },
     },
-  };
-
-  // Styles
-  const styles = {
-    statCard: {
-      border: 'none',
-      borderRadius: theme.borderRadius.lg,
-      height: '100%',
-      boxShadow: theme.shadows.sm,
-    },
-    statIcon: {
-      width: '48px',
-      height: '48px',
-      borderRadius: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: '16px',
-      fontSize: '1.5rem',
-    },
-    appointmentCard: {
-      border: 'none',
-      borderRadius: theme.borderRadius.md,
-      marginBottom: '15px',
-      boxShadow: theme.shadows.sm,
-    },
-    sectionTitle: {
-      color: theme.colors.primary.dark,
-      fontWeight: '600',
-      marginBottom: '20px',
-    },
-    viewAllLink: {
-      color: theme.colors.primary.main,
-      textDecoration: 'none',
-      fontWeight: '500',
-      display: 'flex',
-      alignItems: 'center',
-    },
-    infoItem: {
-      display: 'flex',
-      alignItems: 'center',
-      marginBottom: '8px',
-      color: theme.colors.text.secondary,
-    },
-    infoIcon: {
-      marginRight: '8px',
-      color: theme.colors.primary.main,
-    },
-    statusBadge: (status) => {
-      const colors = {
-        confirmed: theme.colors.success,
-        pending: theme.colors.warning,
-        cancelled: theme.colors.error,
-        completed: '#6c757d',
-      };
-      return {
-        backgroundColor: colors[status.toLowerCase()],
-      };
-    },
-    activityIcon: (type) => {
-      const colors = {
-        new_appointment: theme.colors.primary.main,
-        completed_appointment: theme.colors.success,
-        new_review: theme.colors.accent.gold,
-        payment_received: theme.colors.secondary.main,
-      };
-      return {
-        backgroundColor: `${colors[type] || colors.new_appointment}20`,
-        color: colors[type] || colors.new_appointment,
-        width: '40px',
-        height: '40px',
-        borderRadius: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: '15px',
-      };
-    },
-    chartContainer: {
-      height: '250px',
-    },
-    switchButton: {
-      backgroundColor: 'transparent',
-      border: 'none',
-      color: theme.colors.text.secondary,
-      fontWeight: '500',
-      padding: '6px 12px',
-      borderRadius: theme.borderRadius.md,
-    },
-    activeSwitchButton: {
-      backgroundColor: `${theme.colors.primary.main}20`,
-      color: theme.colors.primary.main,
-    },
-    loadingContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '150px',
-    }
   };
 
   // Get activity icon based on activity type
@@ -314,7 +218,6 @@ const ProviderDashboard = ({ user }) => {
     setLoadingChartData(true);
     setChartDataError('');
     try {
-      // Load earnings data
       const revenueResponse = await fetchProviderRevenueData(user?._id, range);
       if (revenueResponse.success) {
         setEarningsData({
@@ -323,8 +226,8 @@ const ProviderDashboard = ({ user }) => {
             {
               label: range === 'week' ? 'Weekly Earnings' : 'Monthly Earnings',
               data: revenueResponse.data.values || [],
-              backgroundColor: `${theme.colors.primary.main}50`,
-              borderColor: theme.colors.primary.main,
+              backgroundColor: 'rgba(var(--bs-primary-rgb), 0.3)', // Updated
+              borderColor: 'var(--bs-primary)', // Updated
               borderWidth: 2,
               tension: 0.4,
               fill: true,
@@ -335,7 +238,6 @@ const ProviderDashboard = ({ user }) => {
         setChartDataError(revenueResponse.error || 'Failed to load earnings data.');
       }
       
-      // Load appointment type distribution data
       const appointmentTypesResponse = await fetchProviderAppointmentTypes(user?._id);
       if (appointmentTypesResponse.success) {
         setAppointmentTypeData({
@@ -345,12 +247,15 @@ const ProviderDashboard = ({ user }) => {
               label: 'Appointment Types',
               data: appointmentTypesResponse.data.values || [],
               backgroundColor: [
-                theme.colors.primary.main,
-                theme.colors.primary.light,
-                theme.colors.secondary.main,
-                theme.colors.accent.gold,
-                theme.colors.accent.lightGreen,
-              ],
+                'var(--bs-primary)', 
+                'var(--bs-info)', 
+                'var(--bs-warning)', 
+                'var(--bs-success)',
+                'var(--bs-secondary)',
+                'var(--bs-danger)', 
+                'var(--bs-light)', 
+                'var(--bs-dark)' 
+              ], // Updated
               borderWidth: 1,
             }
           ]
@@ -394,107 +299,118 @@ const ProviderDashboard = ({ user }) => {
   };
   
   const renderLoading = (section) => (
-    <div style={styles.loadingContainer}>
-      <Spinner animation="border" role="status" style={{ color: theme.colors.primary.main }}>
+    // Use Bootstrap classes for centering
+    <div className="d-flex justify-content-center align-items-center text-primary" style={{ minHeight: '150px' }}> 
+      <Spinner animation="border" role="status">
         <span className="visually-hidden">Loading {section}...</span>
       </Spinner>
     </div>
   );
 
+  // Helper to get badge variant based on status
+  const getStatusBadgeVariant = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'confirmed': return 'success';
+      case 'requested': return 'warning';
+      case 'cancelled': return 'danger';
+      case 'completed': return 'secondary';
+      default: return 'light';
+    }
+  };
+
+  // Helper to get activity icon classes
+  const getActivityIconClass = (type) => {
+    switch (type) {
+      case 'new_appointment': return 'bg-primary-subtle text-primary';
+      case 'completed_appointment': return 'bg-success-subtle text-success';
+      case 'new_review': return 'bg-warning-subtle text-warning';
+      case 'payment_received': return 'bg-secondary-subtle text-secondary';
+      default: return 'bg-light text-dark';
+    }
+  };
+
   return (
-    <div className="provider-dashboard">
-      {/* Stats Cards */}
+    <div className="provider-dashboard p-3"> {/* Added padding */}
+      {/* Stats Cards - Use utility classes */}
       <Row className="mb-4">
-        <Col md={3}>
-          <Card style={styles.statCard}>
+        <Col md={6} lg={3} className="mb-3"> {/* Adjusted cols */} 
+          <Card className="border-0 shadow-sm h-100">
             <Card.Body className="d-flex align-items-center">
               <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.primary.main}20`,
-                  color: theme.colors.primary.main
-                }}
+                className="d-flex align-items-center justify-content-center me-3 p-2 bg-primary-subtle text-primary rounded"
+                style={{ width: '48px', height: '48px', fontSize: '1.5rem' }}
               >
                 <Calendar3 />
               </div>
               <div>
-                <h6 className="text-muted mb-1">Pending Appointments</h6>
+                <h6 className="text-muted mb-1 small">Pending Appointments</h6> 
                 {loadingStats ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  <h3 className="mb-0">{stats.pendingAppointments}</h3>
+                  <h3 className="mb-0 fw-bold">{stats.pendingAppointments}</h3>
                 )}
               </div>
             </Card.Body>
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
+        <Col md={6} lg={3} className="mb-3"> {/* Adjusted cols */} 
+          <Card className="border-0 shadow-sm h-100">
             <Card.Body className="d-flex align-items-center">
               <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.success}20`,
-                  color: theme.colors.success
-                }}
+                 className="d-flex align-items-center justify-content-center me-3 p-2 bg-success-subtle text-success rounded"
+                 style={{ width: '48px', height: '48px', fontSize: '1.5rem' }}
               >
                 <Check2Circle />
               </div>
               <div>
-                <h6 className="text-muted mb-1">Confirmed Appointments</h6>
+                <h6 className="text-muted mb-1 small">Confirmed Appointments</h6>
                 {loadingStats ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  <h3 className="mb-0">{stats.confirmedAppointments}</h3>
+                  <h3 className="mb-0 fw-bold">{stats.confirmedAppointments}</h3>
                 )}
               </div>
             </Card.Body>
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
+        <Col md={6} lg={3} className="mb-3"> {/* Adjusted cols */} 
+          <Card className="border-0 shadow-sm h-100">
             <Card.Body className="d-flex align-items-center">
               <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.accent.gold}20`,
-                  color: theme.colors.accent.gold
-                }}
+                className="d-flex align-items-center justify-content-center me-3 p-2 bg-warning-subtle text-warning rounded"
+                style={{ width: '48px', height: '48px', fontSize: '1.5rem' }}
               >
                 <Star />
               </div>
               <div>
-                <h6 className="text-muted mb-1">Average Rating</h6>
+                <h6 className="text-muted mb-1 small">Average Rating</h6>
                 {loadingStats ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  <h3 className="mb-0">{stats.rating.toFixed(1)} <small className="text-muted fs-6">({stats.reviewCount})</small></h3>
+                  <h3 className="mb-0 fw-bold">{stats.rating.toFixed(1)} <small className="text-muted fw-normal">({stats.reviewCount})</small></h3>
                 )}
               </div>
             </Card.Body>
           </Card>
         </Col>
         
-        <Col md={3}>
-          <Card style={styles.statCard}>
+        <Col md={6} lg={3} className="mb-3"> {/* Adjusted cols */} 
+          <Card className="border-0 shadow-sm h-100">
             <Card.Body className="d-flex align-items-center">
               <div 
-                style={{
-                  ...styles.statIcon,
-                  backgroundColor: `${theme.colors.secondary.main}20`,
-                  color: theme.colors.secondary.main
-                }}
+                className="d-flex align-items-center justify-content-center me-3 p-2 bg-secondary-subtle text-secondary rounded"
+                style={{ width: '48px', height: '48px', fontSize: '1.5rem' }}
               >
                 <Wallet2 />
               </div>
               <div>
-                <h6 className="text-muted mb-1">Monthly Earnings</h6>
+                <h6 className="text-muted mb-1 small">Monthly Earnings</h6>
                 {loadingStats ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  <h3 className="mb-0">${stats.totalEarnings}</h3>
+                  <h3 className="mb-0 fw-bold">${stats.totalEarnings}</h3>
                 )}
               </div>
             </Card.Body>
@@ -504,25 +420,22 @@ const ProviderDashboard = ({ user }) => {
 
       {/* Charts */}
       <Row className="mb-4">
-        <Col md={8}>
+        <Col lg={8} className="mb-3 mb-lg-0"> {/* Adjusted cols */} 
           <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-white d-flex justify-content-between align-items-center" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Earnings Overview</h5>
+            <Card.Header className="bg-light d-flex justify-content-between align-items-center">
+              <h5 className="mb-0 text-dark fw-semibold">Earnings Overview</h5>
               <div>
                 <Button 
-                  style={{
-                    ...styles.switchButton,
-                    ...(dateRange === 'week' ? styles.activeSwitchButton : {})
-                  }}
-                  onClick={() => setDateRange('week')}
+                  variant={dateRange === 'week' ? "primary" : "outline-secondary"} 
+                  size="sm" 
+                  onClick={() => setDateRange('week')} 
+                  className="me-1"
                 >
                   Weekly
                 </Button>
                 <Button 
-                  style={{
-                    ...styles.switchButton,
-                    ...(dateRange === 'month' ? styles.activeSwitchButton : {})
-                  }}
+                  variant={dateRange === 'month' ? "primary" : "outline-secondary"} 
+                  size="sm" 
                   onClick={() => setDateRange('month')}
                 >
                   Monthly
@@ -530,7 +443,7 @@ const ProviderDashboard = ({ user }) => {
               </div>
             </Card.Header>
             <Card.Body>
-              <div style={styles.chartContainer}>
+              <div style={{ height: '250px' }}>
                 {loadingChartData ? (
                   renderLoading('earnings data')
                 ) : chartDataError ? (
@@ -543,13 +456,13 @@ const ProviderDashboard = ({ user }) => {
           </Card>
         </Col>
         
-        <Col md={4}>
+        <Col lg={4}> {/* Adjusted cols */} 
           <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-white" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Appointment Types</h5>
+            <Card.Header className="bg-light">
+              <h5 className="mb-0 text-dark fw-semibold">Appointment Types</h5>
             </Card.Header>
             <Card.Body>
-              <div style={styles.chartContainer}>
+              <div style={{ height: '250px' }}>
                 {loadingChartData ? (
                   renderLoading('appointment types')
                 ) : chartDataError ? (
@@ -565,11 +478,11 @@ const ProviderDashboard = ({ user }) => {
 
       {/* Upcoming Appointments & Activity */}
       <Row className="mb-4">
-        <Col md={8}>
+        <Col lg={8} className="mb-3 mb-lg-0"> {/* Adjusted cols */} 
           <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white d-flex justify-content-between align-items-center" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Upcoming Appointments</h5>
-              <Link to="/provider-appointments" style={styles.viewAllLink}>
+            <Card.Header className="bg-light d-flex justify-content-between align-items-center">
+              <h5 className="mb-0 text-dark fw-semibold">Upcoming Appointments</h5>
+              <Link to="/provider-appointments" className="btn btn-link btn-sm text-primary fw-medium"> 
                 View All
               </Link>
             </Card.Header>
@@ -580,30 +493,31 @@ const ProviderDashboard = ({ user }) => {
                   <p className="text-center text-muted">No upcoming appointments found.</p>
               )}
               {!loadingAppointments && !appointmentsError && appointments.map((appointment) => (
-                <Card key={appointment._id} style={styles.appointmentCard}>
+                <Card key={appointment._id} className="mb-3 shadow-sm border">
                   <Card.Body>
                     <Row>
                       <Col md={6}>
-                        <h6 style={{ color: theme.colors.primary.main, fontWeight: '600' }}>
+                        <h6 className="text-primary fw-semibold">
                           {appointment.service?.name || 'Veterinary Service'} for {appointment.pet?.name || 'Pet'}
                         </h6>
-                        <p className="text-muted mb-0">
+                        <p className="text-muted mb-0 small">
                           Client: {appointment.clientProfile?.user?.name || 'Client'}
                         </p>
                       </Col>
-                      <Col md={4}>
-                        <div style={styles.infoItem}>
-                          <Clock style={styles.infoIcon} />
+                      <Col md={4} className="small">
+                        <div className="d-flex align-items-center text-muted mb-1">
+                          <Clock className="me-2 text-primary"/>
                           {new Date(appointment.appointmentTime).toLocaleDateString()} at {new Date(appointment.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
-                        <div style={styles.infoItem}>
-                          <GeoAlt style={styles.infoIcon} />
+                        <div className="d-flex align-items-center text-muted">
+                          <GeoAlt className="me-2 text-primary" />
                           {appointment.appointmentLocation || 'Location not specified'}
                         </div>
                       </Col>
-                      <Col md={2} className="text-end d-flex flex-column justify-content-between">
+                      <Col md={2} className="text-end d-flex flex-column justify-content-between align-items-end">
                         <Badge 
-                          style={styles.statusBadge(appointment.status || 'pending')}
+                          pill 
+                          bg={getStatusBadgeVariant(appointment.status)} // Use helper function
                           className="mb-2"
                         >
                           {appointment.status ? 
@@ -616,7 +530,7 @@ const ProviderDashboard = ({ user }) => {
                             size="sm"
                             onClick={() => handleShowDetails(appointment._id)}
                             className="me-1"
-                            style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
+                            title="View Details"
                           >
                             <Eye size={16} />
                           </Button>
@@ -627,7 +541,7 @@ const ProviderDashboard = ({ user }) => {
                                 size="sm"
                                 className="me-1"
                                 onClick={() => handleUpdateStatus(appointment._id, 'Confirmed')}
-                                style={{ borderColor: theme.colors.success, color: theme.colors.success }}
+                                title="Confirm"
                               >
                                 <Check2Circle size={16} />
                               </Button>
@@ -635,7 +549,7 @@ const ProviderDashboard = ({ user }) => {
                                 variant="outline-danger" 
                                 size="sm"
                                 onClick={() => handleUpdateStatus(appointment._id, 'Cancelled')}
-                                style={{ borderColor: theme.colors.error, color: theme.colors.error }}
+                                title="Cancel"
                               >
                                 <XCircle size={16} />
                               </Button>
@@ -651,10 +565,10 @@ const ProviderDashboard = ({ user }) => {
           </Card>
         </Col>
         
-        <Col md={4}>
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Recent Activity</h5>
+        <Col lg={4}> {/* Adjusted cols */} 
+          <Card className="border-0 shadow-sm mb-3 mb-lg-0"> {/* Added mb */} 
+            <Card.Header className="bg-light">
+              <h5 className="mb-0 text-dark fw-semibold">Recent Activity</h5>
             </Card.Header>
             <Card.Body>
               {loadingActivity && renderLoading('activity')}
@@ -667,11 +581,14 @@ const ProviderDashboard = ({ user }) => {
                   key={activityItem._id}
                   className="d-flex align-items-start mb-4"
                 >
-                  <div style={styles.activityIcon(activityItem.type)}>
+                  <div 
+                    className={`d-flex align-items-center justify-content-center me-3 p-2 rounded ${getActivityIconClass(activityItem.type)}`}
+                    style={{ width: '40px', height: '40px' }}
+                  >
                     {getActivityIcon(activityItem.type)}
                   </div>
                   <div>
-                    <p className="mb-1">{activityItem.message}</p>
+                    <p className="mb-1 small">{activityItem.message}</p>
                     <small className="text-muted">{activityItem.timeAgo}</small>
                   </div>
                 </div>
@@ -681,7 +598,7 @@ const ProviderDashboard = ({ user }) => {
                 <div className="text-center mt-3">
                   <Button 
                     variant="outline-primary"
-                    style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
+                    size="sm"
                   >
                     View All Activity
                   </Button>
@@ -690,34 +607,20 @@ const ProviderDashboard = ({ user }) => {
             </Card.Body>
           </Card>
           
-          {/* Install Now Button Card */}
           <Card className="border-0 shadow-sm mt-4">
             <Card.Body className="d-flex flex-column align-items-center text-center p-4">
               <div 
-                style={{
-                  backgroundColor: `${theme.colors.secondary.main}20`,
-                  color: theme.colors.secondary.main,
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '2rem',
-                  marginBottom: '16px',
-                }}
+                className="d-flex align-items-center justify-content-center mb-3 p-3 bg-secondary-subtle text-secondary rounded-3"
+                style={{ fontSize: '2rem' }}
               >
                 <Download />
               </div>
-              <h5 style={{ color: theme.colors.primary.dark, fontWeight: '600' }}>Desktop Application</h5>
-              <p className="text-muted mb-3">
+              <h5 className="text-dark fw-semibold">Desktop Application</h5>
+              <p className="text-muted mb-3 small">
                 Install our desktop application for quick access to your dashboard and offline features.
               </p>
               <Button 
-                style={{
-                  backgroundColor: theme.colors.secondary.main,
-                  borderColor: theme.colors.secondary.main,
-                }}
+                variant="secondary"
               >
                 <Download className="me-2" /> Install Now
               </Button>
@@ -727,19 +630,20 @@ const ProviderDashboard = ({ user }) => {
       </Row>
 
       {/* Service Requests Card */}
-      <Row>
+      <Row className="mt-4"> {/* Added margin top */} 
         <Col md={4}>
-          <Card className="dashboard-card shadow-sm h-100">
-            <Card.Body className="text-center">
+          <Card className="shadow-sm h-100 border-0">
+            <Card.Body className="text-center d-flex flex-column align-items-center p-4">
               <FileEarmarkText size={40} className="mb-3 text-primary" />
-              <Card.Title>Service Requests</Card.Title>
-              <Card.Text>
+              <Card.Title className="h6 fw-semibold">Service Requests</Card.Title>
+              <Card.Text className="small text-muted flex-grow-1">
                 View and respond to service requests from clinics.
               </Card.Text>
               <Button 
                 variant="primary" 
                 as={Link} 
                 to="/dashboard/provider/service-requests"
+                className="mt-3"
               >
                 View Requests
               </Button>

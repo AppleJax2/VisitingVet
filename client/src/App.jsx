@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 // import 'bootstrap/dist/css/bootstrap.min.css'; // Import SCSS instead
-import './styles/main.scss'; // Import custom SCSS
+// import './styles/main.scss'; // REMOVED
+// import './App.css'; // REMOVED
+
+// Assuming CoreUI components are placed in src/layout and src/components/coreui
+import DefaultLayout from './layout/DefaultLayout'; 
+// import Header from './components/Header'; // Removed Header below
+// import Footer from './components/Footer'; // Removed Footer below
+import { Spinner, Container } from 'react-bootstrap'; // Keep for PrivateRoute loading
+
 import { checkAuthStatus } from './services/api';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -22,13 +30,9 @@ import PetProfilePage from './pages/PetProfilePage';
 import ManageRemindersPage from './pages/ManageRemindersPage';
 import ServiceRequestsPage from './pages/ServiceRequestsPage';
 import ServiceRequestDetailPage from './pages/ServiceRequestDetailPage';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import './App.css';
-import { Spinner, Container } from 'react-bootstrap';
 
 // Import Admin components
-import AdminLayout from './components/Admin/AdminLayout';
+// import AdminLayout from './components/Admin/AdminLayout'; // REMOVED (using DefaultLayout)
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
 import AdminUserListPage from './pages/Admin/AdminUserListPage';
 import AdminVerificationListPage from './pages/Admin/AdminVerificationListPage';
@@ -63,7 +67,8 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage'; // Assume this page
 import StripeConnectReturnPage from './pages/StripeConnectReturnPage';
 import StripeConnectRefreshPage from './pages/StripeConnectRefreshPage';
 
-// Protected route component with role check using context
+
+// Protected route component remains the same for now, handling role checks within the layout
 const PrivateRoute = ({ allowedRoles }) => {
   const { user, loading } = useAuth();
 
@@ -87,114 +92,108 @@ const PrivateRoute = ({ allowedRoles }) => {
     return <Navigate to="/dashboard" replace />; 
   }
 
-  // Authorized: render the nested routes
+  // Authorized: render the nested routes (which will be wrapped by DefaultLayout)
   return <Outlet />;
 };
+
+// New component to wrap routes that need the DefaultLayout
+const LayoutWrapper = ({ children }) => {
+  // Potentially add logic here if layout needs context or specific props
+  return <DefaultLayout>{children}</DefaultLayout>;
+};
+
 
 function AppRoutes() {
   const { user, loading } = useAuth(); // Use auth context here
 
   if (loading) {
+    // Keep the top-level loading spinner for initial auth check
     return (
-      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: 'calc(100vh - 120px)' }}>
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
         <Spinner animation="border" />
       </Container>
     );
   }
 
   return (
-    <div className="App d-flex flex-column min-vh-100">
-      <Header />
-      <div className="main-content flex-grow-1">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-          <Route path="/verify-account" element={<VerifyAccountPage />} />
-          <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
-          <Route path="/search-providers" element={<ProviderSearchPage />} />
-          <Route path="/about" element={<AboutUsPage />} />
-          <Route path="/services" element={<ServicesPage />} />
-          
-          {/* Payment Routes - Public access needed for Stripe redirect */}
-          <Route path="/pay/appointment/:appointmentId" element={<PaymentPage />} /> 
-          <Route path="/appointment/:appointmentId/payment-success" element={<PaymentSuccessPage />} />
-          {/* Stripe Connect Return URLs - Should be accessible without strict login state sometimes */}
-          <Route path="/stripe/connect/return" element={<StripeConnectReturnPage />} />
-          <Route path="/stripe/connect/refresh" element={<StripeConnectRefreshPage />} />
+    <Routes>
+      {/* Public Routes (remain outside DefaultLayout) */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+      <Route path="/verify-account" element={<VerifyAccountPage />} />
+      <Route path="/providers/:id" element={<ProviderProfileViewPage />} />
+      <Route path="/search-providers" element={<ProviderSearchPage />} />
+      <Route path="/about" element={<AboutUsPage />} />
+      <Route path="/services" element={<ServicesPage />} />
+      <Route path="/pay/appointment/:appointmentId" element={<PaymentPage />} /> 
+      <Route path="/appointment/:appointmentId/payment-success" element={<PaymentSuccessPage />} />
+      <Route path="/stripe/connect/return" element={<StripeConnectReturnPage />} />
+      <Route path="/stripe/connect/refresh" element={<StripeConnectRefreshPage />} />
+      <Route path="/admin/forgot-password" element={<AdminResetPasswordPage />} />
+      <Route path="/admin/reset-password/:resetToken" element={<AdminResetPasswordPage />} />
 
-          {/* Admin specific password reset routes */}
-          <Route path="/admin/forgot-password" element={<AdminResetPasswordPage />} />
-          <Route path="/admin/reset-password/:resetToken" element={<AdminResetPasswordPage />} />
+      {/* Authenticated Routes - Use PrivateRoute for auth check and nest inside DefaultLayout */}
+      <Route element={<PrivateRoute allowedRoles={['PetOwner', 'MVSProvider', 'Clinic', 'Admin']} />}>
+        {/* Wrap elements needing the layout with LayoutWrapper */}
+        <Route path="/dashboard" element={<LayoutWrapper><DashboardPage /></LayoutWrapper>} /> 
+        <Route path="/dashboard/messages" element={<LayoutWrapper><MessagesPage /></LayoutWrapper>} />
+        <Route path="/dashboard/messages/:conversationId" element={<LayoutWrapper><MessagesPage /></LayoutWrapper>} />
+        
+        {/* Pet Owner Routes */}
+        <Route path="/dashboard/pet-owner" element={<LayoutWrapper><PetOwnerDashboard /></LayoutWrapper>} />
+        <Route path="/my-appointments" element={<LayoutWrapper><MyPetOwnerAppointmentsPage /></LayoutWrapper>} />
+        <Route path="/my-pets" element={<LayoutWrapper><MyPetsPage /></LayoutWrapper>} />
+        <Route path="/add-pet" element={<LayoutWrapper><AddPetPage /></LayoutWrapper>} />
+        <Route path="/pet/:petId" element={<LayoutWrapper><PetProfilePage /></LayoutWrapper>} />
+        <Route path="/manage-reminders" element={<LayoutWrapper><ManageRemindersPage /></LayoutWrapper>} />
+        <Route path="/add-reminder" element={<LayoutWrapper><AddReminderPage /></LayoutWrapper>} />
+        <Route path="/profile" element={<LayoutWrapper><UserProfilePage /></LayoutWrapper>} />
+        <Route path="/dashboard/pet-owner/service-requests" element={<LayoutWrapper><ServiceRequestsPage /></LayoutWrapper>} />
+        <Route path="/dashboard/pet-owner/service-requests/:id" element={<LayoutWrapper><ServiceRequestDetailPage /></LayoutWrapper>} />
 
-          {/* Logged-in User Routes (Dashboard is role-specific) */}
-          <Route element={<PrivateRoute allowedRoles={['PetOwner', 'MVSProvider', 'Clinic', 'Admin']} />}>
-            <Route path="/dashboard" element={<DashboardPage />} /> 
-            <Route path="/dashboard/messages" element={<MessagesPage />} />
-            <Route path="/dashboard/messages/:conversationId" element={<MessagesPage />} />
-            
-            {/* Pet Owner Routes */}
-            <Route path="/dashboard/pet-owner" element={<PetOwnerDashboard />} />
-            <Route path="/my-appointments" element={<MyPetOwnerAppointmentsPage />} />
-            <Route path="/my-pets" element={<MyPetsPage />} />
-            <Route path="/add-pet" element={<AddPetPage />} />
-            <Route path="/pet/:petId" element={<PetProfilePage />} />
-            <Route path="/manage-reminders" element={<ManageRemindersPage />} />
-            <Route path="/add-reminder" element={<AddReminderPage />} />
-            <Route path="/profile" element={<UserProfilePage />} />
-            <Route path="/dashboard/pet-owner/service-requests" element={<ServiceRequestsPage />} />
-            <Route path="/dashboard/pet-owner/service-requests/:id" element={<ServiceRequestDetailPage />} />
+        {/* MVS Provider Routes */}
+        <Route path="/dashboard/provider" element={<LayoutWrapper><ProviderDashboard /></LayoutWrapper>} />
+        <Route path="/provider-appointments" element={<LayoutWrapper><ProviderAppointmentsPage /></LayoutWrapper>} />
+        <Route path="/provider-profile" element={<LayoutWrapper><ProviderProfileEditPage /></LayoutWrapper>} /> 
+        <Route path="/dashboard/provider/service-requests" element={<LayoutWrapper><ServiceRequestsPage /></LayoutWrapper>} />
+        <Route path="/dashboard/provider/service-requests/:id" element={<LayoutWrapper><ServiceRequestDetailPage /></LayoutWrapper>} />
 
-            {/* MVS Provider Routes */}
-            <Route path="/dashboard/provider" element={<ProviderDashboard />} />
-            <Route path="/provider-appointments" element={<ProviderAppointmentsPage />} />
-            <Route path="/provider-profile" element={<ProviderProfileEditPage />} /> 
-            {/* <Route path="/provider-clients" element={<ProviderClientsPage />} /> Add this page if needed */}
-            {/* <Route path="/provider-settings" element={<ProviderSettingsPage />} /> Add this page if needed */}
-            <Route path="/dashboard/provider/service-requests" element={<ServiceRequestsPage />} />
-            <Route path="/dashboard/provider/service-requests/:id" element={<ServiceRequestDetailPage />} />
+        {/* Clinic Routes */}
+        <Route path="/dashboard/clinic" element={<LayoutWrapper><ClinicDashboard /></LayoutWrapper>} />
+        <Route path="/dashboard/clinic/service-requests" element={<LayoutWrapper><ServiceRequestsPage /></LayoutWrapper>} />
+        <Route path="/dashboard/clinic/service-requests/:id" element={<LayoutWrapper><ServiceRequestDetailPage /></LayoutWrapper>} />
+      </Route>
 
-            {/* Clinic Routes */}
-            <Route path="/dashboard/clinic" element={<ClinicDashboard />} />
-            {/* <Route path="/clinic-appointments" element={<ClinicAppointmentsPage />} /> Add this page */}
-            {/* <Route path="/clinic-staff" element={<ClinicStaffPage />} /> Add this page */}
-            {/* <Route path="/clinic-profile" element={<ClinicProfilePage />} /> Add this page */}
-            {/* <Route path="/clinic-settings" element={<ClinicSettingsPage />} /> Add this page */}
-            <Route path="/dashboard/clinic/service-requests" element={<ServiceRequestsPage />} />
-            <Route path="/dashboard/clinic/service-requests/:id" element={<ServiceRequestDetailPage />} />
-          </Route>
-
-          {/* Admin Protected Routes */}
-          <Route element={<PrivateRoute allowedRoles={['Admin']} />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="users" element={<AdminUserListPage />} />
-              <Route path="users/:userId" element={<AdminUserDetailPage />} />
-              <Route path="edit-profile/:userId" element={<AdminEditProfilePage />} />
-              <Route path="verifications" element={<AdminVerificationListPage />} />
-              <Route path="logs" element={<AdminLogPage />} />
-              <Route path="settings" element={<AdminSettingsPage />} />
-              <Route path="mfa-setup" element={<AdminMFASetupPage />} />
-              <Route path="sessions" element={<AdminSessionsPage />} />
-              <Route path="permissions" element={<AdminPermissionsPage />} />
-              <Route path="analytics" element={<AdminAnalyticsDashboardPage />} />
-              <Route path="service-requests" element={<ServiceRequestsPage />} />
-              <Route path="service-requests/:id" element={<ServiceRequestDetailPage />} />
-            </Route>
-          </Route>
-          
-          {/* Handle 404 */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-      {/* Footer - conditional rendering based on route might be needed */}
-      <Footer /> 
-    </div>
+      {/* Admin Protected Routes - Use PrivateRoute for Admin role check */}
+      <Route element={<PrivateRoute allowedRoles={['Admin']} />}>
+         {/* Wrap the Admin section with the LayoutWrapper */}
+         <Route path="/admin" element={<LayoutWrapper />}> 
+            {/* Nest Admin pages directly as children, LayoutWrapper renders DefaultLayout */}
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="users" element={<AdminUserListPage />} />
+            <Route path="users/:userId" element={<AdminUserDetailPage />} />
+            <Route path="edit-profile/:userId" element={<AdminEditProfilePage />} />
+            <Route path="verifications" element={<AdminVerificationListPage />} />
+            <Route path="logs" element={<AdminLogPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
+            <Route path="mfa-setup" element={<AdminMFASetupPage />} />
+            <Route path="sessions" element={<AdminSessionsPage />} />
+            <Route path="permissions" element={<AdminPermissionsPage />} />
+            <Route path="analytics" element={<AdminAnalyticsDashboardPage />} />
+            <Route path="service-requests" element={<ServiceRequestsPage />} />
+            <Route path="service-requests/:id" element={<ServiceRequestDetailPage />} />
+         </Route>
+      </Route>
+      
+      {/* Handle 404 */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
+
 
 function App() {
   return (

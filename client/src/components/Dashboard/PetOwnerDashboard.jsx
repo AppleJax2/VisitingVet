@@ -5,7 +5,6 @@ import {
   Search, Calendar2Check, PlusCircle, 
   GeoAlt, Clock, Stars, Bell, FileEarmarkText
 } from 'react-bootstrap-icons';
-import theme from '../../utils/theme';
 import { 
   fetchPetOwnerDashboardData, 
   fetchUserReminders, 
@@ -14,6 +13,9 @@ import {
   fetchTopRatedVets
 } from '../../services/api';
 import AppointmentDetailModal from '../AppointmentDetailModal';
+import { CWidgetStatsF } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilDog, cilList, cilMedicalCross, cilSearch, cilCalendar } from '@coreui/icons';
 
 const PetOwnerDashboard = ({ user }) => {
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
@@ -86,185 +88,90 @@ const PetOwnerDashboard = ({ user }) => {
       setShowDetailModal(false);
   };
 
-  // Styles
-  const styles = {
-    actionCard: {
-      borderRadius: theme.borderRadius.lg,
-      border: 'none',
-      height: '100%',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-      cursor: 'pointer',
-      '&:hover': {
-        transform: 'translateY(-5px)',
-        boxShadow: theme.shadows.lg,
-      },
-    },
-    actionIcon: {
-      backgroundColor: `${theme.colors.accent.lightGreen}50`,
-      color: theme.colors.primary.main,
-      width: '60px',
-      height: '60px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: '50%',
-      fontSize: '1.8rem',
-      marginBottom: '15px',
-    },
-    petCard: {
-      border: 'none',
-      borderRadius: theme.borderRadius.lg,
-      overflow: 'hidden',
-      height: '100%',
-    },
-    petImage: {
-      height: '140px',
-      objectFit: 'cover',
-    },
-    reminderBadge: (priority) => {
-      const colors = {
-        high: theme.colors.error,
-        medium: theme.colors.warning,
-        low: theme.colors.success,
-      };
-      return {
-        backgroundColor: colors[priority],
-      };
-    },
-    appointmentCard: {
-      border: 'none',
-      borderRadius: theme.borderRadius.md,
-      marginBottom: '15px',
-      boxShadow: theme.shadows.sm,
-    },
-    statusBadge: (status) => {
-      const colors = {
-        confirmed: theme.colors.success,
-        pending: theme.colors.warning,
-        cancelled: theme.colors.error,
-        completed: theme.colors.accent.blue,
-      };
-      return {
-        backgroundColor: colors[status] || theme.colors.info,
-      };
-    },
-    addButton: {
-      backgroundColor: theme.colors.primary.main,
-      border: 'none',
-    },
-    sectionTitle: {
-      color: theme.colors.primary.dark,
-      fontWeight: '600',
-      marginBottom: '20px',
-    },
-    cardTitle: {
-      color: theme.colors.primary.main,
-      fontWeight: '600',
-    },
-    viewAllLink: {
-      color: theme.colors.primary.main,
-      textDecoration: 'none',
-      fontWeight: '500',
-      display: 'flex',
-      alignItems: 'center',
-    },
-    infoItem: {
-      display: 'flex',
-      alignItems: 'center',
-      marginBottom: '8px',
-      color: theme.colors.text.secondary,
-    },
-    infoIcon: {
-      marginRight: '8px',
-      color: theme.colors.primary.main,
-    },
-    loadingContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '150px',
-    },
-    vetImage: {
-      width: '50px', 
-      height: '50px', 
-      borderRadius: '50%', 
-      marginRight: '15px'
+  const getStatusBadgeVariant = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'confirmed': return 'success';
+      case 'pending': return 'warning';
+      case 'cancelled': return 'danger';
+      case 'completed': return 'info';
+      default: return 'secondary';
+    }
+  };
+
+  const getPriorityBadgeVariant = (priority) => {
+     switch (priority?.toLowerCase()) {
+      case 'high': return 'danger';
+      case 'medium': return 'warning';
+      case 'low': return 'success';
+      default: return 'secondary';
     }
   };
 
   const renderLoading = (section) => (
-    <div style={styles.loadingContainer}>
-      <Spinner animation="border" role="status" style={{ color: theme.colors.primary.main }}>
+    <div className="d-flex justify-content-center align-items-center p-5">
+      <Spinner animation="border" variant="primary" role="status">
         <span className="visually-hidden">Loading {section}...</span>
       </Spinner>
     </div>
   );
 
   return (
-    <div className="pet-owner-dashboard">
-      {/* Quick Action Cards */}
-      <Row className="mb-4">
-        <Col md={3}>
-          <Card style={styles.actionCard} as={Link} to="/search-providers">
-            <Card.Body className="text-center p-4">
-              <div style={styles.actionIcon} className="mx-auto">
-                <Search />
-              </div>
-              <h5 style={styles.cardTitle}>Find a Vet</h5>
-              <p className="text-muted">
-                Search for mobile veterinarians in your area
-              </p>
-            </Card.Body>
-          </Card>
+    <div className="pet-owner-dashboard p-3">
+      {/* Quick Action Cards - Using CWidgetStatsF */}
+      <Row className="mb-4 g-4">
+        <Col xs={12} sm={6} lg={3}>
+          <CWidgetStatsF
+            className="h-100 shadow-sm border-0"
+            icon={<CIcon width={24} icon={cilSearch} size="xl" />}
+            padding={false}
+            title="Find a Vet"
+            value={<Button as={Link} to="/search-providers" variant="primary" size="sm" className="mt-2">Search Now</Button>}
+            color="primary"
+            footer={<Link to="/search-providers" className="text-decoration-none text-white"><small>Search for mobile veterinarians</small></Link>}
+          />
         </Col>
-        <Col md={3}>
-          <Card style={styles.actionCard} as={Link} to="/my-appointments">
-            <Card.Body className="text-center p-4">
-              <div style={styles.actionIcon} className="mx-auto">
-                <Calendar2Check />
-              </div>
-              <h5 style={styles.cardTitle}>Manage Appointments</h5>
-              <p className="text-muted">
-                View and schedule vet appointments
-              </p>
-            </Card.Body>
-          </Card>
+        <Col xs={12} sm={6} lg={3}>
+          <CWidgetStatsF
+            className="h-100 shadow-sm border-0"
+            icon={<CIcon width={24} icon={cilCalendar} size="xl" />}
+            padding={false}
+            title="Appointments"
+            value={<Button as={Link} to="/my-appointments" variant="success" size="sm" className="mt-2">View/Schedule</Button>}
+            color="success"
+            footer={<Link to="/my-appointments" className="text-decoration-none text-white"><small>Manage appointments</small></Link>}
+          />
         </Col>
-        <Col md={3}>
-          <Card style={styles.actionCard} as={Link} to="/my-pets">
-            <Card.Body className="text-center p-4">
-              <div style={styles.actionIcon} className="mx-auto">
-                <PlusCircle />
-              </div>
-              <h5 style={styles.cardTitle}>Add a Pet</h5>
-              <p className="text-muted">
-                Register a new pet to your profile
-              </p>
-            </Card.Body>
-          </Card>
+        <Col xs={12} sm={6} lg={3}>
+           <CWidgetStatsF
+            className="h-100 shadow-sm border-0"
+            icon={<CIcon width={24} icon={cilDog} size="xl" />}
+            padding={false}
+            title="My Pets"
+            value={<Button as={Link} to="/add-pet" variant="info" size="sm" className="mt-2">Add/View Pets</Button>}
+            color="info"
+            footer={<Link to="/my-pets" className="text-decoration-none text-white"><small>Manage your pet profiles</small></Link>}
+          />
         </Col>
-        <Col md={3}>
-          <Card style={styles.actionCard} as={Link} to="/dashboard/pet-owner/service-requests">
-            <Card.Body className="text-center p-4">
-              <div style={styles.actionIcon} className="mx-auto">
-                <FileEarmarkText />
-              </div>
-              <h5 style={styles.cardTitle}>Specialist Referrals</h5>
-              <p className="text-muted">
-                View referrals from your vet clinic.
-              </p>
-            </Card.Body>
-          </Card>
+        <Col xs={12} sm={6} lg={3}>
+          <CWidgetStatsF
+            className="h-100 shadow-sm border-0"
+            icon={<CIcon width={24} icon={cilList} size="xl" />}
+            padding={false}
+            title="Service Requests"
+            value={<Button as={Link} to="/dashboard/pet-owner/service-requests" variant="warning" size="sm" className="mt-2">View Requests</Button>}
+            color="warning"
+            footer={<Link to="/dashboard/pet-owner/service-requests" className="text-decoration-none text-white"><small>Check specialist referrals</small></Link>}
+          />
         </Col>
       </Row>
 
-      {/* Upcoming Appointments */}
+      {/* Upcoming Appointments - Simplified Card/List */}
       <Row className="mb-4">
         <Col md={12}>
           <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white d-flex justify-content-between align-items-center" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Upcoming Appointments</h5>
-              <Link to="/my-appointments" style={styles.viewAllLink}>
+            <Card.Header className="bg-white d-flex justify-content-between align-items-center border-bottom">
+              <h5 className="mb-0 fw-semibold">Upcoming Appointments</h5>
+              <Link to="/my-appointments" className="btn btn-link btn-sm text-decoration-none">
                 View All
               </Link>
             </Card.Header>
@@ -272,32 +179,31 @@ const PetOwnerDashboard = ({ user }) => {
               {loading.appointments ? (
                 renderLoading('appointments')
               ) : upcomingAppointments.length > 0 ? (
-                upcomingAppointments.map((appointment) => (
-                  <Card key={appointment._id} style={styles.appointmentCard}>
-                    <Card.Body>
-                      <Row>
-                        <Col md={6}>
-                          <h6 style={styles.cardTitle}>
-                            {appointment.service?.name || 'Veterinary Service'} with {appointment.providerProfile?.user?.name || 'Veterinarian'}
+                <ListGroup variant="flush">
+                  {upcomingAppointments.slice(0, 3).map((appointment) => (
+                    <ListGroup.Item key={appointment._id} className="px-0">
+                      <Row className="align-items-center">
+                        <Col xs={12} md={5} className="mb-2 mb-md-0">
+                          <h6 className="mb-1 fw-semibold">
+                            {appointment.service?.name || 'Veterinary Service'}
                           </h6>
-                          <p className="text-muted mb-0">
-                            For {appointment.pet?.name || 'Your Pet'}
-                          </p>
+                          <small className="text-muted">
+                            With {appointment.providerProfile?.user?.name || 'Veterinarian'} for {appointment.pet?.name || 'Your Pet'}
+                          </small>
                         </Col>
-                        <Col md={4}>
-                          <div style={styles.infoItem}>
-                            <Clock style={styles.infoIcon} />
+                        <Col xs={12} sm={6} md={4} className="mb-2 mb-md-0">
+                          <small className="d-block text-muted">
+                            <Clock className="me-1" /> 
                             {new Date(appointment.appointmentTime).toLocaleDateString()} at {new Date(appointment.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                          <div style={styles.infoItem}>
-                            <GeoAlt style={styles.infoIcon} />
-                            {appointment.appointmentLocation}
-                          </div>
+                          </small>
+                          <small className="d-block text-muted">
+                            <GeoAlt className="me-1" /> {appointment.appointmentLocation}
+                          </small>
                         </Col>
-                        <Col md={2} className="text-end d-flex flex-column justify-content-between">
+                        <Col xs={12} sm={6} md={3} className="text-start text-sm-end">
                           <Badge 
-                            style={styles.statusBadge(appointment.status.toLowerCase())}
-                            className="mb-2"
+                            bg={getStatusBadgeVariant(appointment.status)}
+                            className="mb-2 mb-sm-0 me-sm-2"
                           >
                             {appointment.status}
                           </Badge>
@@ -305,25 +211,19 @@ const PetOwnerDashboard = ({ user }) => {
                             variant="outline-primary" 
                             size="sm"
                             onClick={() => handleShowDetails(appointment._id)}
-                            style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
                           >
                             Details
                           </Button>
                         </Col>
                       </Row>
-                    </Card.Body>
-                  </Card>
-                ))
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
               ) : (
                 <div className="text-center py-4">
                   <p className="text-muted">No upcoming appointments</p>
-                  <Button 
-                    as={Link} 
-                    to="/search-providers"
-                    style={{ backgroundColor: theme.colors.secondary.main, borderColor: theme.colors.secondary.main }}
-                  >
-                    <Search className="me-2" />
-                    Find a Vet
+                  <Button as={Link} to="/search-providers" variant="secondary">
+                    <Search className="me-2" /> Find a Vet
                   </Button>
                 </div>
               )}
@@ -332,183 +232,115 @@ const PetOwnerDashboard = ({ user }) => {
         </Col>
       </Row>
 
-      {/* Pets and Reminders */}
+      {/* Pets and Reminders - Simplified */}
       <Row>
-        <Col md={8}>
-          <Card className="border-0 shadow-sm mb-4">
-            <Card.Header className="bg-white d-flex justify-content-between align-items-center" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">My Pets</h5>
-              <Link to="/my-pets" style={styles.viewAllLink}>
+        {/* My Pets Section */}
+        <Col md={7} lg={8} className="mb-4">
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Header className="bg-white d-flex justify-content-between align-items-center border-bottom">
+              <h5 className="mb-0 fw-semibold">My Pets</h5>
+              <Link to="/my-pets" className="btn btn-link btn-sm text-decoration-none">
                 Manage Pets
               </Link>
             </Card.Header>
             <Card.Body>
               {loading.pets ? (
                 renderLoading('pets')
-              ) : (
-                <Row>
-                  {pets.map((pet) => (
-                    <Col md={6} key={pet._id} className="mb-3">
-                      <Card style={styles.petCard}>
+              ) : pets.length > 0 ? (
+                <Row className="g-3">
+                  {pets.slice(0, 3).map((pet) => (
+                    <Col sm={6} lg={4} key={pet._id}>
+                      <Card className="h-100">
                         <Card.Img 
                           variant="top" 
                           src={pet.profileImage || 'https://via.placeholder.com/300x200?text=Pet'} 
-                          style={styles.petImage}
+                          style={{ height: '120px', objectFit: 'cover' }}
+                          loading="lazy"
                         />
-                        <Card.Body>
-                          <Card.Title style={styles.cardTitle}>{pet.name}</Card.Title>
-                          <Card.Text className="text-muted mb-1">
-                            {pet.breed} • {pet.age} years old
-                          </Card.Text>
-                          <Card.Text className="text-muted mb-3">
-                            Last checkup: {pet.lastCheckup ? new Date(pet.lastCheckup).toLocaleDateString() : 'No records yet'}
-                          </Card.Text>
-                          <div className="d-grid">
-                            <Button 
-                              variant="outline-primary" 
-                              size="sm"
-                              as={Link}
-                              to={`/pet/${pet._id}`}
-                              style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                            >
-                              View Profile
-                            </Button>
-                          </div>
+                        <Card.Body className="d-flex flex-column p-2">
+                          <Card.Title as="h6" className="fw-semibold mb-1">{pet.name}</Card.Title>
+                          <small className="text-muted mb-2">
+                            {pet.breed} • {pet.age} yrs
+                          </small>
+                          <Button 
+                            variant="outline-primary" 
+                            size="sm"
+                            className="mt-auto"
+                            as={Link}
+                            to={`/pet/${pet._id}`}
+                          >
+                            Profile
+                          </Button>
                         </Card.Body>
                       </Card>
                     </Col>
                   ))}
-                  <Col md={6} className="mb-3">
-                    <Card style={{ ...styles.petCard, height: '100%', border: `2px dashed ${theme.colors.background.light}` }}>
-                      <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
-                        <PlusCircle size={40} className="mb-3" style={{ color: theme.colors.primary.light }} />
-                        <h5 style={styles.cardTitle}>Add a New Pet</h5>
-                        <p className="text-muted text-center mb-3">
-                          Register a new pet to your profile
-                        </p>
-                        <Button 
-                          as={Link} 
-                          to="/add-pet"
-                          style={{ backgroundColor: theme.colors.primary.main, borderColor: theme.colors.primary.main }}
-                        >
-                          Add Pet
-                        </Button>
-                      </Card.Body>
-                    </Card>
-                  </Col>
                 </Row>
+                 ) : (
+                 <div className="text-center py-4">
+                    <p className="text-muted">No pets added yet.</p>
+                    <Button as={Link} to="/add-pet" variant="primary">
+                      <PlusCircle className="me-2" />Add Pet
+                    </Button>
+                  </div>
               )}
             </Card.Body>
+             {pets.length > 0 && (
+              <Card.Footer className="text-center bg-light">
+                <Button as={Link} to="/add-pet" variant="secondary" size="sm">
+                   <PlusCircle className="me-1" /> Add Another Pet
+                </Button>
+              </Card.Footer>
+            )}
           </Card>
         </Col>
-        <Col md={4}>
-          <Card className="border-0 shadow-sm mb-4">
-            <Card.Header className="bg-white" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Reminders</h5>
+
+        {/* Reminders Section */}
+        <Col md={5} lg={4} className="mb-4">
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Header className="bg-white d-flex justify-content-between align-items-center border-bottom">
+              <h5 className="mb-0 fw-semibold">Reminders</h5>
+               <Link to="/manage-reminders" className="btn btn-link btn-sm text-decoration-none">
+                Manage
+              </Link>
             </Card.Header>
             <Card.Body>
               {loading.reminders ? (
                 renderLoading('reminders')
               ) : reminders.length > 0 ? (
-                reminders.map((reminder) => (
-                  <div 
-                    key={reminder._id} 
-                    className="p-3 mb-3" 
-                    style={{ 
-                      backgroundColor: `${theme.colors.background.light}50`,
-                      borderRadius: theme.borderRadius.md,
-                      borderLeft: `4px solid ${styles.reminderBadge(reminder.priority).backgroundColor}`
-                    }}
-                  >
-                    <div className="d-flex justify-content-between align-items-start">
-                      <h6 style={styles.cardTitle}>{reminder.title}</h6>
-                      <Badge style={styles.reminderBadge(reminder.priority)}>
-                        {reminder.priority.charAt(0).toUpperCase() + reminder.priority.slice(1)}
-                      </Badge>
-                    </div>
-                    <p className="text-muted mb-1">{reminder.description}</p>
-                    <small className="d-flex align-items-center">
-                      <Bell className="me-1" style={{ color: theme.colors.primary.main }} />
-                      Due: {new Date(reminder.dueDate).toLocaleDateString()}
-                    </small>
-                  </div>
-                ))
+                 <ListGroup variant="flush">
+                  {reminders.slice(0, 4).map((reminder) => (
+                    <ListGroup.Item key={reminder._id} className="px-0">
+                       <div className="d-flex justify-content-between align-items-start">
+                          <h6 className="mb-1 fw-semibold">{reminder.title}</h6>
+                          <Badge pill bg={getPriorityBadgeVariant(reminder.priority)}>
+                            {reminder.priority}
+                          </Badge>
+                        </div>
+                        <p className="text-muted mb-1 small">{reminder.description}</p>
+                        <small className="text-muted d-flex align-items-center">
+                          <Bell className="me-1" size={12} />
+                          Due: {new Date(reminder.dueDate).toLocaleDateString()}
+                        </small>
+                    </ListGroup.Item>
+                  ))}
+                 </ListGroup>
               ) : (
-                <div className="text-center py-3">
-                  <p className="text-muted mb-3">No reminders yet</p>
-                  <Button 
-                    variant="outline-primary" 
-                    size="sm"
-                    as={Link}
-                    to="/add-reminder"
-                    style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                  >
-                    Add Reminder
-                  </Button>
-                </div>
-              )}
-              {reminders.length > 0 && (
-                <div className="text-center">
-                  <Button 
-                    variant="outline-primary" 
-                    size="sm"
-                    as={Link}
-                    to="/add-reminder"
-                    style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
-                  >
-                    Add Reminder
-                  </Button>
+                 <div className="text-center py-3">
+                  <p className="text-muted mb-3">No reminders set</p>
                 </div>
               )}
             </Card.Body>
-          </Card>
-          
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white" style={{ borderBottom: `1px solid ${theme.colors.background.light}` }}>
-              <h5 style={styles.sectionTitle} className="mb-0">Top Rated Vets Near You</h5>
-            </Card.Header>
-            <Card.Body>
-              {loading.topVets ? (
-                renderLoading('top vets')
-              ) : topVets.length > 0 ? (
-                topVets.map((vet, index) => (
-                  <div 
-                    key={vet._id}
-                    className="d-flex mb-3 pb-3" 
-                    style={{ borderBottom: index !== topVets.length - 1 ? `1px solid ${theme.colors.background.light}` : 'none' }}
-                  >
-                    <img 
-                      src={vet.profileImage || 'https://via.placeholder.com/150?text=Vet'} 
-                      alt={vet.name}
-                      style={styles.vetImage}
-                    />
-                    <div>
-                      <h6 style={styles.cardTitle} className="mb-0">{vet.name}</h6>
-                      <div className="d-flex align-items-center mb-1">
-                        <Stars className="me-1" style={{ color: theme.colors.accent.gold }} />
-                        <span className="text-muted">{vet.rating.toFixed(1)} ({vet.reviewCount} reviews)</span>
-                      </div>
-                      <small className="text-muted">{vet.specialty}</small>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-3">
-                  <p className="text-muted mb-3">No veterinarians found in your area</p>
-                </div>
-              )}
-              
-              <div className="text-center mt-3">
+             <Card.Footer className="text-center bg-light">
                 <Button 
-                  as={Link} 
-                  to="/search-providers"
-                  variant="outline-primary"
-                  style={{ borderColor: theme.colors.primary.main, color: theme.colors.primary.main }}
+                  variant="outline-primary" 
+                  size="sm"
+                  as={Link}
+                  to="/add-reminder"
                 >
-                  View All Vets
+                  <PlusCircle className="me-1"/> Add Reminder
                 </Button>
-              </div>
-            </Card.Body>
+              </Card.Footer>
           </Card>
         </Col>
       </Row>

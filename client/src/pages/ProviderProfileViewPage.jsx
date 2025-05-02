@@ -112,25 +112,25 @@ function ProviderProfileViewPage() {
     <Container className="my-5">
       <Row>
         <Col md={4}>
-          <Card className="mb-4">
-            <Card.Body className="text-center">
+          <Card className="mb-4 border-0 shadow-sm">
+            <Card.Body className="text-center p-4">
               {profile.photoUrl ? (
                 <img
                   src={profile.photoUrl}
                   alt={`${user.email}`}
-                  className="img-fluid rounded-circle mb-3"
+                  className="img-fluid rounded-circle mb-3 shadow-sm border"
                   style={{ width: '150px', height: '150px', objectFit: 'cover' }}
                 />
               ) : (
                 <div
-                  className="bg-secondary text-white rounded-circle mb-3 d-flex align-items-center justify-content-center mx-auto"
-                  style={{ width: '150px', height: '150px', fontSize: '3rem' }}
+                  className="bg-secondary text-white rounded-circle mb-3 d-flex align-items-center justify-content-center mx-auto shadow-sm border display-1 fw-bold"
+                  style={{ width: '150px', height: '150px' }}
                 >
                   {user.email.charAt(0).toUpperCase()}
                 </div>
               )}
-              <h3>{user.email}</h3>
-              <p className="text-muted">Visiting Veterinarian</p>
+              <h3 className="h5 fw-bold">{user.email}</h3>
+              <p className="text-muted mb-2">Visiting Veterinarian</p>
               
               <div className="mb-2">
                     {profile.numberOfReviews > 0 ? (
@@ -159,9 +159,9 @@ function ProviderProfileViewPage() {
             </Card.Body>
           </Card>
           
-          <Card className="mb-4">
-            <Card.Header>
-              <h5>Service Area</h5>
+          <Card className="mb-4 border-0 shadow-sm">
+            <Card.Header className="bg-light">
+              <h5 className="mb-0">Service Area</h5>
             </Card.Header>
             <Card.Body>
               {profile.serviceAreaDescription && (
@@ -184,9 +184,9 @@ function ProviderProfileViewPage() {
           </Card>
           
           {profile.clinicAffiliations && profile.clinicAffiliations.length > 0 && (
-            <Card className="mb-4">
-              <Card.Header>
-                <h5>Affiliated With</h5>
+            <Card className="mb-4 border-0 shadow-sm">
+              <Card.Header className="bg-light">
+                <h5 className="mb-0">Affiliated With</h5>
               </Card.Header>
               <ListGroup variant="flush">
                 {profile.clinicAffiliations.map((clinic, index) => (
@@ -198,18 +198,18 @@ function ProviderProfileViewPage() {
         </Col>
         
         <Col md={8}>
-          <Card className="mb-4">
-            <Card.Header>
-              <h4>About</h4>
+          <Card className="mb-4 border-0 shadow-sm">
+            <Card.Header className="bg-light">
+              <h4 className="mb-0">About</h4>
             </Card.Header>
             <Card.Body>
               <p>{profile.bio}</p>
             </Card.Body>
           </Card>
           
-          <Card className="mb-4">
-            <Card.Header>
-              <h4>Services Offered</h4>
+          <Card className="mb-4 border-0 shadow-sm">
+            <Card.Header className="bg-light">
+              <h4 className="mb-0">Services Offered</h4>
             </Card.Header>
             <Card.Body>
               {services.length === 0 ? (
@@ -219,21 +219,23 @@ function ProviderProfileViewPage() {
               ) : (
                 <Row>
                   {services.map((service) => (
-                    <Col md={6} key={service._id} className="mb-3">
-                      <Card>
-                        <Card.Body>
-                          <Card.Title>{service.name}</Card.Title>
-                          <Card.Text>{service.description}</Card.Text>
-                          <div className="d-flex justify-content-between">
-                            <span>
-                              <strong>Duration:</strong> {service.estimatedDurationMinutes} mins
-                            </span>
-                            <span>
-                              <strong>Price:</strong> ${service.price} ({service.priceType})
-                            </span>
+                    <Col md={6} key={service._id} className="mb-3 d-flex align-items-stretch">
+                      <Card className="border h-100 w-100">
+                        <Card.Body className="d-flex flex-column">
+                          <div className="flex-grow-1">
+                            <Card.Title className="h6 fw-bold">{service.name}</Card.Title>
+                            <Card.Text>{service.description}</Card.Text>
+                            <div className="d-flex justify-content-between small text-muted mb-2">
+                              <span>
+                                <strong>Duration:</strong> {service.estimatedDurationMinutes} mins
+                              </span>
+                              <span>
+                                <strong>Price:</strong> ${service.price} ({service.priceType})
+                              </span>
+                            </div>
                           </div>
-                          <div className="mt-2 d-flex justify-content-between align-items-center">
-                            <Badge bg={
+                          <div className="mt-auto d-flex justify-content-between align-items-center">
+                            <Badge pill bg={
                               service.offeredLocation === 'InHome' ? 'success' :
                               service.offeredLocation === 'InClinic' ? 'primary' : 'warning'
                             }>
@@ -275,9 +277,9 @@ function ProviderProfileViewPage() {
             </Card.Body>
           </Card>
 
-          <Card>
-            <Card.Header>
-              <h4>Reviews ({profile.numberOfReviews || 0})</h4>
+          <Card className="border-0 shadow-sm">
+            <Card.Header className="bg-light">
+              <h4 className="mb-0">Reviews ({profile.numberOfReviews || 0})</h4>
             </Card.Header>
             <Card.Body>
                <ReviewList 

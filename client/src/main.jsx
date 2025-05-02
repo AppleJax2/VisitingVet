@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 // Import Bootstrap's JavaScript bundle (must come after CSS import if CSS is also imported here, but CSS is in App.jsx)
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './index.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import './index.css';
+import './scss/style.scss';
 import theme from './utils/theme';
 
 // Create a style element to inject theme CSS variables
