@@ -7,42 +7,66 @@ import {
   CardChecklist, HeartPulse, TelephonePlus
 } from 'react-bootstrap-icons';
 
-// Update image fallback URLs with WebP format and fallbacks
+// Import images directly or use relative URLs
+// Either import the actual images:
+// import heroImage from '../assets/images/landing-page/hero-vet.jpg';
+// Or use relative URLs that will be resolved correctly:
 const heroVetImage = {
-  webp: "/assets/images/landing-page/hero-vet.webp",
-  fallback: "/assets/images/landing-page/hero-vet.jpg"
+  webp: "https://placehold.co/1200x600/124438/FFFFFF.webp?text=Visiting+Vet",
+  fallback: "https://placehold.co/1200x600/124438/FFFFFF.jpg?text=Visiting+Vet"
 };
+
 const smallAnimalImage = {
-  webp: "/assets/images/landing-page/small-animal.webp",
-  fallback: "/assets/images/landing-page/small-animal.jpg"
+  webp: "https://placehold.co/800x500/4289f5/FFFFFF.webp?text=Small+Animal+Care",
+  fallback: "https://placehold.co/800x500/4289f5/FFFFFF.jpg?text=Small+Animal+Care"
 };
+
 const equineImage = {
-  webp: "/assets/images/landing-page/equine.webp",
-  fallback: "/assets/images/landing-page/equine.jpg"
+  webp: "https://placehold.co/800x500/8a42f5/FFFFFF.webp?text=Equine+Services",
+  fallback: "https://placehold.co/800x500/8a42f5/FFFFFF.jpg?text=Equine+Services"
 };
+
 const farmAnimalImage = {
-  webp: "/assets/images/landing-page/farm-animal.webp",
-  fallback: "/assets/images/landing-page/farm-animal.jpg"
+  webp: "https://placehold.co/800x500/42f584/FFFFFF.webp?text=Farm+Animal+Care",
+  fallback: "https://placehold.co/800x500/42f584/FFFFFF.jpg?text=Farm+Animal+Care"
 };
+
 const ctaBgImage = {
-  webp: "/assets/images/landing-page/cta-bg.webp",
-  fallback: "/assets/images/landing-page/cta-bg.jpg"
+  webp: "https://placehold.co/1200x400/577e46/FFFFFF.webp?text=Join+Our+Network",
+  fallback: "https://placehold.co/1200x400/577e46/FFFFFF.jpg?text=Join+Our+Network"
 };
 
 const LandingPage = () => {
   const mainContentRef = useRef(null);
 
   useEffect(() => {
-    const elements = document.querySelectorAll('.scroll-fade-in');
-    const observer = new window.IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
+    try {
+      const elements = document.querySelectorAll('.scroll-fade-in');
+      if (!window.IntersectionObserver) {
+        // Fallback for browsers without IntersectionObserver
+        elements.forEach(el => el.classList.add('visible'));
+        return;
+      }
+      
+      const observer = new window.IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.15 });
+      
+      elements.forEach(el => observer.observe(el));
+      return () => {
+        if (observer && observer.disconnect) {
+          observer.disconnect();
         }
-      });
-    }, { threshold: 0.15 });
-    elements.forEach(el => observer.observe(el));
-    return () => observer.disconnect();
+      };
+    } catch (error) {
+      console.error('Error setting up intersection observer:', error);
+      // Ensure elements are still visible even if the animation fails
+      document.querySelectorAll('.scroll-fade-in').forEach(el => el.classList.add('visible'));
+    }
   }, []);
 
   return (
@@ -232,19 +256,19 @@ const LandingPage = () => {
                 >
                   {[
                     {
-                      image: "https://randomuser.me/api/portraits/women/54.jpg",
+                      image: "https://placehold.co/100x100/cccccc/333333.jpg?text=SJ",
                       text: "Having a vet come to our farm has been a game-changer. Our cattle receive prompt care without the stress of transportation. The scheduling system is seamless!",
                       name: "Sarah Johnson",
                       role: "Cattle Farmer"
                     },
                     {
-                      image: "https://randomuser.me/api/portraits/men/32.jpg",
+                      image: "https://placehold.co/100x100/cccccc/333333.jpg?text=MC",
                       text: "As a small animal veterinarian, this platform has helped me connect with more clients and manage my schedule efficiently. The support team is always helpful.",
                       name: "Dr. Michael Chen",
                       role: "Small Animal Veterinarian"
                     },
                     {
-                      image: "https://randomuser.me/api/portraits/women/28.jpg",
+                      image: "https://placehold.co/100x100/cccccc/333333.jpg?text=LM",
                       text: "My elderly cat gets anxious at clinics, so having a vet come to us has been wonderful. The booking process was easy and the vet was professional and caring.",
                       name: "Lisa Martinez",
                       role: "Pet Owner"
