@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { resetPassword } from '../services/api';
 import { Form, Button, Container, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
 import { Lock } from 'react-bootstrap-icons';
-import './AuthPages.css';
+// import './AuthPages.css';
 
 function ResetPasswordPage() {
   const { token } = useParams();

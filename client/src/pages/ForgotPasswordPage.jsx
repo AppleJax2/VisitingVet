@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Form, Button, Container, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
 import { Envelope } from 'react-bootstrap-icons';
 import theme from '../utils/theme';
-import './AuthPages.css';
+// import './AuthPages.css';
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

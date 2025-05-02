@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
 import { CheckCircleFill, XCircleFill } from 'react-bootstrap-icons';
-import './AuthPages.css';
+// import './AuthPages.css';
 
 function VerifyAccountPage() {
   const [searchParams] = useSearchParams();
