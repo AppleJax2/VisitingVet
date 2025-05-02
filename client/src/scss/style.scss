@@ -1,4 +1,4 @@
-@use "@coreui/coreui/scss/coreui" as * with ( 
+@use "@coreui/coreui/scss/coreui" as coreui with (
   $enable-deprecation-messages: false,
 );
 @use "@coreui/chartjs/scss/coreui-chartjs";
@@ -12,7 +12,7 @@ body {
   width: 100%;
   padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
   will-change: auto;
-  @include transition(padding .15s);
+  @include coreui.transition(padding .15s);
 }
 
 .header > .container-fluid,
@@ -56,7 +56,7 @@ body {
   min-height: calc(3rem + 1px); // stylelint-disable-line function-disallowed-list
 }
 
-@include color-mode(dark) {
+@include coreui.color-mode(dark) {
   body {
     background-color: var(--cui-dark-bg-subtle);
   }
