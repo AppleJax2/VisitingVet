@@ -21,7 +21,9 @@ This document outlines the tasks required to refactor the Visiting Vet frontend,
 *   **(P1) Refactor Dashboard Components (Partially Done):** Update dashboard-specific components (`PetOwnerDashboard`, `ProviderDashboard`, `ClinicDashboard`, `AdminLayout`, and their sub-components like `MyPetsPage`, `ProviderAppointmentsPage`, `AdminUserListPage`, etc.) to use React-Bootstrap components (`Table`, `Tabs`, `Accordion`, `Pagination`, `Badge`, `Alert`, `Modal`, `Form`) and CoreUI components where appropriate (e.g., `CCard`, `CWidgetStatsF`). Replace custom table styles, form layouts, and UI elements. Affects files in `src/components/Dashboard/`, `src/pages/Admin/`, specific role pages in `src/pages/`.
     *   **DONE:** `PetOwnerDashboard.jsx`
     *   **TODO:** Remaining dashboard/admin/role-specific components.
-*   **(P2) Refactor Forms:** Systematically go through all forms (Login, Register, Contact, Add Pet, Profile Edit, etc.) and ensure they are built using `react-bootstrap/Form`, `Form.Group`, `Form.Label`, `Form.Control`, `Form.Text`, `Form.Check`, etc., for consistent appearance, behavior, and accessibility. Affects numerous page and component files.
+*   **(P2) Refactor Forms (Partially Done):** Systematically go through all forms (Login, Register, Contact, Add Pet, Profile Edit, etc.) and ensure they are built using `react-bootstrap/Form`, `Form.Group`, `Form.Label`, `Form.Control`, `Form.Text`, `Form.Check`, etc., for consistent appearance, behavior, and accessibility. Affects numerous page and component files.
+    *   **DONE:** Forms within `LoginPage`, `RegisterPage`, `AddPetPage`.
+    *   **TODO:** Forms within other pages/components as they are refactored.
 
 **Cleanup & Verification:**
 
