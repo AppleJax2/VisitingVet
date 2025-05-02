@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Form, Button, Container, Row, Col, Card, Alert } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { addPet } from '../services/api';
-import theme from '../utils/theme';
 
 function AddPetPage() {
   const [petData, setPetData] = useState({
@@ -61,43 +60,21 @@ function AddPetPage() {
       setIsLoading(false);
     }
   };
-  
-  // Basic styles (consider moving to theme or CSS)
-  const styles = {
-    card: {
-      padding: '30px',
-      borderRadius: theme.borderRadius.lg,
-      boxShadow: theme.shadows.md,
-      border: 'none',
-      marginTop: '30px',
-    },
-    title: {
-      color: theme.colors.primary.dark,
-      marginBottom: '25px',
-      fontWeight: '600',
-    },
-    button: {
-      backgroundColor: theme.colors.primary.main,
-      borderColor: theme.colors.primary.main,
-      padding: '10px 20px',
-      fontWeight: '500',
-    }
-  };
 
   return (
     <Container className="py-5">
       <Row className="justify-content-center">
         <Col md={8} lg={6}>
-          <Card style={styles.card}>
+          <Card className="p-4 p-md-5 shadow-sm border-0">
             <Card.Body>
-              <h2 style={styles.title} className="text-center">Add New Pet</h2>
+              <h2 className="text-center fw-semibold mb-4">Add New Pet</h2>
               
               {error && <Alert variant="danger">{error}</Alert>}
               {success && <Alert variant="success">{success}</Alert>}
 
               <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="formPetName">
-                  <Form.Label>Pet Name*</Form.Label>
+                  <Form.Label>Pet Name<span className="text-danger ms-1">*</span></Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Enter pet's name"
@@ -109,7 +86,7 @@ function AddPetPage() {
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="formPetSpecies">
-                  <Form.Label>Species*</Form.Label>
+                  <Form.Label>Species<span className="text-danger ms-1">*</span></Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="e.g., Dog, Cat, Rabbit"
@@ -122,7 +99,7 @@ function AddPetPage() {
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="formPetBreed">
-                  <Form.Label>Breed*</Form.Label>
+                  <Form.Label>Breed<span className="text-danger ms-1">*</span></Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="e.g., Golden Retriever, Siamese"
@@ -134,7 +111,7 @@ function AddPetPage() {
                 </Form.Group>
 
                 <Form.Group className="mb-4" controlId="formPetAge">
-                  <Form.Label>Age (Years)*</Form.Label>
+                  <Form.Label>Age (Years)<span className="text-danger ms-1">*</span></Form.Label>
                   <Form.Control
                     type="number"
                     placeholder="Enter pet's age in years"
@@ -153,9 +130,11 @@ function AddPetPage() {
                     variant="primary" 
                     type="submit" 
                     disabled={isLoading}
-                    style={styles.button}
+                    size="lg"
                   >
-                    {isLoading ? 'Adding Pet...' : 'Add Pet'}
+                    {isLoading ? (
+                      <><Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2"/>Adding Pet...</>
+                     ) : 'Add Pet'}
                   </Button>
                 </div>
               </Form>
