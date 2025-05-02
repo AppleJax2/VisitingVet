@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Fix: Ensure API_URL is trimmed to remove any whitespace
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').trim();
+
+// Log for debugging
+console.log('Using API URL:', API_URL);
 
 // Create axios instance
 const api = axios.create({
