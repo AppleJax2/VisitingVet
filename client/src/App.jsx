@@ -117,8 +117,12 @@ const PrivateRoute = ({ allowedRoles }) => {
 
 // New component to wrap routes that need the DefaultLayout
 const LayoutWrapper = ({ children }) => {
-  // Potentially add logic here if layout needs context or specific props
-  return <DefaultLayout>{children}</DefaultLayout>;
+  // LayoutWrapper now needs to render an <Outlet /> to display nested routes
+  return (
+    <DefaultLayout>
+      {children || <Outlet />} {/* Render children if passed, otherwise Outlet */}
+    </DefaultLayout>
+  );
 };
 
 function AppRoutes() {
@@ -192,9 +196,9 @@ function AppRoutes() {
 
         {/* Admin Protected Routes - Use PrivateRoute for Admin role check */}
         <Route element={<PrivateRoute allowedRoles={['Admin']} />}>
-           {/* Wrap the Admin section with the LayoutWrapper */}
+           {/* The parent /admin route uses LayoutWrapper */}
            <Route path="/admin" element={<LayoutWrapper />}> 
-              {/* Nest Admin pages directly as children, LayoutWrapper renders DefaultLayout */}
+              {/* Nested Admin pages render inside LayoutWrapper's Outlet */}
               <Route index element={<AdminDashboardPage />} />
               <Route path="users" element={<AdminUserListPage />} />
               <Route path="users/:userId" element={<AdminUserDetailPage />} />
