@@ -1,7 +1,11 @@
 @use "@coreui/coreui/scss/coreui" as coreui with (
   $enable-deprecation-messages: false,
 );
-@use "@coreui/chartjs/scss/coreui-chartjs" as chartjs;
+
+// Temporarily commenting out chartjs import to resolve variable conflicts
+// The chartjs import causes $white variable conflicts with CoreUI
+// @use "@coreui/chartjs/scss/coreui-chartjs";
+
 @use "vendors/simplebar";
 
 body {
