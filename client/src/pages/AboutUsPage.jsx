@@ -21,7 +21,7 @@ const AboutUsPage = () => {
               <h2 className="text-dark" id="mission-title">Our Mission</h2>
               <figure className="mt-4 mb-4">
                 <blockquote className="blockquote fs-5" style={{ borderLeft: '4px solid var(--bs-primary)', paddingLeft: '1rem' }}>
-                  Every animal deserves quality care in the comfort of their own environment.
+                Every animal deserves quality care in the comfort of their own environment.
                 </blockquote>
               </figure>
               <div>
@@ -34,13 +34,13 @@ const AboutUsPage = () => {
               </div>
             </Col>
             <Col md={6}>
-              <Image 
-                src="/assets/images/landing-page/about-mission.jpg" 
-                alt="Veterinarian caring for a dog at home" 
-                fluid 
-                rounded 
+                <Image 
+                  src="/assets/images/landing-page/about-mission.jpg" 
+                  alt="Veterinarian caring for a dog at home" 
+                  fluid 
+                  rounded 
                 className="shadow-sm border"
-              />
+                />
             </Col>
           </Row>
         </section>
@@ -69,7 +69,7 @@ const AboutUsPage = () => {
                     </Card.Text>
                   </Card.Body>
                 </Card>
-              </Col>
+            </Col>
             ))}
           </Row>
         </section>
@@ -107,22 +107,22 @@ const AboutUsPage = () => {
               <Col lg={3} md={6} sm={6} className="mb-4 d-flex align-items-stretch" key={index}>
                 <Card className="shadow-sm border-0 w-100" style={{ borderRadius: '12px', overflow: 'hidden' }}>
                   <div className="text-center mt-4">
-                     <Image
-                        src={member.image}
-                        alt={`${member.name}, ${member.role}`}
+                          <Image
+                            src={member.image}
+                            alt={`${member.name}, ${member.role}`}
                         roundedCircle
-                        style={{ 
+                            style={{ 
                           width: '150px', 
                           height: '150px', 
                           objectFit: 'cover', 
                           border: '3px solid var(--bs-primary-bg-subtle)'
-                        }}
-                        onError={(e) => {
+                            }}
+                            onError={(e) => {
                           e.target.onerror = null; 
                           e.target.src = '/assets/images/team/default-avatar.png';
-                        }}
-                      />
-                  </div>
+                            }}
+                          />
+                        </div>
                   <Card.Body className="text-center d-flex flex-column">
                     <Card.Title className="mb-1 fw-bold">{member.name}</Card.Title>
                     <p className="text-muted small mb-2">{member.role}</p>
@@ -133,8 +133,8 @@ const AboutUsPage = () => {
                       <Button variant="link" className="text-primary p-1 me-2"><i className="fas fa-envelope"></i></Button> 
                       <Button variant="link" className="text-primary p-1"><i className="fas fa-user"></i></Button>
                     </div>
-                  </Card.Body>
-                </Card>
+                    </Card.Body>
+                  </Card>
               </Col>
             ))}
           </Row>
@@ -176,13 +176,13 @@ const AboutUsPage = () => {
                           {testimonial.quote}
                         </p>
                         <div className="d-flex align-items-center justify-content-center">
-                          <Image
-                            src={testimonial.image}
-                            alt={testimonial.name}
+                            <Image
+                              src={testimonial.image}
+                              alt={testimonial.name}
                             roundedCircle
                             style={{ width: '50px', height: '50px', objectFit: 'cover', marginRight: '15px' }}
                             onError={(e) => { e.target.onerror = null; e.target.src = '/assets/images/team/default-avatar.png'; }}
-                          />
+                            />
                           <div className="text-start">
                             <h5 className="mb-0 fw-bold">{testimonial.name}</h5>
                             <p className="text-muted small mb-0">{testimonial.pet}</p>
