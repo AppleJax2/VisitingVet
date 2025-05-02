@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Button, InputGroup, FormControl } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { 
   Facebook, 
@@ -11,7 +11,6 @@ import {
   Telephone,
   ChevronRight
 } from 'react-bootstrap-icons';
-import theme from '../utils/theme';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -42,132 +41,128 @@ const Footer = () => {
   ];
   
   return (
-    <footer className="bg-dark-color text-white">
-      {/* Main Footer */}
-      <div className="pt-5 pb-4">
-        <Container>
-          <Row className="gy-4">
-            {/* Company Info */}
-            <Col lg={3} md={6}>
-              <h4 className="text-white fw-bold mb-4">VisitingVet</h4>
-              <p className="text-white-80 mb-4">
-                Connecting pet owners with trusted, mobile veterinary services for convenient and quality animal healthcare.
-              </p>
-              <div className="d-flex social-icons gap-2">
-                {socialMedia.map((social, index) => (
-                  <a 
-                    key={index}
-                    href={social.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="social-icon"
-                    aria-label={social.label}
+    <footer className="text-white pt-5 pb-4 bg-dark" data-bs-theme="dark">
+      <Container>
+        <Row className="gy-4">
+          {/* Company Info */}
+          <Col lg={3} md={6}>
+            <h4 className="fw-bold mb-4">VisitingVet</h4>
+            <p className="text-white-50 mb-4">
+              Connecting pet owners with trusted, mobile veterinary services for convenient and quality animal healthcare.
+            </p>
+            <div className="d-flex gap-2">
+              {socialMedia.map((social, index) => (
+                <a 
+                  key={index}
+                  href={social.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="btn btn-outline-light btn-sm rounded-circle p-2 lh-1"
+                  aria-label={social.label}
+                >
+                  {React.cloneElement(social.icon, { size: 16 })}
+                </a>
+              ))}
+            </div>
+          </Col>
+          
+          {/* Quick Links */}
+          <Col lg={3} md={6}>
+            <h5 className="fw-semibold mb-4">Quick Links</h5>
+            <ul className="list-unstyled">
+              {quickLinks.map((link, index) => (
+                <li key={index} className="mb-2">
+                  <Link 
+                    to={link.path} 
+                    className="link-light link-opacity-75 link-opacity-100-hover text-decoration-none d-flex align-items-center"
                   >
-                    {social.icon}
-                  </a>
-                ))}
-              </div>
-            </Col>
-            
-            {/* Quick Links */}
-            <Col lg={3} md={6}>
-              <h5 className="text-white fw-semibold mb-4">Quick Links</h5>
-              <ul className="list-unstyled footer-links">
-                {quickLinks.map((link, index) => (
-                  <li key={index} className="mb-3">
-                    <Link 
-                      to={link.path} 
-                      className="text-white-70 text-decoration-none d-flex align-items-center"
-                    >
-                      <ChevronRight size={12} className="me-2 text-accent-gold" />
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </Col>
-            
-            {/* Services */}
-            <Col lg={3} md={6}>
-              <h5 className="text-white fw-semibold mb-4">Our Services</h5>
-              <ul className="list-unstyled footer-links">
-                {serviceLinks.map((service, index) => (
-                  <li key={index} className="mb-3">
-                    <Link 
-                      to={service.path} 
-                      className="text-white-70 text-decoration-none d-flex align-items-center"
-                    >
-                      <ChevronRight size={12} className="me-2 text-accent-gold" />
-                      {service.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </Col>
-            
-            {/* Contact Info */}
-            <Col lg={3} md={6}>
-              <h5 className="text-white fw-semibold mb-4">Contact Us</h5>
-              <ul className="list-unstyled contact-info mb-4">
-                <li className="d-flex mb-3">
-                  <GeoAlt className="me-3 mt-1 text-accent-gold" />
-                  <span className="text-white-70">
-                    123 Veterinary Lane<br />
-                    San Francisco, CA 94107
-                  </span>
+                    <ChevronRight size={12} className="me-2 text-primary" />
+                    {link.name}
+                  </Link>
                 </li>
-                <li className="d-flex mb-3">
-                  <Telephone className="me-3 mt-1 text-accent-gold" />
-                  <a href="tel:+15551234567" className="text-white-70 text-decoration-none">
-                    (555) 123-4567
-                  </a>
+              ))}
+            </ul>
+          </Col>
+          
+          {/* Services */}
+          <Col lg={3} md={6}>
+            <h5 className="fw-semibold mb-4">Our Services</h5>
+            <ul className="list-unstyled">
+              {serviceLinks.map((service, index) => (
+                <li key={index} className="mb-2">
+                  <Link 
+                    to={service.path} 
+                    className="link-light link-opacity-75 link-opacity-100-hover text-decoration-none d-flex align-items-center"
+                  >
+                    <ChevronRight size={12} className="me-2 text-primary" />
+                    {service.name}
+                  </Link>
                 </li>
-                <li className="d-flex mb-3">
-                  <Envelope className="me-3 mt-1 text-accent-gold" />
-                  <a href="mailto:support@visitingvet.com" className="text-white-70 text-decoration-none">
-                    support@visitingvet.com
-                  </a>
-                </li>
-              </ul>
-              
-              {/* Newsletter Signup */}
-              <h5 className="text-white fw-semibold mb-3">Subscribe to Newsletter</h5>
-              <div className="input-group">
-                <input 
+              ))}
+            </ul>
+          </Col>
+          
+          {/* Contact Info */}
+          <Col lg={3} md={6}>
+            <h5 className="fw-semibold mb-4">Contact Us</h5>
+            <ul className="list-unstyled mb-4">
+              <li className="d-flex mb-3">
+                <GeoAlt className="me-3 mt-1 text-primary flex-shrink-0" />
+                <span className="text-white-50">
+                  123 Veterinary Lane<br />
+                  San Francisco, CA 94107
+                </span>
+              </li>
+              <li className="d-flex mb-3">
+                <Telephone className="me-3 mt-1 text-primary flex-shrink-0" />
+                <a href="tel:+15551234567" className="link-light link-opacity-75 link-opacity-100-hover text-decoration-none">
+                  (555) 123-4567
+                </a>
+              </li>
+              <li className="d-flex mb-3">
+                <Envelope className="me-3 mt-1 text-primary flex-shrink-0" />
+                <a href="mailto:support@visitingvet.com" className="link-light link-opacity-75 link-opacity-100-hover text-decoration-none">
+                  support@visitingvet.com
+                </a>
+              </li>
+            </ul>
+            
+            {/* Newsletter Signup */}
+            <h5 className="fw-semibold mb-3">Subscribe</h5>
+            <Form onSubmit={(e) => e.preventDefault()}>
+              <InputGroup>
+                <FormControl 
                   type="email" 
-                  className="form-control" 
                   placeholder="Your Email" 
                   aria-label="Your email address"
-                  style={{ borderRadius: 'var(--border-radius-md) 0 0 var(--border-radius-md)' }}
                 />
                 <Button 
-                  variant="secondary"
-                  className="px-3"
+                  variant="primary"
+                  type="submit"
                   aria-label="Subscribe to newsletter"
-                  style={{ borderRadius: '0 var(--border-radius-md) var(--border-radius-md) 0' }}
                 >
                   Subscribe
                 </Button>
-              </div>
-            </Col>
-          </Row>
-        </Container>
-      </div>
+              </InputGroup>
+            </Form>
+          </Col>
+        </Row>
+      </Container>
       
       {/* Bottom Footer/Copyright */}
-      <div className="py-3" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+      <div className="py-3 mt-4 bg-black bg-opacity-25">
         <Container>
           <Row className="align-items-center">
             <Col md={6} className="text-center text-md-start mb-2 mb-md-0">
-              <div className="text-white-70">
+              <div className="text-white-50 small">
                 &copy; {currentYear} VisitingVet. All rights reserved.
               </div>
             </Col>
             <Col md={6} className="text-center text-md-end">
-              <div className="footer-bottom-links">
-                <Link to="/privacy-policy" className="text-white-70 text-decoration-none mx-3">Privacy Policy</Link>
-                <Link to="/terms-of-service" className="text-white-70 text-decoration-none mx-3">Terms of Service</Link>
-                <Link to="/faq" className="text-white-70 text-decoration-none mx-3">FAQ</Link>
+              <div className="small">
+                <Link to="/privacy-policy" className="link-light link-opacity-75 link-opacity-100-hover text-decoration-none mx-2">Privacy Policy</Link>
+                <Link to="/terms-of-service" className="link-light link-opacity-75 link-opacity-100-hover text-decoration-none mx-2">Terms of Service</Link>
+                <Link to="/faq" className="link-light link-opacity-75 link-opacity-100-hover text-decoration-none mx-2">FAQ</Link>
               </div>
             </Col>
           </Row>
