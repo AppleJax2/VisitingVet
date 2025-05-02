@@ -13,6 +13,8 @@ import { cilSearch, cilUserPlus, cilCheckCircle, cilShieldAlt, cilClock, cilAwar
 
 // Define actual image URL (replace with final chosen asset)
 const heroImageUrl = 'https://images.pexels.com/photos/7708806/pexels-photo-7708806.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1';
+// ADD ALT TEXT DESCRIPTION
+const heroImageAltText = "Veterinarian examining a golden retriever dog while a cat sits nearby in a cozy home environment";
 
 // Remove placeholder image objects
 // const heroVetImage = {...};
@@ -79,7 +81,11 @@ const LandingPage = () => {
           alignItems: 'center',
           justifyContent: 'center' // Center content vertically and horizontally
         }}
+        role="banner" // Add role for semantic header
+        aria-label="Hero section: Expert Veterinary Care At Your Doorstep"
       >
+        {/* Optionally add an CImage component for better alt text handling if background image is purely decorative */}
+        {/* <CImage className="visually-hidden" src={heroImageUrl} alt={heroImageAltText} /> */}
         <CContainer>
           <CRow className="justify-content-center">
             <CCol lg={8}>
