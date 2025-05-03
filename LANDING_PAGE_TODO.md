@@ -10,13 +10,13 @@
 *   **Color & Branding:**
     *   `[ ]` **Contrast Check:** Use a contrast checker tool to verify all text/background combinations meet WCAG AA (4.5:1), especially grays (e.g., section subheadings `OUR SERVICES`, testimonial roles `Cattle Farmer`). Target: Browser DevTools, relevant CSS files. Priority: High.
 *   **Interactive Elements:**
-    *   `[x]` **State Styling:** Implement/Verify clear `:hover`, `:active`, and `:focus` states for ALL interactive elements (buttons, links, slider controls, form inputs). Focus states MUST be visible. Target: Relevant CSS files (`buttons.css`, `links.css`, `forms.css`, component styles). Priority: High.
+    *   `[ ]` **State Styling:** Implement/Verify clear `:hover`, `:active`, and `:focus` states for ALL interactive elements (buttons, links, slider controls, form inputs). Focus states MUST be visible. Target: Relevant CSS files (`buttons.css`, `links.css`, `forms.css`, component styles). Priority: High.
 *   **Accessibility:**
-    *   `[x]` **Alt Text Audit:** Review ALL `<img>` tags. Ensure meaningful alt text or `alt=""` for decorative images. Target: `client/src/**/*.jsx`. Priority: High.
+    *   `[ ]` **Alt Text Audit:** Review ALL `<img>` tags. Ensure meaningful alt text or `alt=""` for decorative images. Target: `client/src/**/*.jsx`. Priority: High.
     *   `[ ]` **Keyboard Navigation:** Test tabbing through the entire page. Ensure logical order and all interactive elements are reachable/operable. Fix any issues. Target: Page structure (`.jsx`), potentially needs tabindex adjustments. Priority: High.
-    *   `[x]` **Focus Visibility:** Confirm visible focus outlines appear during keyboard navigation. Remove any `outline: none;` suppressing them. Target: `client/src/styles/base.css` or reset files. Priority: High.
-    *   `[x]` **ARIA Check (Slider):** Inspect testimonial slider implementation. Ensure appropriate ARIA roles/attributes for controls and slides if it's a custom component. Target: `client/src/components/LandingPage/Testimonials.jsx` (or similar). Priority: Medium.
-    *   `[x]` **Reduced Motion:** Check if testimonial slider animation respects `prefers-reduced-motion` media query. Target: Slider CSS/JS. Priority: Medium.
+    *   `[ ]` **Focus Visibility:** Confirm visible focus outlines appear during keyboard navigation. Remove any `outline: none;` suppressing them. Target: `client/src/styles/base.css` or reset files. Priority: High.
+    *   `[ ]` **ARIA Check (Slider):** Inspect testimonial slider implementation. Ensure appropriate ARIA roles/attributes for controls and slides if it's a custom component. Target: `client/src/components/LandingPage/Testimonials.jsx` (or similar). Priority: Medium.
+    *   `[ ]` **Reduced Motion:** Check if testimonial slider animation respects `prefers-reduced-motion` media query. Target: Slider CSS/JS. Priority: Medium.
 *   **Content & Copy:**
     *   `[ ]` **Testimonial Authenticity:** Replace placeholder testimonials (if "Sarah Johnson" is placeholder) with genuine client feedback. Include location/pet type if possible. Target: Content source / `client/src/pages/LandingPage/LandingPage.jsx`. Priority: Medium.
     *   `[ ]` **Social Links:** Ensure social media links in the footer point to actual VisitingVet profiles (currently generic domains). Target: `client/src/components/Shared/Footer.jsx` (or similar). Priority: Medium.
