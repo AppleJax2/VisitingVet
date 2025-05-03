@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { PlusCircle, PencilSquare, Trash, Eye } from 'react-bootstrap-icons';
 import { fetchUserPets, deletePet } from '../services/api'; // Assuming deletePet exists
-import theme from '../utils/theme';
 import PetEditModal from '../components/PetEditModal'; // Import the modal
 import PetCard from '../components/PetCard'; // Import the new PetCard component
 
@@ -94,45 +93,14 @@ function MyPetsPage() {
     navigate(`/pet/${pet._id}`);
   };
 
-  const styles = {
-    pageTitle: {
-      color: theme.colors.primary.dark,
-      marginBottom: '30px',
-    },
-    addButtonCard: {
-      border: `2px dashed ${theme.colors.background.medium}`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '200px',
-      textAlign: 'center',
-      cursor: 'pointer',
-      transition: 'background-color 0.3s ease',
-      backgroundColor: theme.colors.background.light,
-      '&:hover': {
-        backgroundColor: theme.colors.background.medium,
-      },
-      height: '100%',
-    },
-    addButtonIcon: {
-      color: theme.colors.primary.main,
-      fontSize: '2.5rem',
-      marginBottom: '10px',
-    },
-    actionButton: {
-      marginRight: '5px',
-      marginLeft: '5px',
-    }
-  };
-
   return (
     <Container className="py-5">
       <Row className="mb-4 align-items-center">
         <Col>
-          <h1 style={styles.pageTitle}>My Pets</h1>
+          <h1 className="h2 text-dark fw-bold">My Pets</h1>
         </Col>
         <Col className="text-end">
-          <Button variant="primary" onClick={() => navigate('/add-pet')} style={{backgroundColor: theme.colors.primary.main}}>
+          <Button variant="primary" onClick={() => navigate('/add-pet')}>
             <PlusCircle className="me-2" /> Add New Pet
           </Button>
         </Col>
@@ -146,7 +114,7 @@ function MyPetsPage() {
       {deleteSuccess && <Alert variant="success" dismissible onClose={() => setDeleteSuccess('')}>{deleteSuccess}</Alert>}
 
       {loading ? (
-        <div className="text-center"><Spinner animation="border" style={{color: theme.colors.primary.main}} /></div>
+        <div className="text-center"><Spinner animation="border" variant="primary" /></div>
       ) : (
         <Row>
           {pets.length === 0 && !loading ? (

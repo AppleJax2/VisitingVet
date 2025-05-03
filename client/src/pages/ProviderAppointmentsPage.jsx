@@ -442,13 +442,11 @@ const ProviderAppointmentsPage = () => {
                     </div>
                   </td>
                   <td>{getStatusBadge(appointment.status)}</td>
-                  <td>
+                  <td className="small">
                     {appointment.notes ? (
-                      <div style={{ maxWidth: '200px', whiteSpace: 'pre-wrap' }}>
-                        {appointment.notes.length > 50 
-                          ? `${appointment.notes.substring(0, 50)}...` 
-                          : appointment.notes}
-                      </div>
+                      appointment.notes.length > 75
+                        ? `${appointment.notes.substring(0, 75)}...` 
+                        : appointment.notes
                     ) : (
                       <span className="text-muted">No notes</span>
                     )}

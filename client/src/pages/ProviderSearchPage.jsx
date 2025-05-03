@@ -182,6 +182,11 @@ function ProviderSearchPage() {
   };
 
   const renderPaginationItems = () => {
+    if (!Pagination || !Pagination.First || !Pagination.Prev || !Pagination.Ellipsis || !Pagination.Item || !Pagination.Next || !Pagination.Last) {
+        console.error("Pagination component or properties missing in ProviderSearchPage");
+        return null;
+    }
+
     if (!pagination || !pagination.totalPages || pagination.totalPages <= 1) {
       return null;
     }
@@ -195,49 +200,46 @@ function ProviderSearchPage() {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
 
-    // Only add pagination elements if Pagination is defined
-    if (Pagination) {
-      if (Pagination.First) {
+    if (Pagination.First) {
+      items.push(
+        <Pagination.First key="first" onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+      );
+    }
+    
+    if (Pagination.Prev) {
+      items.push(
+        <Pagination.Prev key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+      );
+    }
+
+    if (startPage > 1 && Pagination.Ellipsis) {
+      items.push(<Pagination.Ellipsis key="start-ellipsis" disabled />);
+    }
+
+    for (let number = startPage; number <= endPage; number++) {
+      if (Pagination.Item) {
         items.push(
-          <Pagination.First key="first" onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+          <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
+            {number}
+          </Pagination.Item>
         );
       }
-      
-      if (Pagination.Prev) {
-        items.push(
-          <Pagination.Prev key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
-        );
-      }
+    }
 
-      if (startPage > 1 && Pagination.Ellipsis) {
-        items.push(<Pagination.Ellipsis key="start-ellipsis" disabled />);
-      }
+    if (endPage < pagination.totalPages && Pagination.Ellipsis) {
+      items.push(<Pagination.Ellipsis key="end-ellipsis" disabled />);
+    }
 
-      for (let number = startPage; number <= endPage; number++) {
-        if (Pagination.Item) {
-          items.push(
-            <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
-              {number}
-            </Pagination.Item>
-          );
-        }
-      }
-
-      if (endPage < pagination.totalPages && Pagination.Ellipsis) {
-        items.push(<Pagination.Ellipsis key="end-ellipsis" disabled />);
-      }
-
-      if (Pagination.Next) {
-        items.push(
-          <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} />
-        );
-      }
-      
-      if (Pagination.Last) {
-        items.push(
-          <Pagination.Last key="last" onClick={() => handlePageChange(pagination.totalPages)} disabled={currentPage === pagination.totalPages} />
-        );
-      }
+    if (Pagination.Next) {
+      items.push(
+        <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} />
+      );
+    }
+    
+    if (Pagination.Last) {
+      items.push(
+        <Pagination.Last key="last" onClick={() => handlePageChange(pagination.totalPages)} disabled={currentPage === pagination.totalPages} />
+      );
     }
 
     return items;
@@ -260,106 +262,107 @@ function ProviderSearchPage() {
         </Alert>
       )}
       <Row>
-        <Col md={3} xs={12} className="mb-4 mb-md-0 sticky-sidebar">
-          <Card>
-            <Card.Header as="h5" className="d-flex justify-content-between align-items-center">
-              Refine Search
-              <Button 
-                variant="outline-secondary" 
-                size="sm" 
-                className="d-md-none"
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                aria-controls="filter-collapse-area"
-                aria-expanded={isFilterOpen}
-              >
-                {isFilterOpen ? 'Hide' : 'Show'} Filters
-              </Button>
-            </Card.Header>
-            <Collapse in={isFilterOpen} className="d-md-block"> 
-              <div id="filter-collapse-area">
-                <Card.Body>
-                  <Form>
-                    <FloatingLabel controlId="searchTermInput" label="Search Name/Bio..." className="mb-3">
-                      <Form.Control
-                        type="search"
-                        placeholder="Search Name/Bio..."
-                        value={searchTerm}
-                        onChange={(e) => {
-                          setSearchTerm(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                      />
-                    </FloatingLabel>
-
-                    <InputGroup className="mb-3">
-                      <FloatingLabel controlId="searchLocationInput" label="ZIP Code / Area" className="flex-grow-1">
+        <Col md={4} lg={3} className="mb-4 mb-md-0">
+          <div className="position-sticky" style={{ top: '1rem' }}>
+            <Card className="border-0 shadow-sm">
+              <Card.Header as="h5" className="d-flex justify-content-between align-items-center bg-light">
+                Refine Search
+                <Button 
+                  variant="outline-secondary" 
+                  size="sm" 
+                  className="d-md-none"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  aria-controls="filter-collapse-area"
+                  aria-expanded={isFilterOpen}
+                >
+                  {isFilterOpen ? 'Hide' : 'Show'} Filters
+                </Button>
+              </Card.Header>
+              <Collapse in={isFilterOpen} className="d-md-block"> 
+                <div id="filter-collapse-area">
+                  <Card.Body>
+                    <Form>
+                      <FloatingLabel controlId="searchTermInput" label="Search Name/Bio..." className="mb-3">
                         <Form.Control
                           type="search"
-                          placeholder="ZIP Code / Area"
-                          value={searchLocation}
+                          placeholder="Search Name/Bio..."
+                          value={searchTerm}
                           onChange={(e) => {
-                            setSearchLocation(e.target.value);
+                            setSearchTerm(e.target.value);
                             setCurrentPage(1);
                           }}
-                          disabled={isGeolocating}
                         />
                       </FloatingLabel>
-                      <Button variant="outline-secondary" onClick={handleGeolocate} disabled={isGeolocating} title="Use Current Location" aria-label="Use current location">
-                        {isGeolocating ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : <GeoAltFill />}
-                      </Button>
-                    </InputGroup>
-                    {geoError && <Alert variant="warning" size="sm" className="mt-2">{geoError}</Alert>}
 
-                    <h6 className="mt-4"><HeartPulseFill className="me-2"/>Animal Types</h6>
-                    <div className="mb-3">
-                      {ANIMAL_TYPES.map(type => (
-                        <Form.Check
-                          key={`animal-${type}`}
-                          type="checkbox"
-                          id={`animal-${type.replace(/\s+/g, '-')}`}
-                          label={type}
-                          value={type}
-                          checked={selectedAnimalTypes.includes(type)}
-                          onChange={handleCheckboxChange(setSelectedAnimalTypes, selectedAnimalTypes)}
-                        />
-                      ))}
-                    </div>
+                      <InputGroup className="mb-3">
+                        <FloatingLabel controlId="searchLocationInput" label="ZIP Code / Area" className="flex-grow-1">
+                          <Form.Control
+                            type="search"
+                            placeholder="ZIP Code / Area"
+                            value={searchLocation}
+                            onChange={(e) => {
+                              setSearchLocation(e.target.value);
+                              setCurrentPage(1);
+                            }}
+                            disabled={isGeolocating}
+                          />
+                        </FloatingLabel>
+                        <Button variant="outline-secondary" onClick={handleGeolocate} disabled={isGeolocating} title="Use Current Location" aria-label="Use current location">
+                          {isGeolocating ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : <GeoAltFill />}
+                        </Button>
+                      </InputGroup>
+                      {geoError && <Alert variant="warning" size="sm" className="mt-2">{geoError}</Alert>}
 
-                    <h6><TagFill className="me-2"/>Specialties</h6>
-                    <div className="mb-3">
-                      {SPECIALTY_SERVICES.map(spec => (
-                        <Form.Check
-                          key={`spec-${spec}`}
-                          type="checkbox"
-                          id={`spec-${spec.replace(/\s+/g, '-')}`}
-                          label={spec}
-                          value={spec}
-                          checked={selectedSpecialties.includes(spec)}
-                          onChange={handleCheckboxChange(setSelectedSpecialties, selectedSpecialties)}
-                        />
-                      ))}
-                    </div>
+                      <h6 className="mt-4"><HeartPulseFill className="me-2"/>Animal Types</h6>
+                      <div className="mb-3 border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                        {ANIMAL_TYPES.map(type => (
+                          <Form.Check
+                            key={`animal-${type}`}
+                            type="checkbox"
+                            id={`animal-${type.replace(/\s+/g, '-')}`}
+                            label={type}
+                            value={type}
+                            checked={selectedAnimalTypes.includes(type)}
+                            onChange={handleCheckboxChange(setSelectedAnimalTypes, selectedAnimalTypes)}
+                          />
+                        ))}
+                      </div>
 
-                    <Button 
-                      variant="outline-danger" 
-                      size="sm" 
-                      className="mt-3 w-100" 
-                      onClick={handleClearFilters}
-                      disabled={!searchTerm && !searchLocation && selectedAnimalTypes.length === 0 && selectedSpecialties.length === 0}
-                     >
-                       Clear All Filters
-                     </Button>
+                      <h6><TagFill className="me-2"/>Specialties</h6>
+                      <div className="mb-3 border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                        {SPECIALTY_SERVICES.map(spec => (
+                          <Form.Check
+                            key={`spec-${spec}`}
+                            type="checkbox"
+                            id={`spec-${spec.replace(/\s+/g, '-')}`}
+                            label={spec}
+                            value={spec}
+                            checked={selectedSpecialties.includes(spec)}
+                            onChange={handleCheckboxChange(setSelectedSpecialties, selectedSpecialties)}
+                          />
+                        ))}
+                      </div>
 
-                  </Form>
-                </Card.Body>
-              </div>
-            </Collapse>
-          </Card>
+                      <Button 
+                        variant="outline-danger" 
+                        size="sm" 
+                        className="mt-3 w-100" 
+                        onClick={handleClearFilters}
+                        disabled={!searchTerm && !searchLocation && selectedAnimalTypes.length === 0 && selectedSpecialties.length === 0}
+                       >
+                         Clear All Filters
+                       </Button>
+
+                    </Form>
+                  </Card.Body>
+                </div>
+              </Collapse>
+            </Card>
+          </div>
         </Col>
 
-        <Col md={9}>
-          <h1 className="mb-4">Find a Visiting Veterinarian</h1>
-          {error && <Alert variant="danger">{error}</Alert>}
+        <Col md={8} lg={9}>
+          <h1 className="mb-4 h3">Find a Visiting Veterinarian</h1>
 
           {isLoading ? (
             <div className="text-center py-5">
@@ -383,12 +386,12 @@ function ProviderSearchPage() {
               >
                 {results.map(profile => (
                   <Col key={profile._id}>
-                    <Card className="h-100 shadow-sm provider-card">
+                    <Card className="h-100 shadow-sm border">
                        <Card.Img 
                          variant="top" 
                          src={profile.user?.profileImage || 'https://via.placeholder.com/300x200?text=No+Image'} 
                          alt={`${profile.user?.name || 'Provider'}'s image`} 
-                         style={{ height: '200px', objectFit: 'cover' }}
+                         className="card-img-top"
                          onError={(e) => { 
                            if (e.target.src !== 'https://via.placeholder.com/300x200?text=No+Image') {
                              e.target.onerror = null;
@@ -397,20 +400,13 @@ function ProviderSearchPage() {
                          }} 
                        />
                       <Card.Body className="d-flex flex-column">
-                        <Card.Title className="text-primary mb-2">{profile.businessName || profile.user?.name || 'Unnamed Provider'}</Card.Title>
-                        <Card.Subtitle className="mb-2 text-muted">{profile.user?.email}</Card.Subtitle>
+                        <Card.Title className="text-primary mb-2 h6">{profile.businessName || profile.user?.name || 'Unnamed Provider'}</Card.Title>
+                        <Card.Subtitle className="mb-2 text-muted small">{profile.user?.email}</Card.Subtitle>
                         
                         {renderStars(profile.averageRating)} 
 
                         <Card.Text 
-                          className="text-muted flex-grow-1 mb-3"
-                          style={{ 
-                            display: '-webkit-box', 
-                            WebkitLineClamp: 3, 
-                            WebkitBoxOrient: 'vertical', 
-                            overflow: 'hidden', 
-                            textOverflow: 'ellipsis' 
-                           }}
+                          className="text-muted flex-grow-1 mb-3 small text-truncate"
                           title={profile.bio || 'No bio available.'}
                         >
                           {profile.bio || 'No bio available.'}
@@ -455,40 +451,4 @@ function ProviderSearchPage() {
   );
 }
 
-export default ProviderSearchPage;
-
-const style = document.createElement('style');
-style.textContent = `
-  .filter-checkbox-group {
-    max-height: 150px;
-    overflow-y: auto;
-    border: 1px solid #dee2e6;
-    padding: 10px;
-    border-radius: 0.25rem;
-    margin-bottom: 1rem;
-  }
-  .provider-card {
-    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
-  }
-  .provider-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,.1);
-  }
-`;
-document.head.appendChild(style);
-
-const stickyStyle = document.createElement('style');
-stickyStyle.textContent = `
-  @media (min-width: 768px) {
-    .sticky-sidebar {
-      position: sticky;
-      top: 20px;
-      height: calc(100vh - 40px);
-      overflow-y: auto;
-    }
-    .sticky-sidebar > .card {
-       height: 100%; 
-    }
-  }
-`;
-document.head.appendChild(stickyStyle); 
+export default ProviderSearchPage; 

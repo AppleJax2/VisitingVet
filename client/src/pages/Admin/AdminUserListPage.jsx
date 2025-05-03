@@ -350,6 +350,12 @@ const AdminUserListPage = () => {
 
   // Render pagination items
   const renderPaginationItems = () => {
+    // Add this check: Ensure Pagination and its needed properties exist
+    if (!Pagination || !Pagination.First || !Pagination.Prev || !Pagination.Ellipsis || !Pagination.Item || !Pagination.Next || !Pagination.Last) {
+        logger.error("Pagination component or properties missing in AdminUserListPage"); // Use logger
+        return null; // Return nothing if Pagination is incomplete
+    }
+
     if (!pagination || !pagination.totalPages || pagination.totalPages <= 1) {
       return null;
     }
@@ -363,45 +369,42 @@ const AdminUserListPage = () => {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
 
-    // Check if Pagination components exist before using them
-    if (Pagination) {
-      if (Pagination.First) {
-        items.push(<Pagination.First key="first" onClick={() => handlePageChange(1)} disabled={currentPage === 1} />);
-      }
-      
-      if (Pagination.Prev) {
-        items.push(<Pagination.Prev key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />);
-      }
+    if (Pagination.First) {
+      items.push(<Pagination.First key="first" onClick={() => handlePageChange(1)} disabled={currentPage === 1} />);
+    }
+    
+    if (Pagination.Prev) {
+      items.push(<Pagination.Prev key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />);
+    }
 
-      if (startPage > 1 && Pagination.Ellipsis) {
-        items.push(<Pagination.Ellipsis key="start-ellipsis" disabled />);
-      }
+    if (startPage > 1 && Pagination.Ellipsis) {
+      items.push(<Pagination.Ellipsis key="start-ellipsis" disabled />);
+    }
 
-      for (let number = startPage; number <= endPage; number++) {
-        if (Pagination.Item) {
-          items.push(
-            <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
-              {number}
-            </Pagination.Item>
-          );
-        }
-      }
-
-      if (endPage < pagination.totalPages && Pagination.Ellipsis) {
-        items.push(<Pagination.Ellipsis key="end-ellipsis" disabled />);
-      }
-
-      if (Pagination.Next) {
+    for (let number = startPage; number <= endPage; number++) {
+      if (Pagination.Item) {
         items.push(
-          <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} />
+          <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
+            {number}
+          </Pagination.Item>
         );
       }
-      
-      if (Pagination.Last) {
-        items.push(
-          <Pagination.Last key="last" onClick={() => handlePageChange(pagination.totalPages)} disabled={currentPage === pagination.totalPages} />
-        );
-      }
+    }
+
+    if (endPage < pagination.totalPages && Pagination.Ellipsis) {
+      items.push(<Pagination.Ellipsis key="end-ellipsis" disabled />);
+    }
+
+    if (Pagination.Next) {
+      items.push(
+        <Pagination.Next key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} />
+      );
+    }
+    
+    if (Pagination.Last) {
+      items.push(
+        <Pagination.Last key="last" onClick={() => handlePageChange(pagination.totalPages)} disabled={currentPage === pagination.totalPages} />
+      );
     }
 
     return items;

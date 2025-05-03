@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
 import { CheckCircleFill, XCircleFill } from 'react-bootstrap-icons';
-import './AuthPages.css';
+// import './AuthPages.css';
 
 function VerifyAccountPage() {
   const [searchParams] = useSearchParams();
@@ -68,19 +68,17 @@ function VerifyAccountPage() {
   };
 
   return (
-    <div className="auth-page">
-      <Container>
-        <Row className="justify-content-center">
-          <Col md={8} lg={6} xl={5}>
-            <Card className="auth-card shadow-lg">
-              <Card.Body className="p-4 p-md-5">
-                {renderContent()}
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+    <Container className="d-flex justify-content-center align-items-center min-vh-100 py-5">
+      <Row className="justify-content-center w-100">
+        <Col md={8} lg={6} xl={5}>
+          <Card className="shadow-lg border-0">
+            <Card.Body className="p-4 p-md-5">
+              {renderContent()}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 

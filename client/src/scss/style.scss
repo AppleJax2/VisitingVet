@@ -1,0 +1,89 @@
+@use "@coreui/coreui/scss/coreui" as coreui with (
+  $enable-deprecation-messages: false,
+);
+
+// Instead of directly importing chartjs, we'll use CSS variables for the charting needs
+// @use "@coreui/chartjs/scss/coreui-chartjs";
+
+@use "vendors/simplebar";
+
+// Define root CSS variables to match CoreUI's recommendations
+:root {
+  // Base CoreUI variables with cui- prefix
+  --cui-body-bg: #fff;
+  --cui-body-color: rgba(44, 56, 74, 0.95);
+  --cui-border-color: #d8dbe0;
+  --cui-primary: #321fdb;
+  --cui-secondary: #9da5b1;
+  --cui-success: #2eb85c;
+  --cui-info: #39f;
+  --cui-warning: #f9b115;
+  --cui-danger: #e55353;
+  --cui-light: #ebedef;
+  --cui-dark: #4f5d73;
+  --cui-tertiary-bg: #f0f4f7;
+  --cui-dark-bg-subtle: #1e2023;
+}
+
+body {
+  background-color: var(--cui-tertiary-bg);
+}
+
+.wrapper {
+  width: 100%;
+  padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
+  will-change: auto;
+  @include coreui.transition(padding .15s);
+}
+
+.header > .container-fluid,
+.sidebar-header {
+  min-height: calc(4rem + 1px); // stylelint-disable-line function-disallowed-list
+}
+
+.sidebar-brand-full {
+  margin-left: 3px;
+}
+
+.sidebar-header {
+  .nav-underline-border {
+    --cui-nav-underline-border-link-padding-x: 1rem;
+    --cui-nav-underline-border-gap: 0;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    min-height: calc(4rem + 1px); // stylelint-disable-line function-disallowed-list
+  }
+}
+
+.sidebar-toggler {
+  margin-inline-start: auto;
+}
+
+.sidebar-narrow,
+.sidebar-narrow-unfoldable:not(:hover) {
+  .sidebar-toggler {
+    margin-inline-end: auto;
+  }
+}
+
+.header > .container-fluid + .container-fluid {
+  min-height: 3rem;
+}
+
+.footer {
+  min-height: calc(3rem + 1px); // stylelint-disable-line function-disallowed-list
+}
+
+// Handle dark mode using CSS variables
+@include coreui.color-mode(dark) {
+  body {
+    background-color: var(--cui-dark-bg-subtle);
+  }
+
+  .footer {
+    --cui-footer-bg: var(--cui-body-bg);
+  }
+}
