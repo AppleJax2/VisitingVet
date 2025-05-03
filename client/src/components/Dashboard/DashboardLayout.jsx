@@ -179,35 +179,37 @@ const DashboardLayout = ({ children }) => {
     },
   };
 
-  // Different navigation items based on user role
+  // Function to get navigation items based on user role
   const getNavItems = () => {
-    const baseDashboardPath = `/dashboard/${user.role.toLowerCase()}`;
-    
+    // Common items for all users
     const commonItems = [
       {
         path: '/dashboard',
         icon: <House style={sidebarStyles.navIcon} />,
         text: 'Dashboard',
       },
+      {
+        path: '/dashboard/messages',
+        icon: <ChatDotsFill style={sidebarStyles.navIcon} />,
+        text: 'Messages',
+      },
     ];
 
-    if (user?.role === 'PetOwner') {
+    // Get role name, handling both string and object cases
+    const roleName = user?.role?.name || user?.role;
+
+    if (roleName === 'PetOwner') {
       return [
         ...commonItems,
         {
-          path: '/search-providers',
-          icon: <Search style={sidebarStyles.navIcon} />,
-          text: 'Find Vets',
-        },
-        {
           path: '/my-appointments',
           icon: <Calendar style={sidebarStyles.navIcon} />,
-          text: 'My Appointments',
+          text: 'Appointments',
         },
         {
           path: '/dashboard/pet-owner/service-requests',
           icon: <FileEarmarkText style={sidebarStyles.navIcon} />,
-          text: 'Specialist Referrals',
+          text: 'Service Requests',
         },
         {
           path: '/my-pets',
@@ -222,12 +224,12 @@ const DashboardLayout = ({ children }) => {
         {
           path: '/profile',
           icon: <Gear style={sidebarStyles.navIcon} />,
-          text: 'Settings',
+          text: 'My Profile',
         },
       ];
-    } 
-    
-    if (user?.role === 'MVSProvider') {
+    }
+
+    if (roleName === 'MVSProvider') {
       return [
         ...commonItems,
         {
@@ -258,7 +260,7 @@ const DashboardLayout = ({ children }) => {
       ];
     }
 
-    if (user?.role === 'Clinic') {
+    if (roleName === 'Clinic') {
       return [
         ...commonItems,
         {

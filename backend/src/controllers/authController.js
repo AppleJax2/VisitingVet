@@ -107,81 +107,74 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: 'Mobile carrier is required for SMS notifications' });
     }
 
+    // Restricted roles - Only allow PetOwner, MVSProvider, and Clinic roles through registration
+    const allowedRoles = ['PetOwner', 'MVSProvider', 'Clinic', 'Pet Owner', 'Mobile Vet Provider', 'Veterinary Clinic'];
+    
+    let standardizedRoleName;
+    // Standardize role names from UI
+    if (roleName === 'Pet Owner') {
+      standardizedRoleName = 'PetOwner';
+    } else if (roleName === 'Mobile Vet Provider' || roleName === 'MVSProvider') {
+      standardizedRoleName = 'MVSProvider';
+    } else if (roleName === 'Veterinary Clinic') {
+      standardizedRoleName = 'Clinic';
+    } else {
+      standardizedRoleName = roleName;
+    }
+    
+    // Prevent registration with Admin role
+    if (standardizedRoleName === 'Admin') {
+      await logUserActivity(null, ip, 'REGISTER_FAILURE', 'FAILURE', { email }, 'Attempted to register with restricted role: Admin');
+      return res.status(403).json({ message: 'Registration with this role is not permitted' });
+    }
+    
     // Log the received role name to help with debugging
-    logger.info(`Registration attempt with role name: "${roleName}"`);
+    logger.info(`Registration attempt with role name: "${roleName}" (standardized to "${standardizedRoleName}")`);
     
-    // Check the available roles in the database for debugging
-    const allRoles = await Role.find({}).select('name');
-    logger.info(`Available roles in database: ${allRoles.map(r => r.name).join(', ')}`);
+    // Get the standardized role from the database
+    const userRole = await Role.findOne({ name: standardizedRoleName });
     
-    // Enhanced role name normalization with multiple strategies
-    let normalizedRoleName = roleName;
-    
-    // 1. First try direct role name matching (exact match)
-    let userRole = await Role.findOne({ name: normalizedRoleName });
-    
-    // 2. If not found, try normalizing UI display names
+    // If role is not found, check for default role or return error
     if (!userRole) {
-      if (roleName === 'Pet Owner') {
-        normalizedRoleName = 'PetOwner';
-      } else if (roleName === 'Mobile Vet Provider' || roleName === 'MVSProvider') {
-        normalizedRoleName = 'MVSProvider';
-      } else if (roleName === 'Veterinary Clinic') {
-        normalizedRoleName = 'Clinic';
+      // Check if there's a default role
+      const defaultRole = await Role.findOne({ isDefault: true });
+      
+      if (!defaultRole) {
+        logger.error(`Registration failed: Role '${standardizedRoleName}' not found and no default role available.`);
+        return res.status(400).json({ message: 'Invalid user role specified and no default role available' });
       }
       
-      userRole = await Role.findOne({ name: normalizedRoleName });
+      logger.info(`Using default role: ${defaultRole.name} instead of requested role: ${standardizedRoleName}`);
       
-      if (userRole) {
-        logger.info(`Found role after normalization: ${userRole.name}`);
-      }
-    }
-    
-    // 3. If still not found, try case-insensitive matching
-    if (!userRole) {
-      // Create a regex for case-insensitive matching
-      const roleRegex = new RegExp(`^${normalizedRoleName}$`, 'i');
-      userRole = await Role.findOne({ name: { $regex: roleRegex } });
+      // Create user with default role
+      const user = await User.create({
+        email,
+        password,
+        role: defaultRole._id,
+        name: name || '',
+        phoneNumber: phoneNumber || '',
+        carrier: carrier || '',
+        smsNotificationsEnabled: !!smsNotificationsEnabled,
+        emailNotificationsEnabled: emailNotificationsEnabled !== false
+      });
       
-      if (userRole) {
-        logger.info(`Found role with case-insensitive match: ${userRole.name}`);
-      }
-    }
-    
-    // 4. If still not found, try to find if there's a default role
-    if (!userRole) {
-      userRole = await Role.findOne({ isDefault: true });
-      if (userRole) {
-        logger.info(`Using default role: ${userRole.name}`);
-      }
-    }
-
-    // 5. If still no role found, return an error
-    if (!userRole) {
-      logger.error(`Registration failed: Role '${normalizedRoleName}' not found. Original role: '${roleName}'. No default role available.`);
-      // Log available roles again
-      logger.error(`Available roles in database: ${allRoles.map(r => r.name).join(', ')}`);
-      return res.status(400).json({ message: 'Invalid user role specified' });
-    }
-
-    // Create user with all provided fields
-    const user = await User.create({
-      email,
-      password, // Password will be hashed by mongoose pre-save hook
-      role: userRole._id, // Assign role ObjectId
-      name: name || '',
-      phoneNumber: phoneNumber || '',
-      carrier: carrier || '',
-      smsNotificationsEnabled: !!smsNotificationsEnabled,
-      emailNotificationsEnabled: emailNotificationsEnabled !== false // Default to true
-    });
-
-    if (user) {
-      await logUserActivity(user._id, ip, 'REGISTER_SUCCESS', 'SUCCESS', { email, role: userRole.name });
+      await logUserActivity(user._id, ip, 'REGISTER_SUCCESS', 'SUCCESS', { email, role: defaultRole.name });
       sendTokenResponse(user, 201, res);
     } else {
-      await logUserActivity(null, ip, 'REGISTER_FAILURE', 'FAILURE', { email }, 'Invalid user data');
-      res.status(400).json({ message: 'Invalid user data' });
+      // Create user with the found role
+      const user = await User.create({
+        email,
+        password,
+        role: userRole._id,
+        name: name || '',
+        phoneNumber: phoneNumber || '',
+        carrier: carrier || '',
+        smsNotificationsEnabled: !!smsNotificationsEnabled,
+        emailNotificationsEnabled: emailNotificationsEnabled !== false
+      });
+      
+      await logUserActivity(user._id, ip, 'REGISTER_SUCCESS', 'SUCCESS', { email, role: userRole.name });
+      sendTokenResponse(user, 201, res);
     }
   } catch (error) {
     logger.error('Server Error during registration:', error);
@@ -285,7 +278,14 @@ const loginUser = async (req, res, next) => {
 
     // Update last activity and potentially session timeout based on role
     user.lastActivity = Date.now();
-    user.sessionTimeoutMinutes = user.role.name === 'Admin' ? 15 : 30; // Example: timeout based on role name
+    
+    // Set session timeout based on role name
+    if (user.role.name === 'Admin') {
+      user.sessionTimeoutMinutes = 15; // Shorter timeout for admins
+    } else {
+      user.sessionTimeoutMinutes = 30; // Standard timeout for other users
+    }
+    
     await user.save({ validateBeforeSave: false }); // Save changes
 
     await sendTokenResponse(user, 200, res);

@@ -106,7 +106,10 @@ const PrivateRoute = ({ allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  // Check if user.role is an object (populated from backend) or just a string
+  const roleName = user.role?.name || user.role;
+
+  if (allowedRoles && !allowedRoles.includes(roleName)) {
     // Not authorized for this role
     return <Navigate to="/dashboard" replace />; 
   }

@@ -40,8 +40,11 @@ function DashboardPage() {
   const renderDashboard = () => {
     if (!user) return null; // Return null if no user yet
 
+    // Check if user.role is an object (populated from backend) or just a string
+    const roleName = user.role?.name || user.role; 
+
     let DashboardComponent;
-    switch (user.role) {
+    switch (roleName) {
       case 'PetOwner':
         DashboardComponent = PetOwnerDashboard;
         break;
@@ -56,7 +59,8 @@ function DashboardPage() {
         navigate('/admin');
         return null;
       default:
-        setError('Unknown user role. Please contact support.');
+        console.error('Unknown user role:', roleName);
+        setError(`Unknown user role: "${roleName}". Please contact support.`);
         return <Alert variant="danger">Unknown user role encountered.</Alert>;
     }
 
